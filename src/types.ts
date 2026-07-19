@@ -1,18 +1,20 @@
 /**
- * Shared types for the DeepSeek Copilot extension.
+ * Shared types for the multi-model extension.
  */
 
 // ---- API request/response types ----
 
-export interface DeepSeekMessage {
+export interface ChatMessage {
 	role: 'system' | 'user' | 'assistant' | 'tool';
 	content: string;
 	tool_call_id?: string;
-	tool_calls?: DeepSeekToolCall[];
+	tool_calls?: ChatToolCall[];
 	reasoning_content?: string;
+	/** Image data for models with native image support (base64 data URLs). */
+	imageUrls?: string[];
 }
 
-export interface DeepSeekToolCall {
+export interface ChatToolCall {
 	id: string;
 	type: 'function';
 	function: {
@@ -21,7 +23,7 @@ export interface DeepSeekToolCall {
 	};
 }
 
-export interface DeepSeekTool {
+export interface ChatTool {
 	type: 'function';
 	function: {
 		name: string;
@@ -30,7 +32,7 @@ export interface DeepSeekTool {
 	};
 }
 
-export interface DeepSeekUsage {
+export interface ChatUsage {
 	prompt_tokens: number;
 	completion_tokens: number;
 	total_tokens: number;
@@ -38,14 +40,15 @@ export interface DeepSeekUsage {
 	prompt_cache_miss_tokens?: number;
 }
 
-export interface DeepSeekRequest {
+export interface ChatCompletionRequest {
 	model: string;
-	messages: DeepSeekMessage[];
+	messages: ChatMessage[];
 	stream: boolean;
 	temperature?: number;
 	top_p?: number;
 	max_tokens?: number;
-	tools?: DeepSeekTool[];
+	max_completion_tokens?: number;
+	tools?: ChatTool[];
 	tool_choice?: 'none' | 'auto' | 'required';
 	thinking?: { type: 'enabled' | 'disabled' };
 	reasoning_effort?: 'high' | 'max';
@@ -54,7 +57,7 @@ export interface DeepSeekRequest {
 	};
 }
 
-export interface DeepSeekStreamChunk {
+export interface ChatStreamChunk {
 	id: string;
 	object: string;
 	created: number;
@@ -77,7 +80,7 @@ export interface DeepSeekStreamChunk {
 		};
 		finish_reason: string | null;
 	}>;
-	usage?: DeepSeekUsage;
+	usage?: ChatUsage;
 }
 
 // ---- Stream callbacks ----
@@ -85,10 +88,10 @@ export interface DeepSeekStreamChunk {
 export interface StreamCallbacks {
 	onContent: (content: string) => void;
 	onThinking: (text: string) => void;
-	onToolCall: (toolCall: DeepSeekToolCall) => void;
+	onToolCall: (toolCall: ChatToolCall) => void;
 	onError: (error: Error) => void;
 	onDone: () => void;
-	onUsage?: (usage: DeepSeekUsage) => void;
+	onUsage?: (usage: ChatUsage) => void;
 }
 
 // ---- Model definitions ----
@@ -103,9 +106,12 @@ export interface ModelPricing {
 	output: number;
 }
 
+export type ApiProvider = 'deepseek' | 'mimo' | 'custom';
+
 export interface ModelDefinition {
 	id: string;
 	name: string;
+	provider: ApiProvider;
 	family: string;
 	version: string;
 	detail: string;
@@ -119,4 +125,43 @@ export interface ModelDefinition {
 	requiresThinkingParam: boolean;
 	pricing?: Readonly<Record<PricingCurrency, ModelPricing>>;
 	priceCategory?: PriceCategory;
+}
+
+// ---- Custom model configuration (from settings) ----
+
+/**
+ * User-defined custom model configuration stored in settings.
+ * Allows connecting to any OpenAI-compatible API endpoint.
+ */
+export interface CustomModelConfig {
+	/** Unique identifier for this model (used in model picker). */
+	id: string;
+	/** Display name shown in the model picker. */
+	name: string;
+	/** Base URL of the OpenAI-compatible API (e.g. https://api.example.com/v1). */
+	baseUrl: string;
+	/** Model ID to send in the API request body. */
+	modelId: string;
+	/** VS Code SecretStorage key for this model's API key. Stored separately. */
+	apiKeySecretKey?: string;
+	/** HTTP header name for authentication. Defaults to 'Authorization'. */
+	authHeader?: string;
+	/** Prefix before the API key value. Defaults to 'Bearer '. Set to '' for api-key header style. */
+	authPrefix?: string;
+	/** Maximum input tokens. Defaults to 128000. */
+	maxInputTokens?: number;
+	/** Maximum output tokens. Defaults to 8192. */
+	maxOutputTokens?: number;
+	/** Tool calling support. true/false or a number for max tools. Defaults to false. */
+	toolCalling?: boolean | number;
+	/** Image input support. Defaults to false. */
+	imageInput?: boolean;
+	/** Thinking/reasoning mode support. Defaults to false. */
+	thinking?: boolean;
+	/** Whether to send thinking: { type: 'enabled' } param. Defaults to false. */
+	requiresThinkingParam?: boolean;
+	/** Use max_completion_tokens instead of max_tokens. Defaults to false. */
+	useMaxCompletionTokens?: boolean;
+	/** Short description for the model picker. */
+	detail?: string;
 }

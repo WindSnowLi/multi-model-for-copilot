@@ -1,25 +1,28 @@
 import vscode from 'vscode';
 import { safeStringify } from '../json';
-import type { DeepSeekMessage, DeepSeekTool, DeepSeekToolCall } from '../types';
+import type { ChatMessage, ChatTool, ChatToolCall } from '../types';
 import { parseFirstReplayMarker } from './replay';
 
 /**
- * Convert VS Code chat messages to DeepSeek format.
+ * Convert VS Code chat messages to API format.
  * Injects marker-replayed reasoning_content for assistant messages.
+ * When supportsNativeVision is true, image data is collected into imageUrls field.
  */
 export function convertMessages(
 	messages: readonly vscode.LanguageModelChatRequestMessage[],
 	isThinkingModel: boolean,
-): DeepSeekMessage[] {
-	const result: DeepSeekMessage[] = [];
+	supportsNativeVision?: boolean,
+): ChatMessage[] {
+	const result: ChatMessage[] = [];
 
 	for (const message of messages) {
 		const role = mapRole(message.role);
 
 		let content = '';
 		let thinkingContent = '';
-		const toolCalls: DeepSeekToolCall[] = [];
+		const toolCalls: ChatToolCall[] = [];
 		const toolResults: Array<{ callId: string; content: string }> = [];
+		const imageUrls: string[] = [];
 
 		for (const part of message.content) {
 			if (part instanceof vscode.LanguageModelTextPart) {
@@ -46,13 +49,17 @@ export function convertMessages(
 					callId: part.callId,
 					content: toolContent || safeStringify(part.content),
 				});
+			} else if (supportsNativeVision && isImageDataPart(part)) {
+				// Collect image data for native vision models
+				const base64 = uint8ArrayToBase64(part.data);
+				imageUrls.push(`data:${part.mimeType};base64,${base64}`);
 			}
 		}
 
 		if (role === 'assistant') {
 			if (content || toolCalls.length > 0) {
 				const replayMarker = isThinkingModel ? parseFirstReplayMarker(message) : undefined;
-				const msg: DeepSeekMessage = {
+				const msg: ChatMessage = {
 					role: 'assistant' as const,
 					content: content || '',
 				};
@@ -68,11 +75,15 @@ export function convertMessages(
 				result.push(msg);
 			}
 		} else {
-			if (content) {
-				result.push({
+			if (content || imageUrls.length > 0) {
+				const msg: ChatMessage = {
 					role: role as 'user' | 'assistant',
 					content: content,
-				});
+				};
+				if (imageUrls.length > 0) {
+					msg.imageUrls = imageUrls;
+				}
+				result.push(msg);
 			}
 		}
 
@@ -126,7 +137,7 @@ function mapRole(role: vscode.LanguageModelChatMessageRole): 'user' | 'assistant
  */
 export function convertTools(
 	tools: readonly vscode.LanguageModelChatTool[] | undefined,
-): DeepSeekTool[] | undefined {
+): ChatTool[] | undefined {
 	if (!tools || tools.length === 0) {
 		return undefined;
 	}
@@ -144,7 +155,7 @@ export function convertTools(
 /**
  * Count total characters across all messages to calibrate chars-per-token ratio.
  */
-export function countMessageChars(messages: DeepSeekMessage[]): number {
+export function countMessageChars(messages: ChatMessage[]): number {
 	let total = 0;
 	for (const msg of messages) {
 		total += msg.content?.length ?? 0;
@@ -157,4 +168,16 @@ export function countMessageChars(messages: DeepSeekMessage[]): number {
 		}
 	}
 	return total;
+}
+
+function isImageDataPart(part: unknown): part is vscode.LanguageModelDataPart {
+	return part instanceof vscode.LanguageModelDataPart && part.mimeType.startsWith('image/');
+}
+
+function uint8ArrayToBase64(data: Uint8Array): string {
+	let binary = '';
+	for (let i = 0; i < data.length; i++) {
+		binary += String.fromCharCode(data[i]);
+	}
+	return btoa(binary);
 }

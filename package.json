@@ -1,14 +1,14 @@
 {
-  "name": "deepseek-v4-for-copilot",
-  "displayName": "DeepSeek V4 for Copilot Chat",
-  "description": "Pick DeepSeek V4 Pro & Flash from the Copilot Chat model picker. Vision, thinking mode, agent tools — zero config, BYOK.",
+  "name": "multi-model-for-copilot",
+  "displayName": "Multi-Model BYOK for Copilot Chat",
+  "description": "Pick DeepSeek V4 and MiMo V2.5 models from the Copilot Chat model picker. Vision, thinking mode, agent tools — zero config, BYOK.",
   "icon": "resources/icon.png",
   "version": "0.6.2",
-  "publisher": "Vizards",
+  "publisher": "WindSnowLi",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Vizards/deepseek-v4-for-copilot"
+    "url": "https://github.com/WindSnowLi/multi-model-for-copilot"
   },
   "engines": {
     "vscode": "^1.116.0",
@@ -22,7 +22,9 @@
   "keywords": [
     "deepseek",
     "deepseek v4",
-    "deepseek-v4",
+    "mimo",
+    "xiaomi",
+    "multi-model",
     "copilot",
     "github copilot",
     "copilot chat",
@@ -49,63 +51,83 @@
     ],
     "commands": [
       {
-        "command": "deepseek-copilot.setApiKey",
-        "title": "%deepseek-copilot.command.setApiKey%"
+        "command": "multi-model-for-copilot.setApiKey",
+        "title": "%multi-model-for-copilot.command.setApiKey%"
       },
       {
-        "command": "deepseek-copilot.getApiKey",
-        "title": "%deepseek-copilot.command.getApiKey%"
+        "command": "multi-model-for-copilot.getApiKey",
+        "title": "%multi-model-for-copilot.command.getApiKey%"
       },
       {
-        "command": "deepseek-copilot.clearApiKey",
-        "title": "%deepseek-copilot.command.clearApiKey%"
+        "command": "multi-model-for-copilot.clearApiKey",
+        "title": "%multi-model-for-copilot.command.clearApiKey%"
       },
       {
-        "command": "deepseek-copilot.setVisionModel",
-        "title": "%deepseek-copilot.command.setVisionModel%"
+        "command": "multi-model-for-copilot.setMiMoApiKey",
+        "title": "%multi-model-for-copilot.command.setMiMoApiKey%"
       },
       {
-        "command": "deepseek-copilot.openSettings",
-        "title": "%deepseek-copilot.command.openSettings%"
+        "command": "multi-model-for-copilot.clearMiMoApiKey",
+        "title": "%multi-model-for-copilot.command.clearMiMoApiKey%"
       },
       {
-        "command": "deepseek-copilot.showLogs",
-        "title": "%deepseek-copilot.command.showLogs%"
+        "command": "multi-model-for-copilot.addCustomModel",
+        "title": "%multi-model-for-copilot.command.addCustomModel%"
       },
       {
-        "command": "deepseek-copilot.openRequestDumpsFolder",
-        "title": "%deepseek-copilot.command.openRequestDumpsFolder%"
+        "command": "multi-model-for-copilot.removeCustomModel",
+        "title": "%multi-model-for-copilot.command.removeCustomModel%"
+      },
+      {
+        "command": "multi-model-for-copilot.discoverModels",
+        "title": "%multi-model-for-copilot.command.discoverModels%"
+      },
+      {
+        "command": "multi-model-for-copilot.setVisionModel",
+        "title": "%multi-model-for-copilot.command.setVisionModel%"
+      },
+      {
+        "command": "multi-model-for-copilot.openSettings",
+        "title": "%multi-model-for-copilot.command.openSettings%"
+      },
+      {
+        "command": "multi-model-for-copilot.showLogs",
+        "title": "%multi-model-for-copilot.command.showLogs%"
+      },
+      {
+        "command": "multi-model-for-copilot.openRequestDumpsFolder",
+        "title": "%multi-model-for-copilot.command.openRequestDumpsFolder%"
       }
     ],
     "walkthroughs": [
       {
-        "id": "deepseekGettingStarted",
-        "title": "%deepseek-copilot.walkthrough.title%",
-        "description": "%deepseek-copilot.walkthrough.description%",
+        "id": "gettingStarted",
+        "title": "%multi-model-for-copilot.walkthrough.title%",
+        "description": "%multi-model-for-copilot.walkthrough.description%",
         "steps": [
           {
             "id": "setApiKey",
-            "title": "%deepseek-copilot.walkthrough.setApiKey.title%",
-            "description": "%deepseek-copilot.walkthrough.setApiKey.description%",
+            "title": "%multi-model-for-copilot.walkthrough.setApiKey.title%",
+            "description": "%multi-model-for-copilot.walkthrough.setApiKey.description%",
             "media": {
               "markdown": "resources/walkthrough/set-api-key.md"
             },
             "completionEvents": [
-              "onCommand:deepseek-copilot.setApiKey"
+              "onCommand:multi-model-for-copilot.setApiKey"
             ]
           },
           {
             "id": "showModels",
-            "title": "%deepseek-copilot.walkthrough.showModels.title%",
-            "description": "%deepseek-copilot.walkthrough.showModels.description%",
+            "title": "%multi-model-for-copilot.walkthrough.showModels.title%",
+            "description": "%multi-model-for-copilot.walkthrough.showModels.description%",
             "media": {
               "markdown": "resources/walkthrough/show-models.md"
             }
           },
           {
             "id": "advancedSettings",
-            "title": "%deepseek-copilot.walkthrough.advancedSettings.title%",
-            "description": "%deepseek-copilot.walkthrough.advancedSettings.description%",
+            "title": "%multi-model-for-copilot.walkthrough.advancedSettings.title%",
+            "description": "%multi-model-for-copilot.walkthrough.advancedSettings.description%",
             "media": {
               "markdown": "resources/walkthrough/advanced-settings.md"
             }
@@ -114,61 +136,101 @@
       }
     ],
     "configuration": {
-      "title": "%deepseek-copilot.config.title%",
+      "title": "%multi-model-for-copilot.config.title%",
       "properties": {
-        "deepseek-copilot.baseUrl": {
+        "multi-model-for-copilot.baseUrl": {
           "type": "string",
           "default": "https://api.deepseek.com",
-          "description": "%deepseek-copilot.config.baseUrl.description%"
+          "description": "%multi-model-for-copilot.config.baseUrl.description%"
         },
-        "deepseek-copilot.maxTokens": {
+        "multi-model-for-copilot.mimoBaseUrl": {
+          "type": "string",
+          "default": "https://token-plan-cn.xiaomimimo.com/v1",
+          "description": "%multi-model-for-copilot.config.mimoBaseUrl.description%"
+        },
+        "multi-model-for-copilot.maxTokens": {
           "type": "number",
           "default": 0,
           "minimum": 0,
-          "description": "%deepseek-copilot.config.maxTokens.description%"
+          "description": "%multi-model-for-copilot.config.maxTokens.description%"
         },
-        "deepseek-copilot.experimental.stabilizeToolList": {
+        "multi-model-for-copilot.experimental.stabilizeToolList": {
           "type": "boolean",
           "default": false,
-          "markdownDescription": "%deepseek-copilot.config.experimental.stabilizeToolList.description%",
+          "markdownDescription": "%multi-model-for-copilot.config.experimental.stabilizeToolList.description%",
           "tags": [
             "experimental"
           ]
         },
-        "deepseek-copilot.modelIdOverrides": {
+        "multi-model-for-copilot.modelIdOverrides": {
           "type": "object",
           "default": {
             "deepseek-v4-flash": "deepseek-v4-flash",
-            "deepseek-v4-pro": "deepseek-v4-pro"
+            "deepseek-v4-pro": "deepseek-v4-pro",
+            "mimo-v2.5-pro": "mimo-v2.5-pro",
+            "mimo-v2.5": "mimo-v2.5"
           },
-          "description": "%deepseek-copilot.config.modelIdOverrides.description%",
+          "description": "%multi-model-for-copilot.config.modelIdOverrides.description%",
           "additionalProperties": false,
           "properties": {
             "deepseek-v4-flash": {
               "type": "string",
-              "description": "%deepseek-copilot.config.modelIdOverrides.deepseek-v4-flash.description%"
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-flash.description%"
             },
             "deepseek-v4-pro": {
               "type": "string",
-              "description": "%deepseek-copilot.config.modelIdOverrides.deepseek-v4-pro.description%"
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-pro.description%"
+            },
+            "mimo-v2.5-pro": {
+              "type": "string",
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.mimo-v2.5-pro.description%"
+            },
+            "mimo-v2.5": {
+              "type": "string",
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.mimo-v2.5.description%"
             }
           }
         },
-        "deepseek-copilot.visionModel": {
+        "multi-model-for-copilot.customModels": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "baseUrl", "modelId"],
+            "properties": {
+              "id": { "type": "string", "description": "Unique model identifier" },
+              "name": { "type": "string", "description": "Display name in model picker" },
+              "baseUrl": { "type": "string", "description": "API base URL (e.g. https://api.example.com/v1)" },
+              "modelId": { "type": "string", "description": "Model ID sent in API request" },
+              "authHeader": { "type": "string", "default": "Authorization", "description": "Auth header name" },
+              "authPrefix": { "type": "string", "default": "Bearer ", "description": "Prefix before API key (e.g. 'Bearer ' or '')" },
+              "maxInputTokens": { "type": "number", "default": 128000 },
+              "maxOutputTokens": { "type": "number", "default": 8192 },
+              "toolCalling": { "default": false, "description": "Tool calling support (true/false or number)" },
+              "imageInput": { "type": "boolean", "default": false },
+              "thinking": { "type": "boolean", "default": false },
+              "requiresThinkingParam": { "type": "boolean", "default": false },
+              "useMaxCompletionTokens": { "type": "boolean", "default": false, "description": "Use max_completion_tokens instead of max_tokens" },
+              "detail": { "type": "string", "description": "Short description shown in model picker" }
+            }
+          },
+          "markdownDescription": "%multi-model-for-copilot.config.customModels.description%"
+        },
+        "multi-model-for-copilot.visionModel": {
           "type": "string",
           "default": "",
           "tags": [
             "advanced"
           ],
-          "markdownDescription": "%deepseek-copilot.config.visionModel.description%"
+          "markdownDescription": "%multi-model-for-copilot.config.visionModel.description%"
         },
-        "deepseek-copilot.visionPrompt": {
+        "multi-model-for-copilot.visionPrompt": {
           "type": "string",
           "editPresentation": "multilineText",
           "default": "Describe all image attachments in this message.\n\nIf there is one image, describe it directly.\nIf there are multiple images:\n1. Describe each image separately, preserving their order.\n2. Then provide a combined description explaining the overall context and relationships across the images.\n\nReturn one concise factual description suitable for inserting into a text-only chat prompt. Include visible text, objects, UI elements, people, and relevant context. Do not invent details.",
-          "markdownDescription": "%deepseek-copilot.config.visionPrompt.description%"
+          "markdownDescription": "%multi-model-for-copilot.config.visionPrompt.description%"
         },
-        "deepseek-copilot.debugMode": {
+        "multi-model-for-copilot.debugMode": {
           "type": "string",
           "default": "minimal",
           "enum": [
@@ -177,16 +239,16 @@
             "verbose"
           ],
           "enumItemLabels": [
-            "%deepseek-copilot.config.debugMode.minimal.label%",
-            "%deepseek-copilot.config.debugMode.metadata.label%",
-            "%deepseek-copilot.config.debugMode.verbose.label%"
+            "%multi-model-for-copilot.config.debugMode.minimal.label%",
+            "%multi-model-for-copilot.config.debugMode.metadata.label%",
+            "%multi-model-for-copilot.config.debugMode.verbose.label%"
           ],
           "markdownEnumDescriptions": [
-            "%deepseek-copilot.config.debugMode.minimal.description%",
-            "%deepseek-copilot.config.debugMode.metadata.description%",
-            "%deepseek-copilot.config.debugMode.verbose.description%"
+            "%multi-model-for-copilot.config.debugMode.minimal.description%",
+            "%multi-model-for-copilot.config.debugMode.metadata.description%",
+            "%multi-model-for-copilot.config.debugMode.verbose.description%"
           ],
-          "markdownDescription": "%deepseek-copilot.config.debugMode.description%"
+          "markdownDescription": "%multi-model-for-copilot.config.debugMode.description%"
         }
       }
     }

@@ -1,18 +1,18 @@
-import { isOfficialDeepSeekBaseUrl } from '../../endpoint';
+import { isOfficialDeepSeekBaseUrl, isOfficialMiMoBaseUrl } from '../../endpoint';
 import { t } from '../../i18n';
 import { safeStringify } from '../../json';
 import { API_PROVIDER_HTTP_ERROR_LINKS, MAX_DIAGNOSTIC_FIELD_LENGTH } from '../consts';
-import { getNetworkErrorCauseInfo, getNetworkErrorCode, getNetworkErrorMessage } from './network';
 import type {
-	ApiProviderId,
-	DeepSeekRequestErrorKind,
-	ErrorActionLink,
-	ErrorActionUrls,
-	HttpErrorLinkDefinition,
-	HttpErrorLinkStatusKey,
-	RequestErrorContext,
+    ApiProviderId,
+    ApiRequestErrorKind,
+    ErrorActionLink,
+    ErrorActionUrls,
+    HttpErrorLinkDefinition,
+    HttpErrorLinkStatusKey,
+    RequestErrorContext,
 } from '../types';
-export type { DeepSeekRequestErrorKind, ErrorActionUrls } from '../types';
+import { getNetworkErrorCauseInfo, getNetworkErrorCode, getNetworkErrorMessage } from './network';
+export type { ApiRequestErrorKind, ErrorActionUrls } from '../types';
 
 const errorActionUrlStore = (() => {
 	let current: ErrorActionUrls = {};
@@ -29,8 +29,8 @@ export function setErrorActionUrl(key: keyof ErrorActionUrls, url: string): void
 	errorActionUrlStore.set(key, url);
 }
 
-export class DeepSeekRequestError extends Error {
-	readonly kind: DeepSeekRequestErrorKind;
+export class ApiRequestError extends Error {
+	readonly kind: ApiRequestErrorKind;
 	readonly userSummary: string;
 	readonly diagnosticMessage: string;
 	readonly baseUrl?: string;
@@ -40,7 +40,7 @@ export class DeepSeekRequestError extends Error {
 	constructor(options: {
 		message: string;
 		userSummary?: string;
-		kind: DeepSeekRequestErrorKind;
+		kind: ApiRequestErrorKind;
 		diagnosticMessage?: string;
 		baseUrl?: string;
 		status?: number;
@@ -48,7 +48,7 @@ export class DeepSeekRequestError extends Error {
 		cause?: unknown;
 	}) {
 		super(options.message, { cause: options.cause });
-		this.name = 'DeepSeekRequestError';
+		this.name = 'ApiRequestError';
 		this.kind = options.kind;
 		this.userSummary = options.userSummary ?? options.message;
 		this.diagnosticMessage = options.diagnosticMessage ?? options.message;
@@ -61,7 +61,7 @@ export class DeepSeekRequestError extends Error {
 export async function createHttpError(
 	response: Response,
 	context: RequestErrorContext,
-): Promise<DeepSeekRequestError> {
+): Promise<ApiRequestError> {
 	const { baseUrl } = context;
 	const responseText = await response.text();
 	const serverMessage = extractServerMessage(responseText);
@@ -70,7 +70,7 @@ export async function createHttpError(
 		getCreateApiKeyUrl(response.status, baseUrl),
 	);
 
-	return new DeepSeekRequestError({
+	return new ApiRequestError({
 		message: `DeepSeek API request failed with HTTP ${response.status}`,
 		userSummary,
 		kind: 'http',
@@ -91,13 +91,13 @@ export async function createHttpError(
 }
 
 export function normalizeRequestError(error: unknown, context: RequestErrorContext): Error {
-	if (error instanceof DeepSeekRequestError) {
+	if (error instanceof ApiRequestError) {
 		return error;
 	}
 
 	if (!(error instanceof Error)) {
 		const value = truncateSingleLine(String(error));
-		return new DeepSeekRequestError({
+		return new ApiRequestError({
 			message: `DeepSeek request failed with a non-Error value: ${value}`,
 			userSummary: t('error.unknown', value),
 			kind: 'unknown',
@@ -117,10 +117,10 @@ export function normalizeRequestError(error: unknown, context: RequestErrorConte
 
 	const code = getNetworkErrorCode(causeInfo);
 	const userSummary = getNetworkErrorMessage(code);
-	const enhanced = new DeepSeekRequestError({
+	const enhanced = new ApiRequestError({
 		message: code
 			? `DeepSeek request failed due to network error ${code}`
-			: 'DeepSeek request failed due to a network error',
+			: 'API request failed due to a network error',
 		userSummary,
 		kind: 'network',
 		baseUrl: context.baseUrl,
@@ -140,7 +140,7 @@ export function normalizeRequestError(error: unknown, context: RequestErrorConte
 
 export function formatRequestError(error: Error): string {
 	const diagnosticMessage = joinDiagnosticParts(
-		error instanceof DeepSeekRequestError
+		error instanceof ApiRequestError
 			? error.diagnosticMessage
 			: `message=${safeStringify(error.message)}`,
 	);
@@ -149,7 +149,7 @@ export function formatRequestError(error: Error): string {
 
 export function createUserFacingError(error: Error): Error {
 	const message =
-		error instanceof DeepSeekRequestError
+		error instanceof ApiRequestError
 			? formatMarkdownMessage(error.userSummary, getErrorActions(error, errorActionUrlStore.get()))
 			: error.message;
 	const displayError = new Error(message);
@@ -226,7 +226,7 @@ function formatActionLink(action: ErrorActionLink): string {
 }
 
 function getErrorActions(
-	error: DeepSeekRequestError,
+	error: ApiRequestError,
 	actionUrls: ErrorActionUrls,
 ): readonly ErrorActionLink[] {
 	if (error.kind === 'http' && error.status !== undefined && error.baseUrl) {
@@ -292,6 +292,9 @@ function getRequestDiagnosticMessage(context: RequestErrorContext): string {
 		request.temperature !== undefined ? `temperature=${request.temperature}` : undefined,
 		request.top_p !== undefined ? `topP=${request.top_p}` : undefined,
 		request.max_tokens !== undefined ? `maxTokens=${request.max_tokens}` : undefined,
+		request.max_completion_tokens !== undefined
+			? `maxCompletionTokens=${request.max_completion_tokens}`
+			: undefined,
 		request.thinking?.type ? `thinking=${safeStringify(request.thinking.type)}` : undefined,
 		request.reasoning_effort
 			? `reasoningEffort=${safeStringify(request.reasoning_effort)}`
@@ -319,7 +322,13 @@ function escapeBoldText(value: string): string {
 }
 
 function identifyApiProvider(baseUrl: string): ApiProviderId | undefined {
-	return isOfficialDeepSeekBaseUrl(baseUrl) ? 'deepseek' : undefined;
+	if (isOfficialDeepSeekBaseUrl(baseUrl)) {
+		return 'deepseek';
+	}
+	if (isOfficialMiMoBaseUrl(baseUrl)) {
+		return 'mimo';
+	}
+	return undefined;
 }
 
 function getHttpErrorLinkStatusKey(status: number): HttpErrorLinkStatusKey | undefined {

@@ -1,5 +1,5 @@
-import { DEEPSEEK_TOOLS_LIMIT } from './provider/tools/consts';
-import type { ModelDefinition } from './types';
+import { DEFAULT_TOOLS_LIMIT } from './provider/tools/consts';
+import type { CustomModelConfig, ModelDefinition } from './types';
 
 /**
  * Compile-time constants shared across the extension.
@@ -9,13 +9,18 @@ import type { ModelDefinition } from './types';
  */
 
 /** VS Code configuration section prefix for all extension settings. */
-export const CONFIG_SECTION = 'deepseek-copilot';
+export const CONFIG_SECTION = 'multi-model-for-copilot';
 
 export const EXTERNAL_URLS = {
 	deepseek: {
 		apiKeys: 'https://platform.deepseek.com/api_keys',
 		usage: 'https://platform.deepseek.com/usage',
 		status: 'https://status.deepseek.com',
+	},
+	mimo: {
+		apiKeys: 'https://platform.xiaomimimo.com/#/console/plan-manage',
+		usage: 'https://platform.xiaomimimo.com/#/console/plan-manage',
+		status: 'https://platform.xiaomimimo.com/#/console/plan-manage',
 	},
 } as const;
 
@@ -34,30 +39,34 @@ export const LANGUAGE_MODEL_CHAT_SYSTEM_ROLE = 3;
 // ---- Secret keys ----
 
 /** SecretStorage key for the DeepSeek API key. */
-export const API_KEY_SECRET = 'deepseek-copilot.apiKey';
+export const API_KEY_SECRET = 'multi-model-for-copilot.apiKey';
+
+/** SecretStorage key for the MiMo API key. */
+export const MIMO_API_KEY_SECRET = 'multi-model-for-copilot.mimoApiKey';
 
 /** memento key tracking whether the welcome walkthrough has been shown. */
-export const WELCOME_SHOWN_KEY = 'deepseek-copilot.welcomeShown';
+export const WELCOME_SHOWN_KEY = 'multi-model-for-copilot.welcomeShown';
 
 // ---- Walkthrough ----
 
 /** Walkthrough contribution ID. */
-export const WALKTHROUGH_ID = 'Vizards.deepseek-v4-for-copilot#deepseekGettingStarted';
+export const WALKTHROUGH_ID = 'Vizards.multi-model-for-copilot#gettingStarted';
 
 // ---- Model registry ----
 
-/** Available DeepSeek models exposed through the language model provider. */
+/** Available models exposed through the language model provider. */
 export const MODELS: ModelDefinition[] = [
 	{
 		id: 'deepseek-v4-flash',
 		name: 'DeepSeek V4 Flash',
+		provider: 'deepseek',
 		family: 'deepseek',
 		version: 'v4',
 		detail: 'Fast, general-purpose model',
-		maxInputTokens: 655360,
+		maxInputTokens: 1048576,
 		maxOutputTokens: 393216,
 		capabilities: {
-			toolCalling: DEEPSEEK_TOOLS_LIMIT,
+			toolCalling: DEFAULT_TOOLS_LIMIT,
 			imageInput: true,
 			thinking: true,
 		},
@@ -71,13 +80,14 @@ export const MODELS: ModelDefinition[] = [
 	{
 		id: 'deepseek-v4-pro',
 		name: 'DeepSeek V4 Pro',
+		provider: 'deepseek',
 		family: 'deepseek',
 		version: 'v4',
 		detail: 'Most capable reasoning model',
-		maxInputTokens: 655360,
+		maxInputTokens: 1048576,
 		maxOutputTokens: 393216,
 		capabilities: {
-			toolCalling: DEEPSEEK_TOOLS_LIMIT,
+			toolCalling: DEFAULT_TOOLS_LIMIT,
 			imageInput: true,
 			thinking: true,
 		},
@@ -88,4 +98,78 @@ export const MODELS: ModelDefinition[] = [
 		},
 		priceCategory: 'low',
 	},
+	{
+		id: 'mimo-v2.5-pro',
+		name: 'MiMo V2.5 Pro',
+		provider: 'mimo',
+		family: 'mimo',
+		version: 'v2.5',
+		detail: 'Flagship reasoning model with deep thinking',
+		maxInputTokens: 1000000,
+		maxOutputTokens: 128000,
+		capabilities: {
+			toolCalling: true,
+			imageInput: false,
+			thinking: true,
+		},
+		requiresThinkingParam: false,
+		pricing: {
+			USD: { cacheHitInput: 0.0036, cacheMissInput: 0.435, output: 0.87 },
+			CNY: { cacheHitInput: 0.025, cacheMissInput: 3, output: 6 },
+		},
+		priceCategory: 'low',
+	},
+	{
+		id: 'mimo-v2.5',
+		name: 'MiMo V2.5',
+		provider: 'mimo',
+		family: 'mimo',
+		version: 'v2.5',
+		detail: 'Omni-modal model with vision and thinking',
+		maxInputTokens: 1000000,
+		maxOutputTokens: 128000,
+		capabilities: {
+			toolCalling: true,
+			imageInput: true,
+			thinking: true,
+		},
+		requiresThinkingParam: false,
+		pricing: {
+			USD: { cacheHitInput: 0.0028, cacheMissInput: 0.14, output: 0.28 },
+			CNY: { cacheHitInput: 0.02, cacheMissInput: 1, output: 2 },
+		},
+		priceCategory: 'low',
+	},
 ];
+
+/**
+ * Convert a user-defined CustomModelConfig into a ModelDefinition
+ * that the provider can use like any built-in model.
+ */
+export function toModelDefinition(cfg: CustomModelConfig): ModelDefinition {
+	return {
+		id: cfg.id,
+		name: cfg.name,
+		provider: 'custom',
+		family: cfg.id,
+		version: '',
+		detail: cfg.detail || `Custom model via ${new URL(cfg.baseUrl).hostname}`,
+		maxInputTokens: cfg.maxInputTokens ?? 128000,
+		maxOutputTokens: cfg.maxOutputTokens ?? 8192,
+		capabilities: {
+			toolCalling: cfg.toolCalling ?? false,
+			imageInput: cfg.imageInput ?? false,
+			thinking: cfg.thinking ?? false,
+		},
+		requiresThinkingParam: cfg.requiresThinkingParam ?? false,
+	};
+}
+
+/**
+ * Get the merged list of all models: built-in + user-defined custom models.
+ */
+export function getAllModels(customConfigs: CustomModelConfig[]): ModelDefinition[] {
+	const builtIn = MODELS;
+	const custom = customConfigs.map(toModelDefinition);
+	return [...builtIn, ...custom];
+}

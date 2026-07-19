@@ -95,8 +95,23 @@ function buildThinkingEffortSchema() {
 }
 
 function resolveModelText(m: ModelDefinition, field: 'detail' | 'tooltip'): string | undefined {
-	const suffix = m.id.startsWith('deepseek-v4-') ? m.id.slice('deepseek-v4-'.length) : m.id;
-	const key = `model.${suffix}.${field}`;
+	const suffix = extractModelSuffix(m);
+	const key = `model.${m.provider}.${suffix}.${field}`;
 	const translated = t(key);
 	return translated !== key ? translated : undefined;
+}
+
+function extractModelSuffix(m: ModelDefinition): string {
+	// DeepSeek: deepseek-v4-flash → flash, deepseek-v4-pro → pro
+	if (m.id.startsWith('deepseek-v4-')) {
+		return m.id.slice('deepseek-v4-'.length);
+	}
+	// MiMo: mimo-v2.5-pro → pro, mimo-v2.5 → standard
+	if (m.id === 'mimo-v2.5') {
+		return 'standard';
+	}
+	if (m.id.startsWith('mimo-v2.5-')) {
+		return m.id.slice('mimo-v2.5-'.length);
+	}
+	return m.id;
 }

@@ -1,5 +1,5 @@
 import vscode from 'vscode';
-import type { DeepSeekRequest, DeepSeekTool } from '../../types';
+import type { ChatCompletionRequest, ChatTool } from '../../types';
 
 export type RequestKind =
 	| 'main-agent'
@@ -66,8 +66,8 @@ export function classifyProviderRequest(input: {
 	});
 }
 
-export function classifyDeepSeekRequest(input: {
-	request: DeepSeekRequest;
+export function classifyChatCompletionRequest(input: {
+	request: ChatCompletionRequest;
 	inputMessages?: readonly vscode.LanguageModelChatRequestMessage[];
 }): RequestKind {
 	return classifyRequest({
@@ -142,7 +142,7 @@ function startsWithAny(text: string, prefixes: readonly string[]): boolean {
 	return prefixes.some((prefix) => text.startsWith(prefix));
 }
 
-function getDeepSeekToolName(tool: DeepSeekTool): string {
+function getDeepSeekToolName(tool: ChatTool): string {
 	return tool.function.name;
 }
 
@@ -177,7 +177,7 @@ function getVscodeMessageText(message: vscode.LanguageModelChatRequestMessage): 
 	return text;
 }
 
-function getLatestDeepSeekUserText(request: DeepSeekRequest): string {
+function getLatestDeepSeekUserText(request: ChatCompletionRequest): string {
 	for (let index = request.messages.length - 1; index >= 0; index -= 1) {
 		const message = request.messages[index];
 		if (message.role === 'user') {

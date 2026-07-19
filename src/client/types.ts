@@ -1,4 +1,4 @@
-import type { DeepSeekRequest } from '../types';
+import type { ChatCompletionRequest } from '../types';
 
 export interface ErrorActionUrls {
 	configureApiKey?: string;
@@ -7,7 +7,7 @@ export interface ErrorActionUrls {
 
 export interface RequestErrorContext {
 	baseUrl: string;
-	request: DeepSeekRequest;
+	request: ChatCompletionRequest;
 }
 
 export interface ErrorActionLink {
@@ -20,10 +20,10 @@ export interface HttpErrorLinkDefinition {
 	url: string;
 }
 
-export type ApiProviderId = 'deepseek';
+export type ApiProviderId = 'deepseek' | 'mimo';
 export type HttpErrorLinkStatusKey = 401 | 402 | '5xx';
 
-export type DeepSeekRequestErrorKind = 'http' | 'network' | 'unknown';
+export type ApiRequestErrorKind = 'http' | 'network' | 'unknown';
 
 export type NetworkErrorCategory =
 	| 'dns'

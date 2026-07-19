@@ -19,19 +19,60 @@ type Translations = Record<string, string>;
 
 const zh: Translations = {
 	// Model descriptions
-	'model.flash.detail': '快速高效',
-	'model.pro.detail': '深度推理',
-	'model.flash.tooltip': '快速高效的 DeepSeek V4 模型，推理能力接近 V4 Pro，API 定价更经济。',
-	'model.pro.tooltip': 'DeepSeek V4 模型，面向 Agent 编程、广泛世界知识和高阶推理任务。',
+	'model.deepseek.flash.detail': '快速高效',
+	'model.deepseek.pro.detail': '深度推理',
+	'model.deepseek.flash.tooltip': '快速高效的 DeepSeek V4 模型，推理能力接近 V4 Pro，API 定价更经济。',
+	'model.deepseek.pro.tooltip': 'DeepSeek V4 模型，面向 Agent 编程、广泛世界知识和高阶推理任务。',
+
+	// MiMo model descriptions
+	'model.mimo.pro.detail': '旗舰推理模型，支持深度思考',
+	'model.mimo.standard.detail': '全模态理解模型，支持视觉与思考',
+	'model.mimo.pro.tooltip': 'MiMo V2.5 Pro 旗舰模型，专为复杂推理、深度分析和长文档处理设计。',
+	'model.mimo.standard.tooltip': 'MiMo V2.5 全模态模型，支持图片、音频、视频内容理解，同时具备深度思考能力。',
 
 	// API Key
 	'auth.apiKeyRequiredDetail': '请先配置 API Key',
 	'auth.prompt': '请输入 DeepSeek API Key 或兼容服务令牌。官方 DeepSeek Key 通常以 "sk-" 开头。',
 	'auth.placeholder': 'sk-... 或服务商令牌',
+	'auth.mimoPrompt': '请输入 MiMo Token Plan API Key。官方 MiMo Key 格式为 "tp-xxxxx"。',
+	'auth.mimoPlaceholder': 'tp-...',
 	'auth.emptyValidation': 'API Key 不能为空',
 	'auth.saved': 'API Key 已安全保存。',
 	'auth.removed': 'API Key 已移除。',
-	'auth.notConfigured': 'API Key 未配置，请在命令面板运行 "DeepSeek: 设置 API Key"。',
+	'auth.notConfigured': 'API Key 未配置，请在命令面板运行 "Multi-Model: 设置 API Key"。',
+
+	// Custom Model
+	'customModel.prompt.id': '输入模型唯一标识（英文、数字、连字符）',
+	'customModel.prompt.name': '输入模型显示名称',
+	'customModel.prompt.baseUrl': '输入 API Base URL（OpenAI 兼容格式）',
+	'customModel.prompt.modelId': '输入 API 请求中的模型 ID',
+	'customModel.prompt.toolCalling': '是否支持工具调用（function calling）',
+	'customModel.prompt.imageInput': '是否支持图片输入',
+	'customModel.prompt.thinking': '是否支持思考/推理模式',
+	'customModel.prompt.apiKey': '输入该模型的 API Key（可跳过）',
+	'customModel.prompt.remove': '选择要移除的自定义模型',
+	'customModel.toolCalling.true': '支持工具调用',
+	'customModel.toolCalling.false': '不支持',
+	'customModel.imageInput.true': '支持图片',
+	'customModel.imageInput.false': '不支持',
+	'customModel.thinking.true': '支持思考模式',
+	'customModel.thinking.false': '不支持',
+	'customModel.added': '自定义模型 "{0}" 已添加。',
+	'customModel.removed': '自定义模型 "{0}" 已移除。',
+	'customModel.none': '暂无自定义模型。',
+	'customModel.error.duplicateId': '模型 ID "{0}" 已存在，请使用不同的 ID。',
+
+	// Discover Models
+	'customModel.discover.pickSource': '选择模型发现来源',
+	'customModel.discover.customUrl': '自定义 API 端点',
+	'customModel.discover.enterUrl': '输入 API Base URL（OpenAI 兼容格式）',
+	'customModel.discover.enterKey': '输入该端点的 API Key',
+	'customModel.discover.noKey': '请先配置 {0} 的 API Key。',
+	'customModel.discover.failed': '模型发现失败：{0}',
+	'customModel.discover.empty': '未发现任何可用模型。',
+	'customModel.discover.allExist': '所有发现的模型已存在。',
+	'customModel.discover.selectModels': '选择要添加的模型（可多选）',
+	'customModel.discover.added': '已添加 {0} 个模型。',
 
 	// Thinking Effort — short labels for model picker dropdown
 	'status.thinking': '思考模式',
@@ -48,9 +89,9 @@ const zh: Translations = {
 	'vision.unavailable': '无可用视觉模型，图片已忽略。',
 	'vision.proxyError': '视觉代理异常：',
 	'vision.action.configureProxy': '配置视觉代理',
-	'vision.panel.title': 'DeepSeek 视觉代理',
+	'vision.panel.title': '多模型视觉代理',
 	'vision.panel.description':
-		'配置一个支持图片输入的模型，用来先把图片转换成文字描述，再把描述随消息发送给 DeepSeek。图片本身不会发送给 DeepSeek。',
+		'配置一个支持图片输入的模型，用来先把图片转换成文字描述，再把描述随消息发送给目标模型。图片本身不会发送给目标模型。',
 	'vision.panel.source.vscodeLm': 'VS Code 模型',
 	'vision.panel.source.apiEndpoint': 'API 端点',
 	'vision.panel.field.source': '视觉代理来源',
@@ -155,13 +196,13 @@ const zh: Translations = {
 
 	// Request
 	'request.toolsLimitExceeded':
-		'DeepSeek 单次 tools 请求最多支持 {0} 个 functions，当前请求包含 {1} 个。请先用 VS Code 的 Configure Tools 关闭不常用的工具；如果正在使用实验性稳定工具列表设置，请关闭它。',
+		'当前模型单次 tools 请求最多支持 {0} 个 functions，当前请求包含 {1} 个。请先用 VS Code 的 Configure Tools 关闭不常用的工具；如果正在使用实验性稳定工具列表设置，请关闭它。',
 	'request.preflightRoundLimitExceeded':
 		'实验性稳定工具列表设置已尝试 {0} 轮，仍无法得到稳定的已启用工具列表。请关闭该实验性设置，或先用 VS Code 的 Configure Tools 关闭不常用的工具。',
-	'notice.visionProxyMissing': '⚠️ 视觉代理不可用，DeepSeek 无法看到图片。[配置视觉代理]({0})',
+	'notice.visionProxyMissing': '⚠️ 视觉代理不可用，目标模型无法看到图片。[配置视觉代理]({0})',
 	'notice.visionProxyFailure': '**⚠️ {0}**\\\n\\\n**{1} · {2}**',
 	'notice.toolDrift':
-		'⚠️ 工具列表不稳定，缓存命中率可能下降。[了解更多](https://github.com/Vizards/deepseek-v4-for-copilot/blob/main/docs/notices/tool-drift.zh.md)',
+		'⚠️ 工具列表不稳定，缓存命中率可能下降。[了解更多](https://github.com/WindSnowLi/multi-model-for-copilot/blob/main/docs/notices/tool-drift.zh.md)',
 
 	// Errors
 	'error.http.400': '[{0}] 请求体格式错误。请根据错误信息提示修改请求体。',
@@ -178,7 +219,8 @@ const zh: Translations = {
 	'error.action.setApiKey': '设置 API Key',
 	'error.action.createApiKey': '创建 API Key',
 	'error.action.viewUsage': '用量',
-	'error.action.checkDeepSeekStatus': 'DeepSeek 状态',
+	'error.action.checkDeepSeekStatus': '查看服务状态',
+	'error.action.checkMiMoStatus': '查看 MiMo 状态',
 	'error.action.viewDetails': '错误详情',
 	'error.network.dns': '[{0}] DNS 解析失败。请检查网络连接、防火墙或代理设置，以及自定义 baseUrl。',
 	'error.network.unreachable':
@@ -193,35 +235,79 @@ const zh: Translations = {
 	'error.network.configuration': '[{0}] 请求配置无效。请检查自定义 baseUrl 或扩展设置。',
 	'error.network.generic':
 		'[{0}] 网络请求失败。请检查网络连接、防火墙或代理设置，以及自定义 baseUrl。',
-	'error.unknown': 'DeepSeek 请求失败：{0}',
+	'error.unknown': '模型请求失败：{0}',
 
 	// Extension
-	'extension.activateFailed': 'DeepSeek 激活失败，请运行 "DeepSeek: 显示日志" 查看详情。',
-	'extension.deactivateFailed': 'DeepSeek 停用异常',
+	'extension.activateFailed': '扩展激活失败，请运行 "Multi-Model: 显示日志" 查看详情。',
+	'extension.deactivateFailed': '扩展停用异常',
 	'extension.welcomeFailed': '欢迎引导加载异常',
 	'extension.openRequestDumpsFolderFailed':
-		'打开请求 dump 目录失败，请运行 "DeepSeek: 显示日志" 查看详情。',
+		'打开请求 dump 目录失败，请运行 "Multi-Model: 显示日志" 查看详情。',
 };
 
 const en: Translations = {
 	// Model descriptions
-	'model.flash.detail': 'Fast, general-purpose model',
-	'model.pro.detail': 'Most capable reasoning model',
-	'model.flash.tooltip':
+	'model.deepseek.flash.detail': 'Fast, general-purpose model',
+	'model.deepseek.pro.detail': 'Most capable reasoning model',
+	'model.deepseek.flash.tooltip':
 		'Fast, efficient DeepSeek V4 model with reasoning close to V4 Pro and economical API pricing.',
-	'model.pro.tooltip':
+	'model.deepseek.pro.tooltip':
 		'DeepSeek V4 model for agentic coding, broad world knowledge, and high-end reasoning.',
 
+	// MiMo model descriptions
+	'model.mimo.pro.detail': 'Flagship reasoning model with deep thinking',
+	'model.mimo.standard.detail': 'Omni-modal model with vision and thinking',
+	'model.mimo.pro.tooltip':
+		'MiMo V2.5 Pro flagship model, designed for complex reasoning, deep analysis, and long-document processing.',
+	'model.mimo.standard.tooltip':
+		'MiMo V2.5 omni-modal model with image, audio, and video understanding plus deep thinking.',
+
 	// API Key
-	'auth.apiKeyRequiredDetail': 'Please run DeepSeek: Set API Key to configure.',
+	'auth.apiKeyRequiredDetail': 'Please run Multi-Model: Set API Key to configure.',
 	'auth.prompt':
-		'Enter your DeepSeek API key or compatible provider token. Official DeepSeek keys usually start with "sk-".',
+		'Enter your DeepSeek API key or compatible provider token. Official DeepSeek keys usually start with "sk-". For MiMo, use a Token Plan key (tp-xxxxx).',
 	'auth.placeholder': 'sk-... or provider token',
+	'auth.mimoPrompt':
+		'Enter your MiMo Token Plan API key. Official MiMo keys use the format "tp-xxxxx".',
+	'auth.mimoPlaceholder': 'tp-...',
 	'auth.emptyValidation': 'API key cannot be empty',
-	'auth.saved': 'DeepSeek API key saved.',
-	'auth.removed': 'DeepSeek API key removed.',
+	'auth.saved': 'API key saved.',
+	'auth.removed': 'API key removed.',
 	'auth.notConfigured':
-		'DeepSeek API key not configured. Run "DeepSeek: Set API Key" from the Command Palette.',
+		'API key not configured. Run "Multi-Model: Set API Key" from the Command Palette.',
+
+	// Custom Model
+	'customModel.prompt.id': 'Enter a unique model identifier (letters, numbers, hyphens)',
+	'customModel.prompt.name': 'Enter a display name for the model',
+	'customModel.prompt.baseUrl': 'Enter the API Base URL (OpenAI-compatible)',
+	'customModel.prompt.modelId': 'Enter the model ID to send in the API request',
+	'customModel.prompt.toolCalling': 'Does this model support tool calling (function calling)?',
+	'customModel.prompt.imageInput': 'Does this model support image input?',
+	'customModel.prompt.thinking': 'Does this model support thinking/reasoning mode?',
+	'customModel.prompt.apiKey': 'Enter API Key for this model (optional, can skip)',
+	'customModel.prompt.remove': 'Select a custom model to remove',
+	'customModel.toolCalling.true': 'Supports tool calling',
+	'customModel.toolCalling.false': 'Not supported',
+	'customModel.imageInput.true': 'Supports images',
+	'customModel.imageInput.false': 'Not supported',
+	'customModel.thinking.true': 'Supports thinking',
+	'customModel.thinking.false': 'Not supported',
+	'customModel.added': 'Custom model "{0}" added.',
+	'customModel.removed': 'Custom model "{0}" removed.',
+	'customModel.none': 'No custom models configured.',
+	'customModel.error.duplicateId': 'Model ID "{0}" already exists. Please use a different ID.',
+
+	// Discover Models
+	'customModel.discover.pickSource': 'Select model discovery source',
+	'customModel.discover.customUrl': 'Custom API endpoint',
+	'customModel.discover.enterUrl': 'Enter the API Base URL (OpenAI-compatible)',
+	'customModel.discover.enterKey': 'Enter the API Key for this endpoint',
+	'customModel.discover.noKey': 'Please configure a {0} API key first.',
+	'customModel.discover.failed': 'Model discovery failed: {0}',
+	'customModel.discover.empty': 'No models discovered.',
+	'customModel.discover.allExist': 'All discovered models already exist.',
+	'customModel.discover.selectModels': 'Select models to add (multi-select)',
+	'customModel.discover.added': 'Added {0} model(s).',
 
 	// Thinking Effort
 	'status.thinking': 'Thinking Effort',
@@ -240,9 +326,9 @@ const en: Translations = {
 	'vision.unavailable': 'No vision models available, image(s) ignored',
 	'vision.proxyError': 'Vision proxy error:',
 	'vision.action.configureProxy': 'Configure Vision Proxy',
-	'vision.panel.title': 'DeepSeek Vision Proxy',
+	'vision.panel.title': 'Multi-Model Vision Proxy',
 	'vision.panel.description':
-		'Configure a vision-capable model to turn image attachments into text before DeepSeek receives the request. DeepSeek receives the description, not the original images.',
+		'Configure a vision-capable model to turn image attachments into text before the target model receives the request. The model receives the description, not the original images.',
 	'vision.panel.source.vscodeLm': 'VS Code model',
 	'vision.panel.source.apiEndpoint': 'API endpoint',
 	'vision.panel.field.source': 'Vision proxy source',
@@ -361,14 +447,14 @@ const en: Translations = {
 
 	// Request
 	'request.toolsLimitExceeded':
-		'DeepSeek supports at most {0} functions in a single `tools` request, but this request contains {1}. Use VS Code Configure Tools to disable tools you rarely use. If the experimental tool-list stabilization setting is enabled, turn it off.',
+		'The current model supports at most {0} functions in a single `tools` request, but this request contains {1}. Use VS Code Configure Tools to disable tools you rarely use. If the experimental tool-list stabilization setting is enabled, turn it off.',
 	'request.preflightRoundLimitExceeded':
 		'Experimental tool-list stabilization tried {0} rounds but still could not get a stable enabled-tools list. Turn this experimental setting off, or use VS Code Configure Tools to disable tools you rarely use first.',
 	'notice.visionProxyMissing':
-		'⚠️ Vision Proxy is unavailable. DeepSeek cannot see images. [Configure Vision Proxy]({0})',
+		'⚠️ Vision Proxy is unavailable. The target model cannot see images. [Configure Vision Proxy]({0})',
 	'notice.visionProxyFailure': '**⚠️ {0}**\\\n\\\n**{1} · {2}**',
 	'notice.toolDrift':
-		'⚠️ Tool list is unstable; cache hit rate may drop. [Learn more](https://github.com/Vizards/deepseek-v4-for-copilot/blob/main/docs/notices/tool-drift.en.md)',
+		'⚠️ Tool list is unstable; cache hit rate may drop. [Learn more](https://github.com/WindSnowLi/multi-model-for-copilot/blob/main/docs/notices/tool-drift.en.md)',
 
 	// Errors
 	'error.http.400':
@@ -391,7 +477,8 @@ const en: Translations = {
 	'error.action.setApiKey': 'Set API Key',
 	'error.action.createApiKey': 'Create API Key',
 	'error.action.viewUsage': 'Usage',
-	'error.action.checkDeepSeekStatus': 'DeepSeek Status',
+	'error.action.checkDeepSeekStatus': 'Check service status',
+	'error.action.checkMiMoStatus': 'Check MiMo status',
 	'error.action.viewDetails': 'Error Details',
 	'error.network.dns':
 		'[{0}] DNS lookup failed. Check your network connection, firewall, or proxy settings, and your custom baseUrl.',
@@ -411,14 +498,14 @@ const en: Translations = {
 		'[{0}] The request configuration is invalid. Check your custom baseUrl or extension settings.',
 	'error.network.generic':
 		'[{0}] Network request failed. Check your network connection, firewall, or proxy settings, and your custom baseUrl.',
-	'error.unknown': 'DeepSeek request failed: {0}',
+	'error.unknown': 'Model request failed: {0}',
 
 	// Extension
-	'extension.activateFailed': 'DeepSeek failed to activate. Run "DeepSeek: Show Logs" for details.',
-	'extension.deactivateFailed': 'Failed to prepare DeepSeek provider for deactivate',
-	'extension.welcomeFailed': 'Failed to show DeepSeek welcome prompt',
+	'extension.activateFailed': 'Extension failed to activate. Run "Multi-Model: Show Logs" for details.',
+	'extension.deactivateFailed': 'Failed to prepare provider for deactivate',
+	'extension.welcomeFailed': 'Failed to show welcome prompt',
 	'extension.openRequestDumpsFolderFailed':
-		'Failed to open request dumps folder. Run "DeepSeek: Show Logs" for details.',
+		'Failed to open request dumps folder. Run "Multi-Model: Show Logs" for details.',
 };
 
 /**

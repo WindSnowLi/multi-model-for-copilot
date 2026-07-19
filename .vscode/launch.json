@@ -12,7 +12,10 @@
       "outFiles": [
         "${workspaceFolder}/out/**/*.js"
       ],
-      "preLaunchTask": "npm: watch"
+      "preLaunchTask": "npm: watch",
+      "env": {
+        "NODE_OPTIONS": "--no-deprecation"
+      }
     },
     {
       "name": "Run Extension (Insiders via CLI)",

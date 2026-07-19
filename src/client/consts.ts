@@ -1,10 +1,10 @@
-import type {
-	ApiProviderId,
-	HttpErrorLinkDefinition,
-	HttpErrorLinkStatusKey,
-	NetworkErrorCategory,
-} from './types';
 import { EXTERNAL_URLS } from '../consts';
+import type {
+    ApiProviderId,
+    HttpErrorLinkDefinition,
+    HttpErrorLinkStatusKey,
+    NetworkErrorCategory,
+} from './types';
 
 export const MAX_DIAGNOSTIC_FIELD_LENGTH = 300;
 
@@ -16,17 +16,29 @@ export const API_PROVIDER_HTTP_ERROR_LINKS: Readonly<
 			labelKey: 'error.action.createApiKey',
 			url: EXTERNAL_URLS.deepseek.apiKeys,
 		},
+		mimo: {
+			labelKey: 'error.action.createApiKey',
+			url: EXTERNAL_URLS.mimo.apiKeys,
+		},
 	},
 	402: {
 		deepseek: {
 			labelKey: 'error.action.viewUsage',
 			url: EXTERNAL_URLS.deepseek.usage,
 		},
+		mimo: {
+			labelKey: 'error.action.viewUsage',
+			url: EXTERNAL_URLS.mimo.usage,
+		},
 	},
 	'5xx': {
 		deepseek: {
 			labelKey: 'error.action.checkDeepSeekStatus',
 			url: EXTERNAL_URLS.deepseek.status,
+		},
+		mimo: {
+			labelKey: 'error.action.checkMiMoStatus',
+			url: EXTERNAL_URLS.mimo.status,
 		},
 	},
 };

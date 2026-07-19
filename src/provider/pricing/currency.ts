@@ -5,7 +5,7 @@ import { isOfficialDeepSeekBaseUrl, normalizeBaseUrl } from '../../endpoint';
 import { logger } from '../../logger';
 import type { PricingCurrency } from '../../types';
 
-const CACHE_KEY = 'deepseek-copilot.balanceCurrency.cache';
+const CACHE_KEY = 'multi-model-for-copilot.balanceCurrency.cache';
 const BALANCE_TIMEOUT_MS = 5000;
 
 interface CachedBalanceCurrency {
@@ -14,13 +14,13 @@ interface CachedBalanceCurrency {
 	readonly baseUrl: string;
 }
 
-interface DeepSeekBalanceInfo {
+interface BalanceInfo {
 	readonly currency?: unknown;
 	readonly total_balance?: unknown;
 	readonly topped_up_balance?: unknown;
 }
 
-interface DeepSeekBalanceResponse {
+interface BalanceResponse {
 	readonly balance_infos?: unknown;
 }
 
@@ -37,9 +37,10 @@ export class BalanceCurrencyResolver {
 	) {}
 
 	getDisplayCurrency(): PricingCurrency | undefined {
-		const baseUrl = normalizeBaseUrl(getBaseUrl());
+		const baseUrl = normalizeBaseUrl(getBaseUrl('deepseek'));
 		if (!isOfficialDeepSeekBaseUrl(baseUrl)) {
-			return undefined;
+			// For non-DeepSeek providers (e.g. MiMo), use locale-based fallback
+			return getLocaleFallbackCurrency();
 		}
 
 		if (this.resolved?.baseUrl === baseUrl) {
@@ -64,7 +65,7 @@ export class BalanceCurrencyResolver {
 		const refresh = this.refreshFromBalance(controller, generation)
 			.catch((error) => {
 				if (!(isAbortError(error) && generation !== this.generation)) {
-					logger.warn('Failed to refresh DeepSeek balance currency', error);
+					logger.warn('Failed to refresh balance currency', error);
 				}
 			})
 			.finally(() => {
@@ -88,7 +89,7 @@ export class BalanceCurrencyResolver {
 	}
 
 	private needsRefresh(): boolean {
-		const baseUrl = normalizeBaseUrl(getBaseUrl());
+		const baseUrl = normalizeBaseUrl(getBaseUrl('deepseek'));
 		if (!isOfficialDeepSeekBaseUrl(baseUrl)) {
 			return false;
 		}
@@ -101,7 +102,7 @@ export class BalanceCurrencyResolver {
 	}
 
 	private async refreshFromBalance(controller: AbortController, generation: number): Promise<void> {
-		const baseUrl = normalizeBaseUrl(getBaseUrl());
+		const baseUrl = normalizeBaseUrl(getBaseUrl('deepseek'));
 		if (!isOfficialDeepSeekBaseUrl(baseUrl)) {
 			return;
 		}
@@ -161,19 +162,19 @@ async function fetchBalanceCurrency(
 			return undefined;
 		}
 
-		const data = (await response.json()) as DeepSeekBalanceResponse;
+		const data = (await response.json()) as BalanceResponse;
 		return chooseBalanceCurrency(data);
 	} finally {
 		clearTimeout(timeout);
 	}
 }
 
-function chooseBalanceCurrency(data: DeepSeekBalanceResponse): PricingCurrency | undefined {
+function chooseBalanceCurrency(data: BalanceResponse): PricingCurrency | undefined {
 	if (!Array.isArray(data.balance_infos)) {
 		return undefined;
 	}
 
-	const infos = data.balance_infos.filter(isDeepSeekBalanceInfo);
+	const infos = data.balance_infos.filter(isBalanceInfo);
 	return (
 		findCurrencyByPositiveBalance(infos, 'topped_up_balance') ??
 		findCurrencyByPositiveBalance(infos, 'total_balance') ??
@@ -182,7 +183,7 @@ function chooseBalanceCurrency(data: DeepSeekBalanceResponse): PricingCurrency |
 }
 
 function findCurrencyByPositiveBalance(
-	infos: readonly DeepSeekBalanceInfo[],
+	infos: readonly BalanceInfo[],
 	key: 'total_balance' | 'topped_up_balance',
 ): PricingCurrency | undefined {
 	for (const info of infos) {
@@ -198,7 +199,7 @@ function parsePricingCurrency(value: unknown): PricingCurrency | undefined {
 	return value === 'USD' || value === 'CNY' ? value : undefined;
 }
 
-function isDeepSeekBalanceInfo(value: unknown): value is DeepSeekBalanceInfo {
+function isBalanceInfo(value: unknown): value is BalanceInfo {
 	return typeof value === 'object' && value !== null;
 }
 

@@ -3,9 +3,9 @@ import vscode from 'vscode';
 import { getDebugLoggingEnabled } from '../../config';
 import { LANGUAGE_MODEL_CHAT_SYSTEM_ROLE } from '../../consts';
 import { logger } from '../../logger';
-import type { DeepSeekMessage, DeepSeekRequest, DeepSeekTool, DeepSeekUsage } from '../../types';
+import type { ChatMessage, ChatCompletionRequest, ChatTool, ChatUsage } from '../../types';
 import {
-	classifyDeepSeekRequest,
+	classifyChatCompletionRequest,
 	formatModelFields,
 	formatRequestLogLine,
 	type RequestKind,
@@ -72,7 +72,7 @@ export interface CacheTraceStats {
 
 export interface CacheTraceMessageSummary {
 	index: number;
-	role: DeepSeekMessage['role'];
+	role: ChatMessage['role'];
 	hash: string;
 	contentHash: string;
 	contentHeadHash: string;
@@ -164,7 +164,7 @@ export interface CacheTraceSystemPromptChange {
 }
 
 export interface BeginCacheDiagnosticsOptions {
-	request: DeepSeekRequest;
+	request: ChatCompletionRequest;
 	segment: ConversationSegment;
 	requestKind?: RequestKind;
 	vscodeModelId: string;
@@ -188,7 +188,7 @@ export interface CacheDiagnosticsRun {
 	onDone(info: CacheDiagnosticsDoneInfo): void;
 	onCancellationTokenRequested(): void;
 	onReplayMarkerReport(info: ReplayMarkerReportInfo): void;
-	onUsage(usage: DeepSeekUsage, charsPerToken: number): void;
+	onUsage(usage: ChatUsage, charsPerToken: number): void;
 }
 
 export type ReplayMarkerReportStatus = 'reported' | 'failed' | 'skipped';
@@ -334,7 +334,7 @@ class DefaultCacheDiagnosticsRecorder implements CacheDiagnosticsRecorder {
 	beginRequest(options: BeginCacheDiagnosticsOptions): CacheDiagnosticsRun {
 		const requestKind =
 			options.requestKind ??
-			classifyDeepSeekRequest({
+			classifyChatCompletionRequest({
 				request: options.request,
 				inputMessages: options.inputMessages,
 			});
@@ -406,7 +406,7 @@ class DefaultCacheDiagnosticsRecorder implements CacheDiagnosticsRecorder {
 					` thinkingEffort=${options.thinkingEffort}` +
 					` maxTokens=${options.maxTokens ?? 'api-default'}` +
 					` inputMessages=${options.inputMessages.length}` +
-					` deepseekMessages=${options.request.messages.length}`,
+					` ChatMessages=${options.request.messages.length}`,
 			),
 		);
 		const hostPromptTrace = summarizeHostPromptTrace(options.inputMessages);
@@ -618,7 +618,7 @@ class ActiveCacheDiagnosticsRun implements CacheDiagnosticsRun {
 		this.recorder.rememberCacheTrace(this.snapshot);
 	}
 
-	onUsage(usage: DeepSeekUsage, charsPerToken: number): void {
+	onUsage(usage: ChatUsage, charsPerToken: number): void {
 		logUsage(usage, charsPerToken, this.usageLogContext, this.requestId);
 		if (this.resultComparison) {
 			const hitRate = getCacheHitRate(usage);
@@ -665,7 +665,7 @@ class NoopCacheDiagnosticsRun implements CacheDiagnosticsRun {
 
 	onReplayMarkerReport(_info: ReplayMarkerReportInfo): void {}
 
-	onUsage(usage: DeepSeekUsage, charsPerToken: number): void {
+	onUsage(usage: ChatUsage, charsPerToken: number): void {
 		logUsage(usage, charsPerToken, this.usageLogContext);
 	}
 }
@@ -797,7 +797,7 @@ function sanitizeLogValue(value: string): string {
 }
 
 function logUsage(
-	usage: DeepSeekUsage,
+	usage: ChatUsage,
 	charsPerToken: number,
 	context: UsageLogContext,
 	requestId?: number,
@@ -816,7 +816,7 @@ function logUsage(
 	);
 }
 
-function getCacheHitRate(usage: DeepSeekUsage): string {
+function getCacheHitRate(usage: ChatUsage): string {
 	const cacheHit = usage.prompt_cache_hit_tokens ?? 0;
 	const cacheMiss = usage.prompt_cache_miss_tokens ?? 0;
 	const cacheTotal = cacheHit + cacheMiss;
@@ -1151,9 +1151,9 @@ function getPartConstructorName(part: unknown): string {
 }
 
 export function createCacheTraceSnapshot(
-	request: DeepSeekRequest,
+	request: ChatCompletionRequest,
 	inputMessages: readonly vscode.LanguageModelChatRequestMessage[] = [],
-	requestKind: RequestKind = classifyDeepSeekRequest({ request, inputMessages }),
+	requestKind: RequestKind = classifyChatCompletionRequest({ request, inputMessages }),
 ): CacheTraceSnapshot {
 	const toolsSerialized = stableStringify(request.tools ?? []);
 	const messageSummaries = summarizeMessages(request.messages);
@@ -1181,7 +1181,7 @@ export function createCacheTraceSnapshot(
 }
 
 function createRedactedComparisonInput(
-	request: DeepSeekRequest,
+	request: ChatCompletionRequest,
 	messageSummaries: CacheTraceMessageSummary[],
 	toolSummaries: CacheTraceToolSummary[],
 ): string {
@@ -1580,7 +1580,7 @@ function formatContentSectionSummary(summary: CacheTraceContentSectionSummary | 
 	);
 }
 
-function summarizeMessages(messages: DeepSeekMessage[]): CacheTraceMessageSummary[] {
+function summarizeMessages(messages: ChatMessage[]): CacheTraceMessageSummary[] {
 	const summaries: CacheTraceMessageSummary[] = [];
 	let followsToolResult = false;
 	for (const [index, message] of messages.entries()) {
@@ -1595,7 +1595,7 @@ function summarizeMessages(messages: DeepSeekMessage[]): CacheTraceMessageSummar
 }
 
 function summarizeMessage(
-	message: DeepSeekMessage,
+	message: ChatMessage,
 	index: number,
 	followsToolResult: boolean,
 ): CacheTraceMessageSummary {
@@ -1760,7 +1760,7 @@ function getSafeSystemPromptSectionLabel(line: string): string | undefined {
 	return SAFE_SYSTEM_PROMPT_TAGS.has(tag) ? `tag:${tag}` : 'tag:other';
 }
 
-function summarizeTools(tools: DeepSeekTool[]): CacheTraceToolSummary[] {
+function summarizeTools(tools: ChatTool[]): CacheTraceToolSummary[] {
 	return tools.map((tool, index) => ({
 		index,
 		name: tool.function.name,
@@ -1770,7 +1770,7 @@ function summarizeTools(tools: DeepSeekTool[]): CacheTraceToolSummary[] {
 	}));
 }
 
-function summarizeStats(messages: DeepSeekMessage[], toolCount: number): CacheTraceStats {
+function summarizeStats(messages: ChatMessage[], toolCount: number): CacheTraceStats {
 	let userMessages = 0;
 	let assistantMessages = 0;
 	let toolMessages = 0;

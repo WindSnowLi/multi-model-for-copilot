@@ -2,30 +2,32 @@ import type { CancellationToken } from 'vscode';
 import { safeStringify } from '../json';
 import { logger } from '../logger';
 import type {
-	DeepSeekRequest,
-	DeepSeekStreamChunk,
-	DeepSeekToolCall,
-	DeepSeekUsage,
-	StreamCallbacks,
+    ApiProvider, ChatCompletionRequest, CustomModelConfig,
+    ChatStreamChunk,
+    ChatToolCall,
+    ChatUsage,
+    StreamCallbacks
 } from '../types';
 import { createHttpError, formatRequestError, normalizeRequestError } from './error';
 
 /**
- * Lightweight SSE-streaming DeepSeek API client.
+ * Lightweight SSE-streaming API client supporting multiple providers.
  * No external dependencies — uses Node's built-in fetch.
  */
-export class DeepSeekClient {
+export class ApiClient {
 	constructor(
 		private readonly baseUrl: string,
 		private readonly apiKey: string,
+		private readonly provider: ApiProvider = 'deepseek',
+		private readonly customConfig?: CustomModelConfig,
 	) {}
 
 	/**
-	 * Stream a chat completion from the DeepSeek API.
+	 * Stream a chat completion from the API.
 	 * Parses SSE chunks and dispatches callbacks for content, thinking, and tool calls.
 	 */
 	async streamChatCompletion(
-		request: DeepSeekRequest,
+		request: ChatCompletionRequest,
 		callbacks: StreamCallbacks,
 		cancellationToken?: CancellationToken,
 	): Promise<void> {
@@ -41,15 +43,30 @@ export class DeepSeekClient {
 			// Request usage stats in streaming responses so we can calibrate token counting.
 			const requestBody = {
 				...request,
+				messages: serializeMessagesWithImages(request.messages),
 				stream_options: { include_usage: true },
 			};
 
+			const headers: Record<string, string> = {
+				'Content-Type': 'application/json',
+			};
+
+			// Custom models: use configured auth header/prefix
+			if (this.customConfig) {
+				const headerName = this.customConfig.authHeader || 'Authorization';
+				const prefix = this.customConfig.authPrefix ?? 'Bearer ';
+				headers[headerName] = `${prefix}${this.apiKey}`;
+			} else if (this.provider === 'mimo') {
+				// MiMo uses `api-key` header
+				headers['api-key'] = this.apiKey;
+			} else {
+				// DeepSeek and others use `Authorization: Bearer`
+				headers['Authorization'] = `Bearer ${this.apiKey}`;
+			}
+
 			const response = await fetch(`${this.baseUrl}/chat/completions`, {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${this.apiKey}`,
-				},
+				headers,
 				body: safeStringify(requestBody),
 				signal: controller.signal,
 			});
@@ -65,10 +82,10 @@ export class DeepSeekClient {
 			const reader = response.body.getReader();
 			const decoder = new TextDecoder();
 			let buffer = '';
-			let latestUsage: DeepSeekUsage | undefined;
+			let latestUsage: ChatUsage | undefined;
 
 			// Accumulate tool call deltas by index, then emit on finish_reason=stop/tool_calls
-			const pendingToolCalls = new Map<number, DeepSeekToolCall>();
+			const pendingToolCalls = new Map<number, ChatToolCall>();
 
 			while (true) {
 				if (cancellationToken?.isCancellationRequested) {
@@ -110,7 +127,7 @@ export class DeepSeekClient {
 
 					const jsonStr = trimmed.slice(6);
 					try {
-						const chunk: DeepSeekStreamChunk = JSON.parse(jsonStr);
+						const chunk: ChatStreamChunk = JSON.parse(jsonStr);
 						const choice = chunk.choices?.[0];
 
 						// Some OpenAI-compatible providers emit usage on every streaming chunk.
@@ -185,7 +202,7 @@ export class DeepSeekClient {
 	}
 }
 
-function reportFinalUsage(callbacks: StreamCallbacks, usage: DeepSeekUsage | undefined): void {
+function reportFinalUsage(callbacks: StreamCallbacks, usage: ChatUsage | undefined): void {
 	if (!usage || !callbacks.onUsage) {
 		return;
 	}
@@ -194,4 +211,28 @@ function reportFinalUsage(callbacks: StreamCallbacks, usage: DeepSeekUsage | und
 
 function isAbortError(error: unknown): boolean {
 	return error instanceof Error && error.name === 'AbortError';
+}
+
+/**
+ * Serialize messages with imageUrls into OpenAI-compatible multipart content format.
+ * Messages without images are passed through unchanged.
+ */
+function serializeMessagesWithImages(
+	messages: ChatCompletionRequest['messages'],
+): ChatCompletionRequest['messages'] {
+	return messages.map((msg) => {
+		if (!msg.imageUrls || msg.imageUrls.length === 0) {
+			return msg;
+		}
+		// Convert to array content format: text + image_url blocks
+		const contentParts: unknown[] = [];
+		if (msg.content) {
+			contentParts.push({ type: 'text', text: msg.content });
+		}
+		for (const url of msg.imageUrls) {
+			contentParts.push({ type: 'image_url', image_url: { url } });
+		}
+		// Use type assertion since the serialized format differs from ChatMessage
+		return { ...msg, content: contentParts as unknown as string };
+	});
 }

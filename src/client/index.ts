@@ -1,9 +1,9 @@
-export { DeepSeekClient } from './core';
+export { ApiClient } from './core';
 export {
 	createHttpError,
 	createUserFacingError,
-	DeepSeekRequestError,
+	ApiRequestError,
 	normalizeRequestError,
 	setErrorActionUrl,
 } from './error';
-export type { DeepSeekRequestErrorKind, ErrorActionUrls } from './types';
+export type { ApiRequestErrorKind, ErrorActionUrls } from './types';

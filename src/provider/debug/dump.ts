@@ -7,9 +7,9 @@ import { getRequestDumpEnabled } from '../../config';
 import { LANGUAGE_MODEL_CHAT_SYSTEM_ROLE } from '../../consts';
 import { safeStringify, toWellFormedString } from '../../json';
 import { logger } from '../../logger';
-import type { DeepSeekMessage, DeepSeekRequest } from '../../types';
+import type { ChatMessage, ChatCompletionRequest } from '../../types';
 import {
-	classifyDeepSeekRequest,
+	classifyChatCompletionRequest,
 	classifyProviderRequest,
 	formatModelFields,
 	formatRequestLogLine,
@@ -94,7 +94,7 @@ interface SystemPromptSummary extends CustomizationsSummary {
 	agentTagCount: number;
 }
 
-export interface DumpDeepSeekRequestOptions {
+export interface dumpApiRequestOptions {
 	globalStorageUri: vscode.Uri;
 	segment: ConversationSegment;
 	requestKind?: RequestKind;
@@ -179,15 +179,15 @@ export function dumpProviderInput(options: DumpProviderInputOptions): void {
  *   deepseek-request-<timestamp>-NNNN.json           — full request body
  *   deepseek-request-<timestamp>-NNNN.msg0.txt       — messages[0] content (system prompt)
  */
-export function dumpDeepSeekRequest(
-	request: DeepSeekRequest,
-	options: DumpDeepSeekRequestOptions,
+export function dumpChatCompletionRequest(
+	request: ChatCompletionRequest,
+	options: dumpApiRequestOptions,
 ): void {
 	if (!getRequestDumpEnabled()) return;
 
 	const requestKind =
 		options.requestKind ??
-		classifyDeepSeekRequest({
+		classifyChatCompletionRequest({
 			request,
 			inputMessages: options.inputMessages,
 		});
@@ -333,9 +333,9 @@ function createProviderInputSnapshot(
 
 function createPipelineSnapshot(
 	stage: 'input' | 'resolved',
-	request: DeepSeekRequest,
+	request: ChatCompletionRequest,
 	messages: readonly vscode.LanguageModelChatRequestMessage[],
-	options: DumpDeepSeekRequestOptions,
+	options: dumpApiRequestOptions,
 	context: DumpContext,
 ): object {
 	return createDumpSnapshot({
@@ -665,7 +665,7 @@ function summarizeVscodeSystemPrompt(
 	);
 }
 
-function summarizeDeepSeekSystemPrompt(messages: readonly DeepSeekMessage[]): SystemPromptSummary {
+function summarizeDeepSeekSystemPrompt(messages: readonly ChatMessage[]): SystemPromptSummary {
 	const message = messages[0];
 	const customizations = summarizeDeepSeekCustomizations(messages);
 	if (!message) {
@@ -722,7 +722,7 @@ function summarizeVscodeCustomizations(
 }
 
 function summarizeDeepSeekCustomizations(
-	messages: readonly DeepSeekMessage[],
+	messages: readonly ChatMessage[],
 ): CustomizationsSummary {
 	let customizationsUpdateCountInHistory = 0;
 	let latestUserMessageIndex: number | null = null;
@@ -1000,8 +1000,8 @@ function logProviderInputDump(
 }
 
 function logRequestDump(
-	request: DeepSeekRequest,
-	options: DumpDeepSeekRequestOptions,
+	request: ChatCompletionRequest,
+	options: dumpApiRequestOptions,
 	paths: RequestDumpPaths,
 	requestJsonLength: number,
 	requestKind: RequestKind,

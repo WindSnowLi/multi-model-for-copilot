@@ -1,17 +1,32 @@
 import vscode from 'vscode';
 import { logger } from '../logger';
-import { DeepSeekChatProvider } from '../provider';
+import { ChatProvider } from '../provider';
 
 export async function registerProvider(
 	context: vscode.ExtensionContext,
-): Promise<DeepSeekChatProvider> {
-	const provider = new DeepSeekChatProvider(context);
+): Promise<ChatProvider> {
+	const provider = new ChatProvider(context);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('deepseek-copilot.setApiKey', () => provider.configureApiKey()),
-		vscode.commands.registerCommand('deepseek-copilot.clearApiKey', () => provider.clearApiKey()),
-		vscode.commands.registerCommand('deepseek-copilot.setVisionModel', () =>
+		vscode.commands.registerCommand('multi-model-for-copilot.setApiKey', () => provider.configureApiKey()),
+		vscode.commands.registerCommand('multi-model-for-copilot.clearApiKey', () => provider.clearApiKey()),
+		vscode.commands.registerCommand('multi-model-for-copilot.setMiMoApiKey', () =>
+			provider.configureMiMoApiKey(),
+		),
+		vscode.commands.registerCommand('multi-model-for-copilot.clearMiMoApiKey', () =>
+			provider.clearMiMoApiKey(),
+		),
+		vscode.commands.registerCommand('multi-model-for-copilot.setVisionModel', () =>
 			provider.setVisionModel(),
+		),
+		vscode.commands.registerCommand('multi-model-for-copilot.addCustomModel', () =>
+			provider.addCustomModel(),
+		),
+		vscode.commands.registerCommand('multi-model-for-copilot.removeCustomModel', () =>
+			provider.removeCustomModel(),
+		),
+		vscode.commands.registerCommand('multi-model-for-copilot.discoverModels', () =>
+			provider.discoverAndAddModels(),
 		),
 		vscode.lm.registerLanguageModelChatProvider('deepseek', provider),
 	);

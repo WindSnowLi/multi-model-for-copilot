@@ -1,27 +1,27 @@
 import vscode from 'vscode';
 import { AuthManager } from '../auth';
-import { DeepSeekClient } from '../client';
-import { getApiModelId, getBaseUrl, getMaxTokens } from '../config';
-import { MODELS } from '../consts';
-import { isOfficialDeepSeekBaseUrl } from '../endpoint';
+import { ApiClient } from '../client';
+import { getApiModelId, getBaseUrl, getCustomModels, getCustomModelSecretKey, getMaxTokens } from '../config';
+import { getAllModels } from '../consts';
+import { isOfficialProviderBaseUrl } from '../endpoint';
 import { t } from '../i18n';
-import type { DeepSeekRequest } from '../types';
+import type { ChatCompletionRequest } from '../types';
 import { convertMessages, countMessageChars } from './convert';
 import {
-	dumpDeepSeekRequest,
+	dumpChatCompletionRequest,
 	type CacheDiagnosticsRecorder,
 	type CacheDiagnosticsRun,
 } from './debug';
 import { getConfiguredThinkingEffort, type ModelConfigurationOptions } from './models';
-import { classifyDeepSeekRequest, shouldForceThinkingNone, type RequestKind } from './routing';
 import type { ReplayMarkerMetadata } from './replay';
+import { classifyChatCompletionRequest, shouldForceThinkingNone, type RequestKind } from './routing';
 import type { ConversationSegment } from './segment';
 import { collectTrailingToolResultIds, prepareRequestTools } from './tools/request';
 import { resolveImageMessages, type VisionDescriber } from './vision';
 
 export interface PreparedChatRequest {
-	client: DeepSeekClient;
-	request: DeepSeekRequest;
+	client: ApiClient;
+	request: ChatCompletionRequest;
 	isThinkingModel: boolean;
 	totalRequestChars: number;
 	trailingToolResultIds: string[];
@@ -56,32 +56,45 @@ export async function prepareChatRequest({
 	cacheDiagnostics,
 	getVisionDescriber,
 }: PrepareChatRequestOptions): Promise<PreparedChatRequest> {
-	const apiKey = await authManager.getApiKey();
+	const customConfigs = getCustomModels();
+	const allModels = getAllModels(customConfigs);
+	const modelDef = allModels.find((m) => m.id === modelInfo.id);
+	const customCfg = customConfigs.find((m) => m.id === modelInfo.id);
+
+	// For custom models, get API key from model-specific secret; otherwise use provider key
+	const secretKey = customCfg ? getCustomModelSecretKey(customCfg.id) : undefined;
+	const apiKey = customCfg
+		? await authManager.getApiKeyForSecret(secretKey!)
+		: await authManager.getApiKey(modelDef?.provider);
 	if (!apiKey) {
 		throw new Error(t('auth.notConfigured'));
 	}
 
-	const baseUrl = getBaseUrl();
-	const client = new DeepSeekClient(baseUrl, apiKey);
-	const modelDef = MODELS.find((m) => m.id === modelInfo.id);
+	// Custom models use their own baseUrl; built-in models use settings
+	const baseUrl = customCfg ? customCfg.baseUrl.replace(/\/+$/u, '') : getBaseUrl(modelDef?.provider);
+	const provider = customCfg ? 'deepseek' : (modelDef?.provider ?? 'deepseek'); // custom models use DeepSeek-style auth by default
+	const client = new ApiClient(baseUrl, apiKey, provider, customCfg);
 	const isThinkingModel = modelDef?.capabilities.thinking ?? false;
 	const maxTokens = getMaxTokens();
 
-	const visionResolution = await resolveImageMessages(messages, token, getVisionDescriber);
+	const visionResolution = await resolveImageMessages(messages, token, getVisionDescriber, modelDef?.capabilities.imageInput);
 	const resolvedMessages = visionResolution.messages;
-	const deepseekMessages = convertMessages(resolvedMessages, isThinkingModel);
+	const ChatMessages = convertMessages(resolvedMessages, isThinkingModel, modelDef?.capabilities.imageInput);
 	const tools = prepareRequestTools(modelDef?.capabilities.toolCalling, options);
 
-	const totalRequestChars = countMessageChars(deepseekMessages);
-	const baseRequest: DeepSeekRequest = {
-		model: getApiModelId(modelInfo.id),
-		messages: deepseekMessages,
+	const totalRequestChars = countMessageChars(ChatMessages);
+	const isMimo = modelDef?.provider === 'mimo';
+	const useMaxCompletionTokens = isMimo || customCfg?.useMaxCompletionTokens;
+	const baseRequest: ChatCompletionRequest = {
+		model: customCfg ? customCfg.modelId : getApiModelId(modelInfo.id),
+		messages: ChatMessages,
 		stream: true,
 		tools,
 		tool_choice: tools && tools.length > 0 ? ('auto' as const) : undefined,
-		max_tokens: maxTokens,
+		// MiMo and custom models with useMaxCompletionTokens use OpenAI-style max_completion_tokens
+		...(useMaxCompletionTokens ? { max_completion_tokens: maxTokens } : { max_tokens: maxTokens }),
 	};
-	const requestKind = classifyDeepSeekRequest({
+	const requestKind = classifyChatCompletionRequest({
 		request: baseRequest,
 		inputMessages: messages,
 	});
@@ -91,20 +104,28 @@ export async function prepareChatRequest({
 	// Only force helper requests into disabled thinking on the official API.
 	// Custom endpoints keep their configured effort to preserve pre-#137 request shape.
 	const forceNoneThinking =
-		shouldForceThinkingNone(requestKind) && isOfficialDeepSeekBaseUrl(baseUrl);
+		shouldForceThinkingNone(requestKind) && isOfficialProviderBaseUrl(baseUrl, modelDef?.provider ?? 'deepseek');
 	const thinkingEffort = forceNoneThinking ? 'none' : configuredThinkingEffort;
-	const request: DeepSeekRequest = {
+	const request: ChatCompletionRequest = {
 		...baseRequest,
 		...(isThinkingModel
-			? {
-					thinking: {
-						type: thinkingEffort === 'none' ? ('disabled' as const) : ('enabled' as const),
-					},
-					...(thinkingEffort === 'none' ? {} : { reasoning_effort: thinkingEffort }),
-				}
+			? isMimo
+				? {
+						...(thinkingEffort !== 'none' ? { reasoning_effort: thinkingEffort } : {}),
+					}
+				: customCfg?.requiresThinkingParam === false
+					? {
+							...(thinkingEffort !== 'none' ? { reasoning_effort: thinkingEffort } : {}),
+						}
+					: {
+							thinking: {
+								type: thinkingEffort === 'none' ? ('disabled' as const) : ('enabled' as const),
+							},
+							...(thinkingEffort === 'none' ? {} : { reasoning_effort: thinkingEffort }),
+						}
 			: {}),
 	};
-	dumpDeepSeekRequest(request, {
+	dumpChatCompletionRequest(request, {
 		globalStorageUri,
 		segment,
 		requestKind,
@@ -140,7 +161,7 @@ export async function prepareChatRequest({
 		request,
 		isThinkingModel,
 		totalRequestChars,
-		trailingToolResultIds: collectTrailingToolResultIds(deepseekMessages),
+		trailingToolResultIds: collectTrailingToolResultIds(ChatMessages),
 		cacheDiagnostics: diagnosticsRun,
 		requestKind,
 		segment,

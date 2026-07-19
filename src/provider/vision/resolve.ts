@@ -36,10 +36,19 @@ export async function resolveImageMessages(
 	messages: readonly vscode.LanguageModelChatRequestMessage[],
 	token: vscode.CancellationToken,
 	getDescriber: () => Promise<VisionDescriber | undefined>,
+	supportsNativeVision?: boolean,
 ): Promise<VisionResolutionResult> {
 	const stats = createVisionResolutionStats();
 	collectInputImageStats(messages, stats);
 	if (stats.inputImageParts === 0) {
+		return { messages, stats, replayMarkerMetadata: {} };
+	}
+
+	// If the target model supports native image input, pass images through directly
+	// without using the vision proxy. The convertMessages function will handle
+	// converting image data to the API's image_url format.
+	if (supportsNativeVision) {
+		stats.droppedImageParts = 0; // images are kept, not dropped
 		return { messages, stats, replayMarkerMetadata: {} };
 	}
 

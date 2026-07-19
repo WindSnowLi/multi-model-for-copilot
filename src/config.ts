@@ -1,14 +1,21 @@
 import vscode from 'vscode';
 import { CONFIG_SECTION } from './consts';
+import type { ApiProvider, CustomModelConfig } from './types';
 
 export type DebugMode = 'minimal' | 'metadata' | 'verbose';
 
 /**
- * Get DeepSeek API base URL from settings.
+ * Get API base URL from settings.
  * Falls back to the official endpoint when not configured.
+ * For MiMo models, checks the `mimoBaseUrl` setting first.
  */
-export function getBaseUrl(): string {
+export function getBaseUrl(provider?: ApiProvider): string {
 	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
+
+	if (provider === 'mimo') {
+		return config.get<string>('mimoBaseUrl') || 'https://token-plan-cn.xiaomimimo.com/v1';
+	}
+
 	return config.get<string>('baseUrl') || 'https://api.deepseek.com';
 }
 
@@ -37,6 +44,64 @@ export function getMaxTokens(): number | undefined {
 }
 
 /**
+ * Read user-defined custom model configurations from settings.
+ * Returns validated entries with required fields present.
+ */
+export function getCustomModels(): CustomModelConfig[] {
+	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
+	const raw = config.get<CustomModelConfig[]>('customModels', []);
+	return raw.filter(
+		(m) =>
+			m &&
+			typeof m.id === 'string' &&
+			m.id.trim() &&
+			typeof m.name === 'string' &&
+			m.name.trim() &&
+			typeof m.baseUrl === 'string' &&
+			m.baseUrl.trim() &&
+			typeof m.modelId === 'string' &&
+			m.modelId.trim(),
+	);
+}
+
+/**
+ * Get the API key secret storage key for a custom model.
+ */
+export function getCustomModelSecretKey(modelId: string): string {
+	return `multi-model-for-copilot.custom.${modelId}`;
+}
+
+/** Model entry returned by the OpenAI-compatible /v1/models endpoint. */
+export interface DiscoveredModel {
+	id: string;
+	object: string;
+	owned_by: string;
+}
+
+/**
+ * Discover available models from an OpenAI-compatible /v1/models endpoint.
+ * Works with MiMo, DeepSeek, and any custom provider.
+ */
+export async function discoverModels(
+	baseUrl: string,
+	apiKey: string,
+	authHeader: string = 'Authorization',
+	authPrefix: string = 'Bearer ',
+	abortSignal?: AbortSignal,
+): Promise<DiscoveredModel[]> {
+	const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+	headers[authHeader] = `${authPrefix}${apiKey}`;
+
+	const url = `${baseUrl.replace(/\/+$/u, '')}/models`;
+	const response = await fetch(url, { headers, signal: abortSignal });
+	if (!response.ok) {
+		throw new Error(`Model discovery failed: HTTP ${response.status}`);
+	}
+	const data = await response.json() as { data?: DiscoveredModel[] };
+	return data.data ?? [];
+}
+
+/**
  * Diagnostic mode. `verbose` also enables metadata logs.
  *
  * The legacy boolean `debug` setting is still read as a fallback so old
@@ -58,7 +123,7 @@ export function getDebugLoggingEnabled(): boolean {
 }
 
 /**
- * Whether to write full DeepSeek request payloads to disk.
+ * Whether to write full request payloads to disk.
  */
 export function getRequestDumpEnabled(): boolean {
 	return getDebugMode() === 'verbose';
@@ -70,7 +135,7 @@ export function getStabilizeToolListEnabled(): boolean {
 }
 
 /**
- * Migrate the legacy boolean `deepseek-copilot.debug` setting to `debugMode`.
+ * Migrate the legacy boolean `multi-model-for-copilot.debug` setting to `debugMode`.
  *
  * `debug: true` maps to `debugMode: metadata`; `debug: false` maps to the
  * default `minimal`, so it only needs cleanup.
