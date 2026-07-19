@@ -34,6 +34,7 @@ This extension brings **multiple AI model providers** into GitHub Copilot Chat's
 |---|---|---|---|
 | **DeepSeek** | V4 Flash, V4 Pro | `Authorization: Bearer` | `sk-...` |
 | **Xiaomi MiMo** | V2.5, V2.5 Pro | `api-key` header | `tp-...` (Token Plan) |
+| **Qwen (千问)** | Max, Plus, Turbo, VL Max, VL Plus, VL Turbo | `Authorization: Bearer` | `sk-...` |
 | **Custom** | Any OpenAI-compatible | Configurable | Any |
 
 Built-in presets include full pricing, capabilities, and context limits. Custom models are added via settings or interactive commands.
@@ -42,7 +43,7 @@ Built-in presets include full pricing, capabilities, and context limits. Custom 
 
 Run **`Multi-Model: Discover Available Models`** to auto-detect available models:
 
-1. Pick a source: **DeepSeek**, **MiMo**, or **custom endpoint**
+1. Pick a source: **DeepSeek**, **MiMo**, **Qwen**, or **custom endpoint**
 2. Extension calls `GET /v1/models` and lists all available models
 3. Multi-select the ones you want — added to config instantly
 
@@ -51,6 +52,7 @@ Run **`Multi-Model: Discover Available Models`** to auto-detect available models
 | Model | Image Support | Method |
 |---|---|---|
 | **MiMo V2.5** | Native | Images sent directly via OpenAI `image_url` format |
+| **Qwen VL Max/Plus/Turbo** | Native | Images sent directly via OpenAI `image_url` format |
 | **DeepSeek V4 Flash/Pro** | Proxy | Images described by another model, text sent to DeepSeek |
 | **Custom models** | Configurable | Set `imageInput: true` for native support |
 
@@ -58,7 +60,7 @@ Supports JPEG, PNG, GIF, WebP, BMP (up to 50MB per image). Multi-image input sup
 
 ### Thinking Mode
 
-Use Copilot Chat's model picker to choose reasoning effort: `none` (off), `high` (default), or `max` (deep reasoning). Works across DeepSeek, MiMo, and custom models.
+Use Copilot Chat's model picker to choose reasoning effort: `none` (off), `high` (default), or `max` (deep reasoning). Works across DeepSeek, MiMo, Qwen, and custom models.
 
 ### Full Copilot Stack
 
@@ -76,6 +78,7 @@ API keys in OS keychain (SecretStorage). Per-provider separation. Zero runtime d
 - An API key from at least one provider:
   - DeepSeek: [platform.deepseek.com](https://platform.deepseek.com) (`sk-...`)
   - MiMo: [platform.xiaomimimo.com](https://platform.xiaomimimo.com) (`tp-...` for Token Plan)
+  - Qwen: [platform.qianwenai.com](https://platform.qianwenai.com) (`sk-...`)
   - Any OpenAI-compatible endpoint
 
 ### Quick Start

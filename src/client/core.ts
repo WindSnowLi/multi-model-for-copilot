@@ -1,6 +1,7 @@
 import type { CancellationToken } from 'vscode';
 import { safeStringify } from '../json';
 import { logger } from '../logger';
+import { buildAuthHeaders } from '../provider-registry';
 import type {
     ApiProvider, ChatCompletionRequest, CustomModelConfig,
     ChatStreamChunk,
@@ -51,17 +52,13 @@ export class ApiClient {
 				'Content-Type': 'application/json',
 			};
 
-			// Custom models: use configured auth header/prefix
+			// Auth headers: custom models use their own config, built-in providers use the registry.
 			if (this.customConfig) {
 				const headerName = this.customConfig.authHeader || 'Authorization';
 				const prefix = this.customConfig.authPrefix ?? 'Bearer ';
 				headers[headerName] = `${prefix}${this.apiKey}`;
-			} else if (this.provider === 'mimo') {
-				// MiMo uses `api-key` header
-				headers['api-key'] = this.apiKey;
 			} else {
-				// DeepSeek and others use `Authorization: Bearer`
-				headers['Authorization'] = `Bearer ${this.apiKey}`;
+				Object.assign(headers, buildAuthHeaders(this.provider, this.apiKey));
 			}
 
 			const response = await fetch(`${this.baseUrl}/chat/completions`, {

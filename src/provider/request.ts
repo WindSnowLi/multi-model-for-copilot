@@ -5,6 +5,7 @@ import { getApiModelId, getBaseUrl, getCustomModels, getCustomModelSecretKey, ge
 import { getAllModels } from '../consts';
 import { isOfficialProviderBaseUrl } from '../endpoint';
 import { t } from '../i18n';
+import { getProviderDescriptor } from '../provider-registry';
 import type { ChatCompletionRequest } from '../types';
 import { convertMessages, countMessageChars } from './convert';
 import {
@@ -67,7 +68,7 @@ export async function prepareChatRequest({
 		? await authManager.getApiKeyForSecret(secretKey!)
 		: await authManager.getApiKey(modelDef?.provider);
 	if (!apiKey) {
-		throw new Error(t('auth.notConfigured'));
+		throw new Error(t('auth.notConfiguredForModel', modelInfo.name || modelInfo.id));
 	}
 
 	// Custom models use their own baseUrl; built-in models use settings
@@ -83,15 +84,15 @@ export async function prepareChatRequest({
 	const tools = prepareRequestTools(modelDef?.capabilities.toolCalling, options);
 
 	const totalRequestChars = countMessageChars(ChatMessages);
-	const isMimo = modelDef?.provider === 'mimo';
-	const useMaxCompletionTokens = isMimo || customCfg?.useMaxCompletionTokens;
+	const providerDesc = getProviderDescriptor(modelDef?.provider ?? 'deepseek');
+	const useMaxCompletionTokens = providerDesc?.useMaxCompletionTokens || customCfg?.useMaxCompletionTokens;
 	const baseRequest: ChatCompletionRequest = {
 		model: customCfg ? customCfg.modelId : getApiModelId(modelInfo.id),
 		messages: ChatMessages,
 		stream: true,
 		tools,
 		tool_choice: tools && tools.length > 0 ? ('auto' as const) : undefined,
-		// MiMo and custom models with useMaxCompletionTokens use OpenAI-style max_completion_tokens
+		// Some providers use OpenAI-style max_completion_tokens instead of max_tokens
 		...(useMaxCompletionTokens ? { max_completion_tokens: maxTokens } : { max_tokens: maxTokens }),
 	};
 	const requestKind = classifyChatCompletionRequest({
@@ -106,23 +107,27 @@ export async function prepareChatRequest({
 	const forceNoneThinking =
 		shouldForceThinkingNone(requestKind) && isOfficialProviderBaseUrl(baseUrl, modelDef?.provider ?? 'deepseek');
 	const thinkingEffort = forceNoneThinking ? 'none' : configuredThinkingEffort;
+
+	// Thinking parameter format is provider-specific:
+	//   'reasoning_effort' → only reasoning_effort param (MiMo, Qwen)
+	//   'thinking_type'    → thinking: { type } + reasoning_effort (DeepSeek)
+	const thinkingFormat = customCfg?.requiresThinkingParam === false
+		? 'reasoning_effort'
+		: providerDesc?.thinkingFormat ?? 'thinking_type';
+
 	const request: ChatCompletionRequest = {
 		...baseRequest,
 		...(isThinkingModel
-			? isMimo
+			? thinkingFormat === 'reasoning_effort'
 				? {
 						...(thinkingEffort !== 'none' ? { reasoning_effort: thinkingEffort } : {}),
 					}
-				: customCfg?.requiresThinkingParam === false
-					? {
-							...(thinkingEffort !== 'none' ? { reasoning_effort: thinkingEffort } : {}),
-						}
-					: {
-							thinking: {
-								type: thinkingEffort === 'none' ? ('disabled' as const) : ('enabled' as const),
-							},
-							...(thinkingEffort === 'none' ? {} : { reasoning_effort: thinkingEffort }),
-						}
+				: {
+						thinking: {
+							type: thinkingEffort === 'none' ? ('disabled' as const) : ('enabled' as const),
+						},
+						...(thinkingEffort === 'none' ? {} : { reasoning_effort: thinkingEffort }),
+					}
 			: {}),
 	};
 	dumpChatCompletionRequest(request, {

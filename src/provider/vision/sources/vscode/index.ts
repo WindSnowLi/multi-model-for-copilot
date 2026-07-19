@@ -10,7 +10,7 @@ import type {
 import { getVSCodeVisionTargetChatSessionType } from './model';
 
 const EXCLUDED_VISION_MODEL_IDS = new Set(['copilot-utility', 'copilot-utility-small']);
-const EXCLUDED_VISION_MODEL_VENDORS = new Set(['deepseek', 'claude-code', 'copilotcli']);
+const EXCLUDED_VISION_MODEL_VENDORS = new Set(['multi-model', 'claude-code', 'copilotcli']);
 const EXCLUDED_VISION_TARGET_CHAT_SESSION_TYPES = new Set(['claude-code', 'copilotcli']);
 const VSCODE_VISION_MODEL_KEY_SEPARATOR = '/';
 

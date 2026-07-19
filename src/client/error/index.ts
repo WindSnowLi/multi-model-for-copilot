@@ -1,4 +1,4 @@
-import { isOfficialDeepSeekBaseUrl, isOfficialMiMoBaseUrl } from '../../endpoint';
+import { isOfficialDeepSeekBaseUrl, isOfficialMiMoBaseUrl, isOfficialQwenBaseUrl } from '../../endpoint';
 import { t } from '../../i18n';
 import { safeStringify } from '../../json';
 import { API_PROVIDER_HTTP_ERROR_LINKS, MAX_DIAGNOSTIC_FIELD_LENGTH } from '../consts';
@@ -147,11 +147,12 @@ export function formatRequestError(error: Error): string {
 	return error.stack ? `${diagnosticMessage}\n${error.stack}` : diagnosticMessage;
 }
 
-export function createUserFacingError(error: Error): Error {
+export function createUserFacingError(error: Error, modelName?: string): Error {
+	const modelLabel = modelName ? `**${escapeBoldText(modelName)}**: ` : '';
 	const message =
 		error instanceof ApiRequestError
-			? formatMarkdownMessage(error.userSummary, getErrorActions(error, errorActionUrlStore.get()))
-			: error.message;
+			? modelLabel + formatMarkdownMessage(error.userSummary, getErrorActions(error, errorActionUrlStore.get()))
+			: modelLabel + error.message;
 	const displayError = new Error(message);
 	displayError.stack = undefined;
 	return displayError;
@@ -167,6 +168,8 @@ function getHttpErrorMessage(status: number, createApiKeyUrl?: string): string {
 				: t('error.http.401', status);
 		case 402:
 			return t('error.http.402', status);
+		case 404:
+			return t('error.http.404', status);
 		case 422:
 			return t('error.http.422', status);
 		case 429:
@@ -327,6 +330,9 @@ function identifyApiProvider(baseUrl: string): ApiProviderId | undefined {
 	}
 	if (isOfficialMiMoBaseUrl(baseUrl)) {
 		return 'mimo';
+	}
+	if (isOfficialQwenBaseUrl(baseUrl)) {
+		return 'qwen';
 	}
 	return undefined;
 }

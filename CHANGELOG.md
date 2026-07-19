@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.7.0](https://github.com/WindSnowLi/multi-model-for-copilot/compare/v0.6.2...v0.7.0) (2026-07-20)
+
+
+### Features
+
+* **provider:** add Qwen (千问) AI Platform support with 6 models: Max, Plus, Turbo, VL Max, VL Plus, VL Turbo
+* **error:** include model name in all user-facing error messages so users can identify which model failed
+* **error:** add HTTP 404 specific error message for model-not-found scenarios
+
+### Bug Fixes
+
+* **error:** API key not configured error now includes the model name for better debugging
+* **error:** network and HTTP errors now prefixed with the model identifier
+
 ## [0.6.2](https://github.com/WindSnowLi/multi-model-for-copilot/compare/v0.6.1...v0.6.2) (2026-06-16)
 
 

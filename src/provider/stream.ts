@@ -69,7 +69,7 @@ export function streamChatCompletion({
 				},
 
 				onError: (error: Error) => {
-					throw createUserFacingError(error);
+					throw createUserFacingError(error, prepared.request.model);
 				},
 
 				onDone: () => {

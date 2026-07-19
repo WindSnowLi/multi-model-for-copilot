@@ -106,7 +106,7 @@ export interface ModelPricing {
 	output: number;
 }
 
-export type ApiProvider = 'deepseek' | 'mimo' | 'custom';
+export type ApiProvider = 'deepseek' | 'mimo' | 'qwen' | 'custom';
 
 export interface ModelDefinition {
 	id: string;

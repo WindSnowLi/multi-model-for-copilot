@@ -4,6 +4,7 @@ import { discoverModels, getBaseUrl, getCustomModels, getCustomModelSecretKey, g
 import { CONFIG_SECTION, getAllModels, MODELS } from '../consts';
 import { t } from '../i18n';
 import { logger } from '../logger';
+import { getProviderDescriptor } from '../provider-registry';
 import { createCacheDiagnosticsRecorder, dumpProviderInput } from './debug';
 import { toChatInfo } from './models';
 import { BalanceCurrencyResolver } from './pricing/currency';
@@ -100,6 +101,19 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 
 	async clearMiMoApiKey(): Promise<void> {
 		await this.authManager.deleteApiKey('mimo');
+		this.invalidateCurrencyAndRefreshModels();
+		vscode.window.showInformationMessage(t('auth.removed'));
+	}
+
+	async configureQwenApiKey(): Promise<void> {
+		const saved = await this.authManager.promptForApiKey('qwen');
+		if (saved) {
+			this.invalidateCurrencyAndRefreshModels();
+		}
+	}
+
+	async clearQwenApiKey(): Promise<void> {
+		await this.authManager.deleteApiKey('qwen');
 		this.invalidateCurrencyAndRefreshModels();
 		vscode.window.showInformationMessage(t('auth.removed'));
 	}
@@ -264,6 +278,7 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 		// Check which providers already have keys
 		const hasDeepSeekKey = await this.authManager.hasApiKey('deepseek');
 		const hasMiMoKey = await this.authManager.hasApiKey('mimo');
+		const hasQwenKey = await this.authManager.hasApiKey('qwen');
 
 		const source = await vscode.window.showQuickPick(
 			[
@@ -277,31 +292,34 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 					description: hasMiMoKey ? '✓ API Key configured' : '',
 					value: 'mimo',
 				},
+				{
+					label: 'Qwen (dashscope.aliyuncs.com)',
+					description: hasQwenKey ? '✓ API Key configured' : '',
+					value: 'qwen',
+				},
 				{ label: t('customModel.discover.customUrl'), value: 'custom' },
 			],
 			{ placeHolder: t('customModel.discover.pickSource') },
 		);
 		if (!source) return;
 
+		const builtinSource = source.value as 'deepseek' | 'mimo' | 'qwen' | 'custom';
+		const providerDesc = getProviderDescriptor(builtinSource);
+
 		let baseUrl: string;
 		let apiKey: string;
 		let authHeader = 'Authorization';
 		let authPrefix = 'Bearer ';
 
-		if (source.value === 'deepseek') {
-			baseUrl = getBaseUrl('deepseek');
-			apiKey = (await this.authManager.getApiKey('deepseek')) ?? '';
-			if (!apiKey) {
-				vscode.window.showErrorMessage(t('customModel.discover.noKey', 'DeepSeek'));
-				return;
+		if (providerDesc) {
+			baseUrl = getBaseUrl(builtinSource);
+			apiKey = (await this.authManager.getApiKey(builtinSource)) ?? '';
+			if (providerDesc.authStyle === 'api-key') {
+				authHeader = 'api-key';
+				authPrefix = '';
 			}
-		} else if (source.value === 'mimo') {
-			baseUrl = 'https://api.xiaomimimo.com/v1';
-			apiKey = (await this.authManager.getApiKey('mimo')) ?? '';
-			authHeader = 'api-key';
-			authPrefix = '';
 			if (!apiKey) {
-				vscode.window.showErrorMessage(t('customModel.discover.noKey', 'MiMo'));
+				vscode.window.showErrorMessage(t('customModel.discover.noKey', providerDesc.displayName));
 				return;
 			}
 		} else {
@@ -364,7 +382,7 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 		if (!selected || selected.length === 0) return;
 
 		// Add selected models to customModels
-		const useMaxCompletionTokens = source.value === 'mimo';
+		const useMaxCompletionTokens = providerDesc?.useMaxCompletionTokens ?? false;
 		const newModels = selected.map((s) => ({
 			id: s.label,
 			name: s.label,
@@ -404,24 +422,26 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 		}
 
 		const pricingCurrency = this.balanceCurrencyResolver.getDisplayCurrency();
-		const hasDeepSeekKey = await this.authManager.hasApiKey('deepseek');
-		const hasMiMoKey = await this.authManager.hasApiKey('mimo');
 		const customConfigs = getCustomModels();
 
-		if (hasDeepSeekKey || hasMiMoKey) {
+		// Check key availability for all built-in providers once.
+		const keyAvailability: Record<string, boolean> = {};
+		for (const model of getAllModels(customConfigs)) {
+			if (model.provider !== 'custom' && !(model.provider in keyAvailability)) {
+				keyAvailability[model.provider] = await this.authManager.hasApiKey(model.provider);
+			}
+		}
+
+		const hasAnyKey = Object.values(keyAvailability).some(Boolean);
+		if (hasAnyKey) {
 			this.balanceCurrencyResolver.refreshInBackground();
 		}
 
 		const allModels = getAllModels(customConfigs);
 		return allModels.map((model) => {
-			let hasKey: boolean;
-			if (model.provider === 'mimo') {
-				hasKey = hasMiMoKey;
-			} else if (model.provider === 'custom') {
-				hasKey = true; // custom models always appear; missing key shown via detail
-			} else {
-				hasKey = hasDeepSeekKey;
-			}
+			const hasKey = model.provider === 'custom'
+				? true // custom models always appear; missing key shown via detail
+				: keyAvailability[model.provider] ?? false;
 			return toChatInfo(model, hasKey, pricingCurrency);
 		});
 	}

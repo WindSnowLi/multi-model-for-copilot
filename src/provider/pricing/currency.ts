@@ -1,9 +1,10 @@
 import vscode from 'vscode';
 import { AuthManager } from '../../auth';
 import { getBaseUrl } from '../../config';
-import { isOfficialDeepSeekBaseUrl, normalizeBaseUrl } from '../../endpoint';
+import { normalizeBaseUrl } from '../../endpoint';
 import { logger } from '../../logger';
-import type { PricingCurrency } from '../../types';
+import { requireProviderDescriptor } from '../../provider-registry';
+import type { ApiProvider, PricingCurrency } from '../../types';
 
 const CACHE_KEY = 'multi-model-for-copilot.balanceCurrency.cache';
 const BALANCE_TIMEOUT_MS = 5000;
@@ -12,6 +13,7 @@ interface CachedBalanceCurrency {
 	readonly version: 1;
 	readonly currency: PricingCurrency;
 	readonly baseUrl: string;
+	readonly provider: string;
 }
 
 interface BalanceInfo {
@@ -23,6 +25,9 @@ interface BalanceInfo {
 interface BalanceResponse {
 	readonly balance_infos?: unknown;
 }
+
+/** Providers whose balance endpoint can auto-detect display currency. */
+const BALANCE_PROVIDERS: Exclude<ApiProvider, 'custom'>[] = ['deepseek'];
 
 export class BalanceCurrencyResolver {
 	private inFlight: Promise<void> | undefined;
@@ -37,19 +42,24 @@ export class BalanceCurrencyResolver {
 	) {}
 
 	getDisplayCurrency(): PricingCurrency | undefined {
-		const baseUrl = normalizeBaseUrl(getBaseUrl('deepseek'));
-		if (!isOfficialDeepSeekBaseUrl(baseUrl)) {
-			// For non-DeepSeek providers (e.g. MiMo), use locale-based fallback
-			return getLocaleFallbackCurrency();
-		}
+		// Check all balance-capable providers in priority order.
+		for (const provider of BALANCE_PROVIDERS) {
+			const desc = requireProviderDescriptor(provider);
+			const baseUrl = normalizeBaseUrl(getBaseUrl(provider));
+			const isOfficial = desc.officialHosts.includes(normalizeHostname(baseUrl));
 
-		if (this.resolved?.baseUrl === baseUrl) {
-			return this.resolved.currency;
-		}
+			if (!isOfficial) {
+				continue;
+			}
 
-		const cached = this.readCache();
-		if (cached?.baseUrl === baseUrl) {
-			return cached.currency;
+			if (this.resolved?.provider === provider && this.resolved?.baseUrl === baseUrl) {
+				return this.resolved.currency;
+			}
+
+			const cached = this.readCache();
+			if (cached?.provider === provider && cached?.baseUrl === baseUrl) {
+				return cached.currency;
+			}
 		}
 
 		return getLocaleFallbackCurrency();
@@ -89,39 +99,45 @@ export class BalanceCurrencyResolver {
 	}
 
 	private needsRefresh(): boolean {
-		const baseUrl = normalizeBaseUrl(getBaseUrl('deepseek'));
-		if (!isOfficialDeepSeekBaseUrl(baseUrl)) {
-			return false;
+		for (const provider of BALANCE_PROVIDERS) {
+			const desc = requireProviderDescriptor(provider);
+			const baseUrl = normalizeBaseUrl(getBaseUrl(provider));
+			if (!desc.officialHosts.includes(normalizeHostname(baseUrl))) {
+				continue;
+			}
+			if (this.resolved?.baseUrl === baseUrl || this.readCache()?.baseUrl === baseUrl) {
+				return false;
+			}
+			return true;
 		}
-
-		if (this.resolved?.baseUrl === baseUrl || this.readCache()?.baseUrl === baseUrl) {
-			return false;
-		}
-
-		return true;
+		return false;
 	}
 
 	private async refreshFromBalance(controller: AbortController, generation: number): Promise<void> {
-		const baseUrl = normalizeBaseUrl(getBaseUrl('deepseek'));
-		if (!isOfficialDeepSeekBaseUrl(baseUrl)) {
-			return;
-		}
+		for (const provider of BALANCE_PROVIDERS) {
+			const desc = requireProviderDescriptor(provider);
+			const baseUrl = normalizeBaseUrl(getBaseUrl(provider));
+			if (!desc.officialHosts.includes(normalizeHostname(baseUrl))) {
+				continue;
+			}
 
-		const apiKey = await this.authManager.getApiKey();
-		if (!apiKey) {
-			return;
-		}
+			const apiKey = await this.authManager.getApiKey(provider);
+			if (!apiKey) {
+				continue;
+			}
 
-		const currency = await fetchBalanceCurrency(baseUrl, apiKey, controller);
-		if (!currency || controller.signal.aborted || generation !== this.generation) {
-			return;
-		}
+			const currency = await fetchBalanceCurrency(baseUrl, apiKey, controller);
+			if (!currency || controller.signal.aborted || generation !== this.generation) {
+				return;
+			}
 
-		const previous = this.resolved ?? this.readCache();
-		this.resolved = { version: 1, currency, baseUrl };
-		await this.context.globalState.update(CACHE_KEY, this.resolved);
-		if (previous?.baseUrl !== baseUrl || previous.currency !== currency) {
-			this.onDidChangeCurrency();
+			const previous = this.resolved ?? this.readCache();
+			this.resolved = { version: 1, currency, baseUrl, provider };
+			await this.context.globalState.update(CACHE_KEY, this.resolved);
+			if (previous?.baseUrl !== baseUrl || previous.currency !== currency) {
+				this.onDidChangeCurrency();
+			}
+			return;
 		}
 	}
 
@@ -131,6 +147,14 @@ export class BalanceCurrencyResolver {
 			return undefined;
 		}
 		return value;
+	}
+}
+
+function normalizeHostname(url: string): string {
+	try {
+		return new URL(url).hostname.toLowerCase();
+	} catch {
+		return '';
 	}
 }
 

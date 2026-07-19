@@ -20,7 +20,7 @@ export interface HttpErrorLinkDefinition {
 	url: string;
 }
 
-export type ApiProviderId = 'deepseek' | 'mimo';
+export type ApiProviderId = 'deepseek' | 'mimo' | 'qwen';
 export type HttpErrorLinkStatusKey = 401 | 402 | '5xx';
 
 export type ApiRequestErrorKind = 'http' | 'network' | 'unknown';

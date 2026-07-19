@@ -8,39 +8,36 @@ import type {
 
 export const MAX_DIAGNOSTIC_FIELD_LENGTH = 300;
 
+/**
+ * Error action links for each provider.
+ * Driven by EXTERNAL_URLS — adding a new provider just needs an entry there.
+ */
+function buildProviderErrorLinks(
+	statusKey: HttpErrorLinkStatusKey,
+	linkFn: (urls: (typeof EXTERNAL_URLS)[ApiProviderId]) => HttpErrorLinkDefinition,
+): Partial<Record<ApiProviderId, HttpErrorLinkDefinition>> {
+	const result: Partial<Record<ApiProviderId, HttpErrorLinkDefinition>> = {};
+	for (const [provider, urls] of Object.entries(EXTERNAL_URLS) as [ApiProviderId, (typeof EXTERNAL_URLS)[ApiProviderId]][]) {
+		result[provider] = linkFn(urls);
+	}
+	return result;
+}
+
 export const API_PROVIDER_HTTP_ERROR_LINKS: Readonly<
 	Record<HttpErrorLinkStatusKey, Readonly<Partial<Record<ApiProviderId, HttpErrorLinkDefinition>>>>
 > = {
-	401: {
-		deepseek: {
-			labelKey: 'error.action.createApiKey',
-			url: EXTERNAL_URLS.deepseek.apiKeys,
-		},
-		mimo: {
-			labelKey: 'error.action.createApiKey',
-			url: EXTERNAL_URLS.mimo.apiKeys,
-		},
-	},
-	402: {
-		deepseek: {
-			labelKey: 'error.action.viewUsage',
-			url: EXTERNAL_URLS.deepseek.usage,
-		},
-		mimo: {
-			labelKey: 'error.action.viewUsage',
-			url: EXTERNAL_URLS.mimo.usage,
-		},
-	},
-	'5xx': {
-		deepseek: {
-			labelKey: 'error.action.checkDeepSeekStatus',
-			url: EXTERNAL_URLS.deepseek.status,
-		},
-		mimo: {
-			labelKey: 'error.action.checkMiMoStatus',
-			url: EXTERNAL_URLS.mimo.status,
-		},
-	},
+	401: buildProviderErrorLinks(401, (urls) => ({
+		labelKey: 'error.action.createApiKey',
+		url: urls.apiKeys,
+	})),
+	402: buildProviderErrorLinks(402, (urls) => ({
+		labelKey: 'error.action.viewUsage',
+		url: urls.usage,
+	})),
+	'5xx': buildProviderErrorLinks('5xx', (urls) => ({
+		labelKey: 'error.action.checkStatus',
+		url: urls.status,
+	})),
 };
 
 /**

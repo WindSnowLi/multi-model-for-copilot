@@ -1,12 +1,14 @@
 import vscode from 'vscode';
-import { API_KEY_SECRET, MIMO_API_KEY_SECRET } from './consts';
 import { t } from './i18n';
+import { getProviderDescriptor } from './provider-registry';
+import { API_KEY_SECRET } from './consts';
 import type { ApiProvider } from './types';
 
 /**
  * Manages API keys via VS Code SecretStorage (secure) with
  * fallback to extension settings (less secure, for CI/automation).
- * Supports multiple providers (DeepSeek, MiMo).
+ * Supports multiple providers — all provider-specific logic is driven
+ * by the Provider Registry, not per-file branching.
  */
 export class AuthManager {
 	private readonly secretStorage: vscode.SecretStorage;
@@ -25,8 +27,9 @@ export class AuthManager {
 			return secretKey;
 		}
 
+		const desc = getProviderDescriptor(provider ?? 'deepseek');
 		const config = vscode.workspace.getConfiguration('multi-model-for-copilot');
-		const settingsKeyName = provider === 'mimo' ? 'mimoApiKey' : 'apiKey';
+		const settingsKeyName = desc?.settingsKey ?? 'apiKey';
 		const settingsKey = config.get<string>(settingsKeyName);
 		if (settingsKey?.trim()) {
 			return settingsKey.trim();
@@ -63,11 +66,7 @@ export class AuthManager {
 	 * Get API key by arbitrary secret key name (for custom models).
 	 */
 	async getApiKeyForSecret(secretKey: string): Promise<string | undefined> {
-		const secret = await this.secretStorage.get(secretKey);
-		if (secret) {
-			return secret;
-		}
-		return undefined;
+		return this.secretStorage.get(secretKey) ?? undefined;
 	}
 
 	/**
@@ -81,10 +80,10 @@ export class AuthManager {
 	 * Prompt user to enter API key via input box.
 	 */
 	async promptForApiKey(provider?: ApiProvider): Promise<boolean> {
-		const isMimo = provider === 'mimo';
+		const id = provider ?? 'deepseek';
 		const apiKey = await vscode.window.showInputBox({
-			prompt: isMimo ? t('auth.mimoPrompt') : t('auth.prompt'),
-			placeHolder: isMimo ? t('auth.mimoPlaceholder') : t('auth.placeholder'),
+			prompt: t(`auth.${id}Prompt`) || t('auth.prompt'),
+			placeHolder: t(`auth.${id}Placeholder`) || t('auth.placeholder'),
 			password: true,
 			ignoreFocusOut: true,
 			validateInput: (value: string) => {
@@ -105,7 +104,8 @@ export class AuthManager {
 	}
 
 	private getSecretName(provider: ApiProvider): string {
-		return provider === 'mimo' ? MIMO_API_KEY_SECRET : API_KEY_SECRET;
+		const desc = getProviderDescriptor(provider);
+		return desc?.secretKey ?? API_KEY_SECRET;
 	}
 
 	private async getSecretKey(provider: ApiProvider): Promise<string | undefined> {

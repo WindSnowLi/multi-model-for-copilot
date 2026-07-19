@@ -1,5 +1,6 @@
 import vscode from 'vscode';
 import { CONFIG_SECTION } from './consts';
+import { getProviderDescriptor } from './provider-registry';
 import type { ApiProvider, CustomModelConfig } from './types';
 
 export type DebugMode = 'minimal' | 'metadata' | 'verbose';
@@ -7,16 +8,13 @@ export type DebugMode = 'minimal' | 'metadata' | 'verbose';
 /**
  * Get API base URL from settings.
  * Falls back to the official endpoint when not configured.
- * For MiMo models, checks the `mimoBaseUrl` setting first.
  */
 export function getBaseUrl(provider?: ApiProvider): string {
 	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
-
-	if (provider === 'mimo') {
-		return config.get<string>('mimoBaseUrl') || 'https://token-plan-cn.xiaomimimo.com/v1';
-	}
-
-	return config.get<string>('baseUrl') || 'https://api.deepseek.com';
+	const desc = getProviderDescriptor(provider ?? 'deepseek');
+	const settingsKey = desc?.baseUrlSettingsKey ?? 'baseUrl';
+	const defaultUrl = desc?.defaultBaseUrl ?? 'https://api.deepseek.com';
+	return config.get<string>(settingsKey) || defaultUrl;
 }
 
 /**

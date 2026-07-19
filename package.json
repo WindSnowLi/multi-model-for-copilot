@@ -3,7 +3,7 @@
   "displayName": "Multi-Model BYOK for Copilot Chat",
   "description": "Pick DeepSeek V4 and MiMo V2.5 models from the Copilot Chat model picker. Vision, thinking mode, agent tools — zero config, BYOK.",
   "icon": "resources/icon.png",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "publisher": "WindSnowLi",
   "license": "MIT",
   "repository": {
@@ -45,8 +45,8 @@
   "contributes": {
     "languageModelChatProviders": [
       {
-        "vendor": "deepseek",
-        "displayName": "DeepSeek"
+        "vendor": "multi-model",
+        "displayName": "Multi-Model"
       }
     ],
     "commands": [
@@ -69,6 +69,14 @@
       {
         "command": "multi-model-for-copilot.clearMiMoApiKey",
         "title": "%multi-model-for-copilot.command.clearMiMoApiKey%"
+      },
+      {
+        "command": "multi-model-for-copilot.setQwenApiKey",
+        "title": "%multi-model-for-copilot.command.setQwenApiKey%"
+      },
+      {
+        "command": "multi-model-for-copilot.clearQwenApiKey",
+        "title": "%multi-model-for-copilot.command.clearQwenApiKey%"
       },
       {
         "command": "multi-model-for-copilot.addCustomModel",
@@ -196,22 +204,72 @@
           "default": [],
           "items": {
             "type": "object",
-            "required": ["id", "name", "baseUrl", "modelId"],
+            "required": [
+              "id",
+              "name",
+              "baseUrl",
+              "modelId"
+            ],
             "properties": {
-              "id": { "type": "string", "description": "Unique model identifier" },
-              "name": { "type": "string", "description": "Display name in model picker" },
-              "baseUrl": { "type": "string", "description": "API base URL (e.g. https://api.example.com/v1)" },
-              "modelId": { "type": "string", "description": "Model ID sent in API request" },
-              "authHeader": { "type": "string", "default": "Authorization", "description": "Auth header name" },
-              "authPrefix": { "type": "string", "default": "Bearer ", "description": "Prefix before API key (e.g. 'Bearer ' or '')" },
-              "maxInputTokens": { "type": "number", "default": 128000 },
-              "maxOutputTokens": { "type": "number", "default": 8192 },
-              "toolCalling": { "default": false, "description": "Tool calling support (true/false or number)" },
-              "imageInput": { "type": "boolean", "default": false },
-              "thinking": { "type": "boolean", "default": false },
-              "requiresThinkingParam": { "type": "boolean", "default": false },
-              "useMaxCompletionTokens": { "type": "boolean", "default": false, "description": "Use max_completion_tokens instead of max_tokens" },
-              "detail": { "type": "string", "description": "Short description shown in model picker" }
+              "id": {
+                "type": "string",
+                "description": "Unique model identifier"
+              },
+              "name": {
+                "type": "string",
+                "description": "Display name in model picker"
+              },
+              "baseUrl": {
+                "type": "string",
+                "description": "API base URL (e.g. https://api.example.com/v1)"
+              },
+              "modelId": {
+                "type": "string",
+                "description": "Model ID sent in API request"
+              },
+              "authHeader": {
+                "type": "string",
+                "default": "Authorization",
+                "description": "Auth header name"
+              },
+              "authPrefix": {
+                "type": "string",
+                "default": "Bearer ",
+                "description": "Prefix before API key (e.g. 'Bearer ' or '')"
+              },
+              "maxInputTokens": {
+                "type": "number",
+                "default": 128000
+              },
+              "maxOutputTokens": {
+                "type": "number",
+                "default": 8192
+              },
+              "toolCalling": {
+                "default": false,
+                "description": "Tool calling support (true/false or number)"
+              },
+              "imageInput": {
+                "type": "boolean",
+                "default": false
+              },
+              "thinking": {
+                "type": "boolean",
+                "default": false
+              },
+              "requiresThinkingParam": {
+                "type": "boolean",
+                "default": false
+              },
+              "useMaxCompletionTokens": {
+                "type": "boolean",
+                "default": false,
+                "description": "Use max_completion_tokens instead of max_tokens"
+              },
+              "detail": {
+                "type": "string",
+                "description": "Short description shown in model picker"
+              }
             }
           },
           "markdownDescription": "%multi-model-for-copilot.config.customModels.description%"

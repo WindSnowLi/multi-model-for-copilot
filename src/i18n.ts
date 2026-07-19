@@ -30,16 +30,33 @@ const zh: Translations = {
 	'model.mimo.pro.tooltip': 'MiMo V2.5 Pro 旗舰模型，专为复杂推理、深度分析和长文档处理设计。',
 	'model.mimo.standard.tooltip': 'MiMo V2.5 全模态模型，支持图片、音频、视频内容理解，同时具备深度思考能力。',
 
+	// Qwen model descriptions
+	'model.qwen.max.detail': '旗舰模型，最强大的能力',
+	'model.qwen.plus.detail': '高性价比模型',
+	'model.qwen.turbo.detail': '快速响应模型',
+	'model.qwen.vl.max.detail': '视觉理解旗舰模型',
+	'model.qwen.vl.plus.detail': '高性价比视觉模型',
+	'model.qwen.vl.turbo.detail': '快速视觉模型',
+	'model.qwen.max.tooltip': '千问 AI 平台旗舰模型，具备最强推理能力和知识储备。',
+	'model.qwen.plus.tooltip': '千问 AI 平台高性价比模型，平衡性能与成本。',
+	'model.qwen.turbo.tooltip': '千问 AI 平台快速响应模型，适合简单任务和高并发场景。',
+	'model.qwen.vl.max.tooltip': '千问 AI 平台视觉理解旗舰模型，支持图片、视频内容理解。',
+	'model.qwen.vl.plus.tooltip': '千问 AI 平台高性价比视觉模型，支持图片理解。',
+	'model.qwen.vl.turbo.tooltip': '千问 AI 平台快速视觉模型，适合简单图像识别任务。',
+
 	// API Key
 	'auth.apiKeyRequiredDetail': '请先配置 API Key',
 	'auth.prompt': '请输入 DeepSeek API Key 或兼容服务令牌。官方 DeepSeek Key 通常以 "sk-" 开头。',
 	'auth.placeholder': 'sk-... 或服务商令牌',
 	'auth.mimoPrompt': '请输入 MiMo Token Plan API Key。官方 MiMo Key 格式为 "tp-xxxxx"。',
 	'auth.mimoPlaceholder': 'tp-...',
+	'auth.qwenPrompt': '请输入千问 AI 平台 API Key。官方千问 Key 通常以 "sk-" 开头。',
+	'auth.qwenPlaceholder': 'sk-...',
 	'auth.emptyValidation': 'API Key 不能为空',
 	'auth.saved': 'API Key 已安全保存。',
 	'auth.removed': 'API Key 已移除。',
 	'auth.notConfigured': 'API Key 未配置，请在命令面板运行 "Multi-Model: 设置 API Key"。',
+	'auth.notConfiguredForModel': '模型 "{0}" 的 API Key 未配置，请在命令面板运行 "Multi-Model: 设置 API Key"。',
 
 	// Custom Model
 	'customModel.prompt.id': '输入模型唯一标识（英文、数字、连字符）',
@@ -211,6 +228,7 @@ const zh: Translations = {
 	'error.http.401.withCreateApiKeyLink':
 		'[{0}] API Key 错误，认证失败。请检查您的 API Key 是否正确。如没有 API key，请先[创建 API Key]({1})。',
 	'error.http.402': '[{0}] 账号余额不足。请确认账户余额，并前往充值页面进行充值。',
+	'error.http.404': '[{0}] 模型不存在或端点路径错误。请检查模型 ID 和 API Base URL 是否正确。',
 	'error.http.422': '[{0}] 请求体参数错误。请根据错误信息提示修改相关参数。',
 	'error.http.429': '[{0}] 请求速率（TPM 或 RPM）达到上限。请合理规划您的请求速率。',
 	'error.http.500': '[{0}] 服务器内部故障。请等待后重试。',
@@ -221,6 +239,7 @@ const zh: Translations = {
 	'error.action.viewUsage': '用量',
 	'error.action.checkDeepSeekStatus': '查看服务状态',
 	'error.action.checkMiMoStatus': '查看 MiMo 状态',
+	'error.action.checkStatus': '查看服务状态',
 	'error.action.viewDetails': '错误详情',
 	'error.network.dns': '[{0}] DNS 解析失败。请检查网络连接、防火墙或代理设置，以及自定义 baseUrl。',
 	'error.network.unreachable':
@@ -262,6 +281,20 @@ const en: Translations = {
 	'model.mimo.standard.tooltip':
 		'MiMo V2.5 omni-modal model with image, audio, and video understanding plus deep thinking.',
 
+	// Qwen model descriptions
+	'model.qwen.max.detail': 'Flagship model with the strongest capabilities',
+	'model.qwen.plus.detail': 'High cost-performance ratio model',
+	'model.qwen.turbo.detail': 'Fast response model',
+	'model.qwen.vl.max.detail': 'Flagship vision understanding model',
+	'model.qwen.vl.plus.detail': 'High cost-performance vision model',
+	'model.qwen.vl.turbo.detail': 'Fast vision model',
+	'model.qwen.max.tooltip': 'Qwen AI Platform flagship model with the strongest reasoning and knowledge capabilities.',
+	'model.qwen.plus.tooltip': 'Qwen AI Platform high cost-performance model, balancing performance and cost.',
+	'model.qwen.turbo.tooltip': 'Qwen AI Platform fast response model, suitable for simple tasks and high-concurrency scenarios.',
+	'model.qwen.vl.max.tooltip': 'Qwen AI Platform flagship vision understanding model, supporting image and video content understanding.',
+	'model.qwen.vl.plus.tooltip': 'Qwen AI Platform high cost-performance vision model, supporting image understanding.',
+	'model.qwen.vl.turbo.tooltip': 'Qwen AI Platform fast vision model, suitable for simple image recognition tasks.',
+
 	// API Key
 	'auth.apiKeyRequiredDetail': 'Please run Multi-Model: Set API Key to configure.',
 	'auth.prompt':
@@ -270,11 +303,16 @@ const en: Translations = {
 	'auth.mimoPrompt':
 		'Enter your MiMo Token Plan API key. Official MiMo keys use the format "tp-xxxxx".',
 	'auth.mimoPlaceholder': 'tp-...',
+	'auth.qwenPrompt':
+		'Enter your Qwen AI Platform API key. Official Qwen keys usually start with "sk-".',
+	'auth.qwenPlaceholder': 'sk-...',
 	'auth.emptyValidation': 'API key cannot be empty',
 	'auth.saved': 'API key saved.',
 	'auth.removed': 'API key removed.',
 	'auth.notConfigured':
 		'API key not configured. Run "Multi-Model: Set API Key" from the Command Palette.',
+	'auth.notConfiguredForModel':
+		'API key for model "{0}" is not configured. Run "Multi-Model: Set API Key" from the Command Palette.',
 
 	// Custom Model
 	'customModel.prompt.id': 'Enter a unique model identifier (letters, numbers, hyphens)',
@@ -465,6 +503,8 @@ const en: Translations = {
 		"[{0}] Authentication fails due to the wrong API key. Please check your API key. If you don't have one, please [create an API key]({1}) first.",
 	'error.http.402':
 		"[{0}] You have run out of balance. Please check your account's balance, and go to the Top up page to add funds.",
+	'error.http.404':
+		'[{0}] Model not found or endpoint path is incorrect. Please verify the model ID and API base URL.',
 	'error.http.422':
 		'[{0}] Your request contains invalid parameters. Please modify your request parameters according to the hints in the error message.',
 	'error.http.429':
@@ -479,6 +519,7 @@ const en: Translations = {
 	'error.action.viewUsage': 'Usage',
 	'error.action.checkDeepSeekStatus': 'Check service status',
 	'error.action.checkMiMoStatus': 'Check MiMo status',
+	'error.action.checkStatus': 'Check service status',
 	'error.action.viewDetails': 'Error Details',
 	'error.network.dns':
 		'[{0}] DNS lookup failed. Check your network connection, firewall, or proxy settings, and your custom baseUrl.',

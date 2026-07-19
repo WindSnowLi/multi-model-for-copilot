@@ -16,6 +16,12 @@ export async function registerProvider(
 		vscode.commands.registerCommand('multi-model-for-copilot.clearMiMoApiKey', () =>
 			provider.clearMiMoApiKey(),
 		),
+		vscode.commands.registerCommand('multi-model-for-copilot.setQwenApiKey', () =>
+			provider.configureQwenApiKey(),
+		),
+		vscode.commands.registerCommand('multi-model-for-copilot.clearQwenApiKey', () =>
+			provider.clearQwenApiKey(),
+		),
 		vscode.commands.registerCommand('multi-model-for-copilot.setVisionModel', () =>
 			provider.setVisionModel(),
 		),
@@ -28,7 +34,7 @@ export async function registerProvider(
 		vscode.commands.registerCommand('multi-model-for-copilot.discoverModels', () =>
 			provider.discoverAndAddModels(),
 		),
-		vscode.lm.registerLanguageModelChatProvider('deepseek', provider),
+		vscode.lm.registerLanguageModelChatProvider('multi-model', provider),
 	);
 
 	// Copilot Chat can serve cached model info without configurationSchema.

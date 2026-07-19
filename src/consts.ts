@@ -22,6 +22,11 @@ export const EXTERNAL_URLS = {
 		usage: 'https://platform.xiaomimimo.com/#/console/plan-manage',
 		status: 'https://platform.xiaomimimo.com/#/console/plan-manage',
 	},
+	qwen: {
+		apiKeys: 'https://platform.qianwenai.com/docs/api-reference/preparation/api-key',
+		usage: 'https://platform.qianwenai.com/docs/api-reference/preparation/api-key',
+		status: 'https://status.qianwenai.com',
+	},
 } as const;
 
 /** URI path handled by this extension to reveal the output log. */
@@ -43,6 +48,9 @@ export const API_KEY_SECRET = 'multi-model-for-copilot.apiKey';
 
 /** SecretStorage key for the MiMo API key. */
 export const MIMO_API_KEY_SECRET = 'multi-model-for-copilot.mimoApiKey';
+
+/** SecretStorage key for the Qwen API key. */
+export const QWEN_API_KEY_SECRET = 'multi-model-for-copilot.qwenApiKey';
 
 /** memento key tracking whether the welcome walkthrough has been shown. */
 export const WELCOME_SHOWN_KEY = 'multi-model-for-copilot.welcomeShown';
@@ -137,6 +145,134 @@ export const MODELS: ModelDefinition[] = [
 		pricing: {
 			USD: { cacheHitInput: 0.0028, cacheMissInput: 0.14, output: 0.28 },
 			CNY: { cacheHitInput: 0.02, cacheMissInput: 1, output: 2 },
+		},
+		priceCategory: 'low',
+	},
+	// Qwen models
+	{
+		id: 'qwen-max',
+		name: 'Qwen Max',
+		provider: 'qwen',
+		family: 'qwen',
+		version: 'max',
+		detail: '千问 AI 平台旗舰模型，最强大的能力',
+		maxInputTokens: 32000,
+		maxOutputTokens: 8192,
+		capabilities: {
+			toolCalling: true,
+			imageInput: false,
+			thinking: true,
+		},
+		requiresThinkingParam: false,
+		pricing: {
+			USD: { cacheHitInput: 0.0014, cacheMissInput: 0.014, output: 0.028 },
+			CNY: { cacheHitInput: 0.01, cacheMissInput: 0.1, output: 0.2 },
+		},
+		priceCategory: 'low',
+	},
+	{
+		id: 'qwen-plus',
+		name: 'Qwen Plus',
+		provider: 'qwen',
+		family: 'qwen',
+		version: 'plus',
+		detail: '千问 AI 平台高性价比模型',
+		maxInputTokens: 131072,
+		maxOutputTokens: 8192,
+		capabilities: {
+			toolCalling: true,
+			imageInput: false,
+			thinking: true,
+		},
+		requiresThinkingParam: false,
+		pricing: {
+			USD: { cacheHitInput: 0.0007, cacheMissInput: 0.007, output: 0.014 },
+			CNY: { cacheHitInput: 0.005, cacheMissInput: 0.05, output: 0.1 },
+		},
+		priceCategory: 'low',
+	},
+	{
+		id: 'qwen-turbo',
+		name: 'Qwen Turbo',
+		provider: 'qwen',
+		family: 'qwen',
+		version: 'turbo',
+		detail: '千问 AI 平台快速响应模型',
+		maxInputTokens: 131072,
+		maxOutputTokens: 8192,
+		capabilities: {
+			toolCalling: true,
+			imageInput: false,
+			thinking: false,
+		},
+		requiresThinkingParam: false,
+		pricing: {
+			USD: { cacheHitInput: 0.00035, cacheMissInput: 0.0035, output: 0.007 },
+			CNY: { cacheHitInput: 0.0025, cacheMissInput: 0.025, output: 0.05 },
+		},
+		priceCategory: 'low',
+	},
+	// Qwen Vision models
+	{
+		id: 'qwen-vl-max',
+		name: 'Qwen VL Max',
+		provider: 'qwen',
+		family: 'qwen-vl',
+		version: 'max',
+		detail: '千问 AI 平台视觉理解旗舰模型',
+		maxInputTokens: 32000,
+		maxOutputTokens: 4096,
+		capabilities: {
+			toolCalling: true,
+			imageInput: true,
+			thinking: true,
+		},
+		requiresThinkingParam: false,
+		pricing: {
+			USD: { cacheHitInput: 0.0014, cacheMissInput: 0.014, output: 0.028 },
+			CNY: { cacheHitInput: 0.01, cacheMissInput: 0.1, output: 0.2 },
+		},
+		priceCategory: 'low',
+	},
+	{
+		id: 'qwen-vl-plus',
+		name: 'Qwen VL Plus',
+		provider: 'qwen',
+		family: 'qwen-vl',
+		version: 'plus',
+		detail: '千问 AI 平台高性价比视觉模型',
+		maxInputTokens: 131072,
+		maxOutputTokens: 4096,
+		capabilities: {
+			toolCalling: true,
+			imageInput: true,
+			thinking: true,
+		},
+		requiresThinkingParam: false,
+		pricing: {
+			USD: { cacheHitInput: 0.0007, cacheMissInput: 0.007, output: 0.014 },
+			CNY: { cacheHitInput: 0.005, cacheMissInput: 0.05, output: 0.1 },
+		},
+		priceCategory: 'low',
+	},
+	{
+		id: 'qwen-vl-turbo',
+		name: 'Qwen VL Turbo',
+		provider: 'qwen',
+		family: 'qwen-vl',
+		version: 'turbo',
+		detail: '千问 AI 平台快速视觉模型',
+		maxInputTokens: 131072,
+		maxOutputTokens: 4096,
+		capabilities: {
+			toolCalling: true,
+			imageInput: true,
+			thinking: false,
+		},
+		requiresThinkingParam: false,
+		pricing: {
+			USD: { cacheHitInput: 0.00035, cacheMissInput: 0.0035, output: 0.007 },
+			CNY: { cacheHitInput: 0.0025, cacheMissInput: 0.025, output: 0.05 },
 		},
 		priceCategory: 'low',
 	},
