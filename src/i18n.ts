@@ -21,8 +21,10 @@ const zh: Translations = {
 	// Model descriptions
 	'model.deepseek.flash.detail': '快速高效',
 	'model.deepseek.pro.detail': '深度推理',
+	'model.deepseek.flash-vision-exp.detail': '实验性原生视觉模型',
 	'model.deepseek.flash.tooltip': '快速高效的 DeepSeek V4 模型，推理能力接近 V4 Pro，API 定价更经济。',
 	'model.deepseek.pro.tooltip': 'DeepSeek V4 模型，面向 Agent 编程、广泛世界知识和高阶推理任务。',
+	'model.deepseek.flash-vision-exp.tooltip': 'DeepSeek 实验性原生视觉模型，可直接理解图片内容（图片直发，不经代理描述）。',
 
 	// MiMo model descriptions
 	'model.mimo.pro.detail': '旗舰推理模型，支持深度思考',
@@ -95,6 +97,8 @@ const zh: Translations = {
 	'status.thinking': '思考模式',
 	'thinking.none': '停用',
 	'thinking.none.desc': '停用思考，响应更快',
+	'thinking.low': '低',
+	'thinking.low.desc': '低强度推理，兼顾速度与效果',
 	'thinking.high': '标准',
 	'thinking.high.desc': '推荐日常使用',
 	'thinking.max': '深度',
@@ -119,9 +123,11 @@ const zh: Translations = {
 	'vision.panel.field.modelId': '模型 ID',
 	'vision.panel.field.customHeaders': '自定义 headers JSON',
 	'vision.panel.field.extraBody': '额外请求体 JSON',
+	'vision.panel.field.timeoutMs': '请求超时（毫秒）',
 	'vision.panel.hint.customHeaders':
 		'Header 会随配置保存。建议尽量把服务商 token 放在 API Key 输入框中。',
 	'vision.panel.hint.extraBody': '会合并进请求体，不能覆盖 model、messages、input 或 stream。',
+	'vision.panel.hint.timeoutMs': '留空使用默认 30 秒。值必须大于 0。',
 	'vision.panel.placeholder.openaiEndpoint': 'https://api.example.com/v1/chat/completions',
 	'vision.panel.placeholder.openaiResponsesEndpoint': 'https://api.example.com/v1/responses',
 	'vision.panel.placeholder.anthropicEndpoint': 'https://api.example.com/v1/messages',
@@ -174,6 +180,7 @@ const zh: Translations = {
 	'vision.panel.test.response': '模型回答',
 	'vision.panel.error.required': '{0} 必填',
 	'vision.panel.error.invalidJson': '{0} 必须是有效的 JSON。',
+	'vision.panel.error.timeoutMsInvalid': '请求超时必须大于 0。',
 	'vision.proxy.error.configurationInvalid': '视觉代理配置无效。',
 	'vision.proxy.error.providerFamilyInvalid': '视觉代理提供方类型无效。',
 	'vision.proxy.error.apiTypeInvalid': '视觉代理 API 类型无效。',
@@ -268,10 +275,13 @@ const en: Translations = {
 	// Model descriptions
 	'model.deepseek.flash.detail': 'Fast, general-purpose model',
 	'model.deepseek.pro.detail': 'Most capable reasoning model',
+	'model.deepseek.flash-vision-exp.detail': 'Experimental native vision model',
 	'model.deepseek.flash.tooltip':
 		'Fast, efficient DeepSeek V4 model with reasoning close to V4 Pro and economical API pricing.',
 	'model.deepseek.pro.tooltip':
 		'DeepSeek V4 model for agentic coding, broad world knowledge, and high-end reasoning.',
+	'model.deepseek.flash-vision-exp.tooltip':
+		'DeepSeek experimental native vision model. Understands images directly (forwarded natively, not proxy-described).',
 
 	// MiMo model descriptions
 	'model.mimo.pro.detail': 'Flagship reasoning model with deep thinking',
@@ -351,6 +361,8 @@ const en: Translations = {
 	'status.thinking': 'Thinking Effort',
 	'thinking.none': 'None',
 	'thinking.none.desc': 'Disable thinking for faster responses',
+	'thinking.low': 'Low',
+	'thinking.low.desc': 'Low reasoning effort, balances speed and quality',
 	'thinking.high': 'High',
 	'thinking.high.desc': 'Recommended for most tasks',
 	'thinking.max': 'Max',
@@ -377,10 +389,12 @@ const en: Translations = {
 	'vision.panel.field.modelId': 'Model ID',
 	'vision.panel.field.customHeaders': 'Custom headers JSON',
 	'vision.panel.field.extraBody': 'Additional request body JSON',
+	'vision.panel.field.timeoutMs': 'Request timeout (ms)',
 	'vision.panel.hint.customHeaders':
 		'Header values are stored with the profile. Put provider tokens in the API key field when possible.',
 	'vision.panel.hint.extraBody':
 		'Merged into the request body. Cannot override model, messages, input, or stream.',
+	'vision.panel.hint.timeoutMs': 'Leave empty for the default 30 seconds. Must be greater than 0.',
 	'vision.panel.placeholder.openaiEndpoint': 'https://api.example.com/v1/chat/completions',
 	'vision.panel.placeholder.openaiResponsesEndpoint': 'https://api.example.com/v1/responses',
 	'vision.panel.placeholder.anthropicEndpoint': 'https://api.example.com/v1/messages',
@@ -438,8 +452,7 @@ const en: Translations = {
 	'vision.panel.test.image': 'Test image',
 	'vision.panel.test.response': 'Model response',
 	'vision.panel.error.required': '{0} is required',
-	'vision.panel.error.invalidJson': '{0} must be valid JSON.',
-	'vision.proxy.error.configurationInvalid': 'Vision proxy configuration is invalid.',
+	'vision.panel.error.invalidJson': '{0} must be valid JSON.',	'vision.panel.error.timeoutMsInvalid': 'Request timeout must be greater than 0.',	'vision.proxy.error.configurationInvalid': 'Vision proxy configuration is invalid.',
 	'vision.proxy.error.providerFamilyInvalid': 'Vision proxy provider type is invalid.',
 	'vision.proxy.error.apiTypeInvalid': 'Vision proxy API type is invalid.',
 	'vision.proxy.error.fieldRequired': '{0} is required.',

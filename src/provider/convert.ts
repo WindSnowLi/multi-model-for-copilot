@@ -1,6 +1,7 @@
 import vscode from 'vscode';
 import { safeStringify } from '../json';
 import type { ChatMessage, ChatTool, ChatToolCall } from '../types';
+import { isImageDataPart, isLanguageModelThinkingPart, toImageDataUrl } from './parts';
 import { parseFirstReplayMarker } from './replay';
 
 /**
@@ -39,20 +40,13 @@ export function convertMessages(
 					},
 				});
 			} else if (part instanceof vscode.LanguageModelToolResultPart) {
-				let toolContent = '';
-				for (const item of part.content) {
-					if (item instanceof vscode.LanguageModelTextPart) {
-						toolContent += item.value;
-					}
-				}
 				toolResults.push({
 					callId: part.callId,
-					content: toolContent || safeStringify(part.content),
+					content: collectToolResultText(part),
 				});
 			} else if (supportsNativeVision && isImageDataPart(part)) {
 				// Collect image data for native vision models
-				const base64 = uint8ArrayToBase64(part.data);
-				imageUrls.push(`data:${part.mimeType};base64,${base64}`);
+				imageUrls.push(toImageDataUrl(part));
 			}
 		}
 
@@ -110,15 +104,38 @@ function getReasoningContent(
 	return thinkingContent;
 }
 
-function isLanguageModelThinkingPart(part: unknown): part is vscode.LanguageModelThinkingPart {
-	return (
-		typeof vscode.LanguageModelThinkingPart === 'function' &&
-		part instanceof vscode.LanguageModelThinkingPart
-	);
-}
-
 function normalizeThinkingPartText(value: string | string[]): string {
 	return Array.isArray(value) ? value.join('') : value;
+}
+
+/**
+ * Extract the text payload of a tool result.
+ *
+ * Tool messages in OpenAI-compatible APIs carry a plain string, so nested image
+ * data parts are deliberately excluded here — never serialize binary image
+ * bytes into a request body. Images that the model must see are forwarded as
+ * top-level user image parts instead.
+ */
+function collectToolResultText(part: vscode.LanguageModelToolResultPart): string {
+	let toolContent = '';
+	const serializableItems: unknown[] = [];
+	for (const item of part.content) {
+		if (item instanceof vscode.LanguageModelTextPart) {
+			toolContent += item.value;
+		} else if (isImageDataPart(item)) {
+			// Skip image bytes; they cannot be represented in a tool message string
+			// and must never be serialized into the request body.
+			continue;
+		} else {
+			serializableItems.push(item);
+		}
+	}
+	if (toolContent) {
+		return toolContent;
+	}
+	// Fall back to a structural summary only when there is genuinely serializable
+	// (non-image) content to describe.
+	return serializableItems.length > 0 ? safeStringify(serializableItems) : '';
 }
 
 function mapRole(role: vscode.LanguageModelChatMessageRole): 'user' | 'assistant' {
@@ -168,16 +185,4 @@ export function countMessageChars(messages: ChatMessage[]): number {
 		}
 	}
 	return total;
-}
-
-function isImageDataPart(part: unknown): part is vscode.LanguageModelDataPart {
-	return part instanceof vscode.LanguageModelDataPart && part.mimeType.startsWith('image/');
-}
-
-function uint8ArrayToBase64(data: Uint8Array): string {
-	let binary = '';
-	for (let i = 0; i < data.length; i++) {
-		binary += String.fromCharCode(data[i]);
-	}
-	return btoa(binary);
 }

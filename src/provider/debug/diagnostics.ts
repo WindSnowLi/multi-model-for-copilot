@@ -10,6 +10,7 @@ import {
 	formatRequestLogLine,
 	type RequestKind,
 } from '../routing';
+import { isImageDataPart, isLanguageModelThinkingPart } from '../parts';
 import { REPLAY_MARKER_MIME, parseFirstReplayMarker } from '../replay';
 import type { ConversationSegment } from '../segment';
 import { ACTIVATE_TOOL_PREFIX } from '../tools/consts';
@@ -884,10 +885,6 @@ function countImageDataParts(message: vscode.LanguageModelChatRequestMessage): n
 	return message.content.filter((part) => isImageDataPart(part)).length;
 }
 
-function isImageDataPart(part: unknown): part is vscode.LanguageModelDataPart {
-	return part instanceof vscode.LanguageModelDataPart && part.mimeType.startsWith('image/');
-}
-
 function getMessageText(message: vscode.LanguageModelChatRequestMessage): string {
 	let text = '';
 	for (const part of message.content) {
@@ -1127,13 +1124,6 @@ function summarizeInputAssistantMessages(
 	}
 
 	return summaries;
-}
-
-function isLanguageModelThinkingPart(part: unknown): part is vscode.LanguageModelThinkingPart {
-	return (
-		typeof vscode.LanguageModelThinkingPart === 'function' &&
-		part instanceof vscode.LanguageModelThinkingPart
-	);
 }
 
 function normalizeThinkingPartValue(value: string | string[]): { text: string; type: string } {

@@ -1,5 +1,5 @@
 import { DEFAULT_TOOLS_LIMIT } from './provider/tools/consts';
-import type { CustomModelConfig, ModelDefinition } from './types';
+import type { CustomModelConfig, ModelDefinition, ThinkingEffort } from './types';
 
 /**
  * Compile-time constants shared across the extension.
@@ -10,6 +10,17 @@ import type { CustomModelConfig, ModelDefinition } from './types';
 
 /** VS Code configuration section prefix for all extension settings. */
 export const CONFIG_SECTION = 'multi-model-for-copilot';
+
+// ---- Reasoning efforts ----
+
+/** Default reasoning efforts for models that expose a thinking picker. */
+export const DEFAULT_THINKING_EFFORTS: readonly ThinkingEffort[] = ['none', 'high', 'max'];
+
+/** DeepSeek V4 family additionally supports a low reasoning tier. */
+export const DEEPSEEK_THINKING_EFFORTS: readonly ThinkingEffort[] = ['none', 'low', 'high', 'max'];
+
+/** DeepSeek native vision model ID (experimental, accepts image_url input). */
+export const DEEPSEEK_VISION_EXP_MODEL_ID = 'deepseek-v4-flash-vision-exp';
 
 export const EXTERNAL_URLS = {
 	deepseek: {
@@ -46,12 +57,6 @@ export const LANGUAGE_MODEL_CHAT_SYSTEM_ROLE = 3;
 /** SecretStorage key for the DeepSeek API key. */
 export const API_KEY_SECRET = 'multi-model-for-copilot.apiKey';
 
-/** SecretStorage key for the MiMo API key. */
-export const MIMO_API_KEY_SECRET = 'multi-model-for-copilot.mimoApiKey';
-
-/** SecretStorage key for the Qwen API key. */
-export const QWEN_API_KEY_SECRET = 'multi-model-for-copilot.qwenApiKey';
-
 /** memento key tracking whether the welcome walkthrough has been shown. */
 export const WELCOME_SHOWN_KEY = 'multi-model-for-copilot.welcomeShown';
 
@@ -76,8 +81,12 @@ export const MODELS: ModelDefinition[] = [
 		capabilities: {
 			toolCalling: DEFAULT_TOOLS_LIMIT,
 			imageInput: true,
+			// Flash does not accept image_url input natively; images are described
+			// by the vision proxy before the request is sent to the model.
+			nativeImageInput: false,
 			thinking: true,
 		},
+		thinkingEfforts: DEEPSEEK_THINKING_EFFORTS,
 		requiresThinkingParam: true,
 		pricing: {
 			USD: { cacheHitInput: 0.0028, cacheMissInput: 0.14, output: 0.28 },
@@ -97,12 +106,38 @@ export const MODELS: ModelDefinition[] = [
 		capabilities: {
 			toolCalling: DEFAULT_TOOLS_LIMIT,
 			imageInput: true,
+			nativeImageInput: false,
 			thinking: true,
 		},
+		thinkingEfforts: DEEPSEEK_THINKING_EFFORTS,
 		requiresThinkingParam: true,
 		pricing: {
 			USD: { cacheHitInput: 0.003625, cacheMissInput: 0.435, output: 0.87 },
 			CNY: { cacheHitInput: 0.025, cacheMissInput: 3, output: 6 },
+		},
+		priceCategory: 'low',
+	},
+	{
+		id: DEEPSEEK_VISION_EXP_MODEL_ID,
+		name: 'DeepSeek V4 Flash Vision Exp',
+		provider: 'deepseek',
+		family: 'deepseek',
+		version: 'v4',
+		detail: 'Experimental native vision model',
+		maxInputTokens: 1048576,
+		maxOutputTokens: 393216,
+		capabilities: {
+			toolCalling: DEFAULT_TOOLS_LIMIT,
+			imageInput: true,
+			// DeepSeek's only model that accepts image_url input natively.
+			nativeImageInput: true,
+			thinking: true,
+		},
+		thinkingEfforts: DEEPSEEK_THINKING_EFFORTS,
+		requiresThinkingParam: true,
+		pricing: {
+			USD: { cacheHitInput: 0.0028, cacheMissInput: 0.14, output: 0.28 },
+			CNY: { cacheHitInput: 0.02, cacheMissInput: 1, output: 2 },
 		},
 		priceCategory: 'low',
 	},
@@ -118,6 +153,7 @@ export const MODELS: ModelDefinition[] = [
 		capabilities: {
 			toolCalling: true,
 			imageInput: false,
+			nativeImageInput: false,
 			thinking: true,
 		},
 		requiresThinkingParam: false,
@@ -139,6 +175,7 @@ export const MODELS: ModelDefinition[] = [
 		capabilities: {
 			toolCalling: true,
 			imageInput: true,
+			nativeImageInput: true,
 			thinking: true,
 		},
 		requiresThinkingParam: false,
@@ -161,6 +198,7 @@ export const MODELS: ModelDefinition[] = [
 		capabilities: {
 			toolCalling: true,
 			imageInput: false,
+			nativeImageInput: false,
 			thinking: true,
 		},
 		requiresThinkingParam: false,
@@ -182,6 +220,7 @@ export const MODELS: ModelDefinition[] = [
 		capabilities: {
 			toolCalling: true,
 			imageInput: false,
+			nativeImageInput: false,
 			thinking: true,
 		},
 		requiresThinkingParam: false,
@@ -203,6 +242,7 @@ export const MODELS: ModelDefinition[] = [
 		capabilities: {
 			toolCalling: true,
 			imageInput: false,
+			nativeImageInput: false,
 			thinking: false,
 		},
 		requiresThinkingParam: false,
@@ -225,6 +265,7 @@ export const MODELS: ModelDefinition[] = [
 		capabilities: {
 			toolCalling: true,
 			imageInput: true,
+			nativeImageInput: true,
 			thinking: true,
 		},
 		requiresThinkingParam: false,
@@ -246,6 +287,7 @@ export const MODELS: ModelDefinition[] = [
 		capabilities: {
 			toolCalling: true,
 			imageInput: true,
+			nativeImageInput: true,
 			thinking: true,
 		},
 		requiresThinkingParam: false,
@@ -267,6 +309,7 @@ export const MODELS: ModelDefinition[] = [
 		capabilities: {
 			toolCalling: true,
 			imageInput: true,
+			nativeImageInput: true,
 			thinking: false,
 		},
 		requiresThinkingParam: false,
@@ -295,8 +338,11 @@ export function toModelDefinition(cfg: CustomModelConfig): ModelDefinition {
 		capabilities: {
 			toolCalling: cfg.toolCalling ?? false,
 			imageInput: cfg.imageInput ?? false,
+			nativeImageInput: cfg.nativeImageInput ?? cfg.imageInput ?? false,
 			thinking: cfg.thinking ?? false,
 		},
+		// Custom models keep the default effort set unless they opt into low.
+		thinkingEfforts: cfg.thinkingEfforts,
 		requiresThinkingParam: cfg.requiresThinkingParam ?? false,
 	};
 }

@@ -38,9 +38,10 @@
 两个模型与 GPT-4o、Claude 等并列在 Copilot Chat 的模型选择器中。均支持 1M Token 上下文。可在对话中途切换模型，不丢失聊天历史。
 
 ### 透明视觉代理
-DeepSeek V4 是纯文本模型。将截图拖入聊天，本扩展会自动将图片交给你已安装的其他 Copilot 模型（Claude、GPT-4o 等）进行描述，再将描述结果反馈给 DeepSeek。**零配置**——只需选择一次你偏好的视觉代理模型即可。
 
-此代理为兼容性桥接方案；如果 DeepSeek 后续支持原生视觉能力，本扩展将向更统一的视觉路径迁移。
+DeepSeek V4 Flash/Pro 是纯文本模型。将截图拖入聊天，本扩展会自动将图片交给视觉代理模型（默认自动选择，或你配置的代理）进行描述，再将描述结果反馈给模型。**零配置**——只需在首次使用时配置一次视觉代理来源即可。
+
+新增的 **DeepSeek V4 Flash Vision Exp** 为官方原生视觉模型，图片会以 OpenAI `image_url` 格式直接发送，无需代理描述。
 
 <p align="center">
   <img src="resources/screenshots/03-vision.png" alt="将图片拖入 Copilot Chat，DeepSeek 通过视觉代理响应" width="800">
@@ -100,6 +101,7 @@ MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
 |---|---|---|---|---|---|---|
 | **DeepSeek V4 Flash** | DeepSeek | 1M | 384K | 代理 | 支持 | 128 |
 | **DeepSeek V4 Pro** | DeepSeek | 1M | 384K | 代理 | 支持 | 128 |
+| **DeepSeek V4 Flash Vision Exp** | DeepSeek | 1M | 384K | 原生 | 支持 | 128 |
 | **MiMo V2.5** | 小米 MiMo | 1M | 128K | 原生 | 支持 | 支持 |
 | **MiMo V2.5 Pro** | 小米 MiMo | 1M | 128K | 不支持 | 支持 | 支持 |
 | **Qwen Max** | 千问 AI | 1M | 128K | 不支持 | 支持 | 支持 |
@@ -140,8 +142,10 @@ MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
 | `maxInputTokens` | 否 | 128000 | 最大输入 |
 | `maxOutputTokens` | 否 | 8192 | 最大输出 |
 | `toolCalling` | 否 | false | 工具调用 |
-| `imageInput` | 否 | false | 原生图片 |
+| `imageInput` | 否 | false | 允许粘贴图片（选择器能力） |
+| `nativeImageInput` | 否 | `imageInput` | API 原生接受图片（`image_url`） |
 | `thinking` | 否 | false | 思考模式 |
+| `thinkingEfforts` | 否 | 停用/标准/深度 | 有序推理强度列表（支持低强度可加 `low`） |
 | `useMaxCompletionTokens` | 否 | false | 使用 `max_completion_tokens` |
 
 ## 命令

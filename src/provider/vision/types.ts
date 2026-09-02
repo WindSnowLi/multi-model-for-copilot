@@ -24,6 +24,8 @@ export interface VisionProxyConfig {
 	apiType: VisionProxyApiType;
 	url: string;
 	modelId: string;
+	/** Optional request timeout in milliseconds. Falls back to the default 30s. */
+	timeoutMs?: number;
 	headers?: Record<string, string>;
 	extraBody?: Record<string, unknown>;
 	updatedAt: number;

@@ -1,7 +1,13 @@
 import vscode from 'vscode';
 import { AuthManager } from '../auth';
 import { ApiClient } from '../client';
-import { getApiModelId, getBaseUrl, getCustomModels, getCustomModelSecretKey, getMaxTokens } from '../config';
+import {
+	getApiModelId,
+	getBaseUrl,
+	getCustomModels,
+	getCustomModelSecretKey,
+	getMaxTokens,
+} from '../config';
 import { getAllModels } from '../consts';
 import { isOfficialProviderBaseUrl } from '../endpoint';
 import { t } from '../i18n';
@@ -13,9 +19,17 @@ import {
 	type CacheDiagnosticsRecorder,
 	type CacheDiagnosticsRun,
 } from './debug';
-import { getConfiguredThinkingEffort, type ModelConfigurationOptions } from './models';
+import {
+	getConfiguredThinkingEffort,
+	getModelThinkingEfforts,
+	type ModelConfigurationOptions,
+} from './models';
 import type { ReplayMarkerMetadata } from './replay';
-import { classifyChatCompletionRequest, shouldForceThinkingNone, type RequestKind } from './routing';
+import {
+	classifyChatCompletionRequest,
+	shouldForceThinkingNone,
+	type RequestKind,
+} from './routing';
 import type { ConversationSegment } from './segment';
 import { collectTrailingToolResultIds, prepareRequestTools } from './tools/request';
 import { resolveImageMessages, type VisionDescriber } from './vision';
@@ -25,6 +39,8 @@ export interface PreparedChatRequest {
 	request: ChatCompletionRequest;
 	isThinkingModel: boolean;
 	totalRequestChars: number;
+	/** Whether this request forwarded image parts natively to a native-image model. */
+	hasNativeImages: boolean;
 	trailingToolResultIds: string[];
 	cacheDiagnostics: CacheDiagnosticsRun;
 	requestKind: RequestKind;
@@ -72,20 +88,34 @@ export async function prepareChatRequest({
 	}
 
 	// Custom models use their own baseUrl; built-in models use settings
-	const baseUrl = customCfg ? customCfg.baseUrl.replace(/\/+$/u, '') : getBaseUrl(modelDef?.provider);
+	const baseUrl = customCfg
+		? customCfg.baseUrl.replace(/\/+$/u, '')
+		: getBaseUrl(modelDef?.provider);
 	const provider = customCfg ? 'deepseek' : (modelDef?.provider ?? 'deepseek'); // custom models use DeepSeek-style auth by default
 	const client = new ApiClient(baseUrl, apiKey, provider, customCfg);
 	const isThinkingModel = modelDef?.capabilities.thinking ?? false;
+	const nativeImageInput = modelDef?.capabilities.nativeImageInput === true;
+	const supportedThinkingEfforts = getModelThinkingEfforts(modelDef);
 	const maxTokens = getMaxTokens();
 
-	const visionResolution = await resolveImageMessages(messages, token, getVisionDescriber, modelDef?.capabilities.imageInput);
+	const visionResolution = await resolveImageMessages(
+		messages,
+		token,
+		getVisionDescriber,
+		nativeImageInput,
+	);
 	const resolvedMessages = visionResolution.messages;
-	const ChatMessages = convertMessages(resolvedMessages, isThinkingModel, modelDef?.capabilities.imageInput);
+	const ChatMessages = convertMessages(resolvedMessages, isThinkingModel, nativeImageInput);
 	const tools = prepareRequestTools(modelDef?.capabilities.toolCalling, options);
 
 	const totalRequestChars = countMessageChars(ChatMessages);
+	// A request only counts as native-image when the converted payload actually
+	// carries forwarded image data. Proxy-described images do not qualify.
+	const hasNativeImages =
+		nativeImageInput && ChatMessages.some((msg) => Boolean(msg.imageUrls?.length));
 	const providerDesc = getProviderDescriptor(modelDef?.provider ?? 'deepseek');
-	const useMaxCompletionTokens = providerDesc?.useMaxCompletionTokens || customCfg?.useMaxCompletionTokens;
+	const useMaxCompletionTokens =
+		providerDesc?.useMaxCompletionTokens || customCfg?.useMaxCompletionTokens;
 	const baseRequest: ChatCompletionRequest = {
 		model: customCfg ? customCfg.modelId : getApiModelId(modelInfo.id),
 		messages: ChatMessages,
@@ -101,27 +131,30 @@ export async function prepareChatRequest({
 	});
 	const configuredThinkingEffort = getConfiguredThinkingEffort(
 		options as ModelConfigurationOptions,
+		supportedThinkingEfforts,
 	);
 	// Only force helper requests into disabled thinking on the official API.
 	// Custom endpoints keep their configured effort to preserve pre-#137 request shape.
 	const forceNoneThinking =
-		shouldForceThinkingNone(requestKind) && isOfficialProviderBaseUrl(baseUrl, modelDef?.provider ?? 'deepseek');
+		shouldForceThinkingNone(requestKind) &&
+		isOfficialProviderBaseUrl(baseUrl, modelDef?.provider ?? 'deepseek');
 	const thinkingEffort = forceNoneThinking ? 'none' : configuredThinkingEffort;
 
 	// Thinking parameter format is provider-specific:
 	//   'reasoning_effort' → only reasoning_effort param (MiMo, Qwen)
 	//   'thinking_type'    → thinking: { type } + reasoning_effort (DeepSeek)
-	const thinkingFormat = customCfg?.requiresThinkingParam === false
-		? 'reasoning_effort'
-		: providerDesc?.thinkingFormat ?? 'thinking_type';
+	const thinkingFormat =
+		customCfg?.requiresThinkingParam === false
+			? 'reasoning_effort'
+			: (providerDesc?.thinkingFormat ?? 'thinking_type');
 
 	const request: ChatCompletionRequest = {
 		...baseRequest,
 		...(isThinkingModel
 			? thinkingFormat === 'reasoning_effort'
-				? {
-						...(thinkingEffort !== 'none' ? { reasoning_effort: thinkingEffort } : {}),
-					}
+				? thinkingEffort === 'none'
+					? {}
+					: { reasoning_effort: thinkingEffort }
 				: {
 						thinking: {
 							type: thinkingEffort === 'none' ? ('disabled' as const) : ('enabled' as const),
@@ -166,6 +199,7 @@ export async function prepareChatRequest({
 		request,
 		isThinkingModel,
 		totalRequestChars,
+		hasNativeImages,
 		trailingToolResultIds: collectTrailingToolResultIds(ChatMessages),
 		cacheDiagnostics: diagnosticsRun,
 		requestKind,

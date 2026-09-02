@@ -21,6 +21,7 @@ export function getVisionProxyPanelScript(initialState: string, initialStrings: 
 		const modelId = document.getElementById('modelId');
 		const headers = document.getElementById('headers');
 		const extraBody = document.getElementById('extraBody');
+		const timeoutMs = document.getElementById('timeoutMs');
 		const status = document.getElementById('status');
 		const testResult = document.getElementById('testResult');
 		const testImage = document.getElementById('testImage');
@@ -46,6 +47,7 @@ export function getVisionProxyPanelScript(initialState: string, initialStrings: 
 			modelId.value = config.modelId || '';
 			headers.value = config.headers ? JSON.stringify(config.headers, null, 2) : '';
 			extraBody.value = config.extraBody ? JSON.stringify(config.extraBody, null, 2) : '';
+			timeoutMs.value = config.timeoutMs ? String(config.timeoutMs) : '';
 			apiKey.value = '';
 			apiKey.placeholder = state.hasApiKey ? '••••••••••••' : strings.placeholderEnterApiKey;
 			renderApiKeyHint(state.hasApiKey);
@@ -280,7 +282,7 @@ export function getVisionProxyPanelScript(initialState: string, initialStrings: 
 			const parsedHeaders = parseOptionalJson(headers.value, strings.fieldCustomHeaders);
 			const parsedExtraBody = parseOptionalJson(extraBody.value, strings.fieldExtraBody);
 			const endpointConfig = getEndpointTypeConfig(endpointType.value);
-			return {
+			const config = {
 				providerFamily: endpointConfig.providerFamily,
 				apiType: endpointConfig.apiType,
 				url: url.value,
@@ -289,6 +291,23 @@ export function getVisionProxyPanelScript(initialState: string, initialStrings: 
 				extraBody: parsedExtraBody,
 				updatedAt: Date.now(),
 			};
+			const parsedTimeoutMs = parseOptionalTimeoutMs(timeoutMs.value);
+			if (parsedTimeoutMs !== undefined) {
+				config.timeoutMs = parsedTimeoutMs;
+			}
+			return config;
+		}
+
+		function parseOptionalTimeoutMs(value) {
+			const text = value.trim();
+			if (!text) {
+				return undefined;
+			}
+			const num = Number(text);
+			if (!Number.isFinite(num) || num <= 0) {
+				throw new Error(strings.errorTimeoutMsInvalid);
+			}
+			return Math.trunc(num);
 		}
 
 		function parseOptionalJson(value, label) {

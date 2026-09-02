@@ -6,11 +6,4 @@ export {
 	parseFirstReplayMarker,
 	parseReplayMarkerData,
 } from './markers';
-export type {
-	LocatedReplayMarker,
-	ReasoningMarkerTextIgnoredReason,
-	ReplayMarkerMetadata,
-	ReplayMarkerParseResult,
-	ReplayMarkerPayloadFormat,
-	VisionMarkerTextIgnoredReason,
-} from './types';
+export type { ReplayMarkerMetadata } from './types';

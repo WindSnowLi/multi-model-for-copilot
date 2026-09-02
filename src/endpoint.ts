@@ -1,9 +1,6 @@
 import type { ApiProvider } from './types';
 import { isOfficialHost } from './provider-registry';
 
-// Re-export for backward compatibility — callers can migrate to `isOfficialHost` directly.
-export const OFFICIAL_DEEPSEEK_API_HOST = 'api.deepseek.com';
-
 export function isOfficialDeepSeekBaseUrl(baseUrl: string): boolean {
 	return isOfficialHost(baseUrl, 'deepseek');
 }

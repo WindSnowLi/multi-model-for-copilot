@@ -1,3 +1,4 @@
+import { isRecord } from '../../../guards';
 import { MAX_DIAGNOSTIC_FIELD_LENGTH } from '../../../client/consts';
 import { getNetworkErrorCauseInfo, getNetworkErrorCode } from '../../../client/error/network';
 import { t } from '../../../i18n';
@@ -365,10 +366,6 @@ function truncateSingleLine(value: string): string {
 function getStringProperty(value: Record<string, unknown>, key: string): string | undefined {
 	const property = value[key];
 	return typeof property === 'string' && property.length > 0 ? property : undefined;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function joinDiagnosticParts(...parts: (string | undefined)[]): string {

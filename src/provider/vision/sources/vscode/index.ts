@@ -127,10 +127,6 @@ export function getConfiguredVisionModelKey(): string | undefined {
 	return key.trim() || undefined;
 }
 
-export function getDefaultVisionModelId(): string {
-	return DEFAULT_VISION_MODEL_ID;
-}
-
 export async function saveVSCodeVisionModelKey(key: string): Promise<void> {
 	const normalizedKey = await normalizeVSCodeVisionModelKeyForSave(key);
 	if (!normalizedKey) {

@@ -32,7 +32,7 @@ This extension brings **multiple AI model providers** into GitHub Copilot Chat's
 
 | Provider | Models | Auth | API Key |
 |---|---|---|---|
-| **DeepSeek** | V4 Flash, V4 Pro | `Authorization: Bearer` | `sk-...` |
+| **DeepSeek** | V4 Flash, V4 Pro, V4 Flash Vision Exp | `Authorization: Bearer` | `sk-...` |
 | **Xiaomi MiMo** | V2.5, V2.5 Pro | `api-key` header | `tp-...` (Token Plan) |
 | **Qwen (千问)** | Max, Plus, Turbo, VL Max, VL Plus, VL Turbo | `Authorization: Bearer` | `sk-...` |
 | **Custom** | Any OpenAI-compatible | Configurable | Any |
@@ -49,8 +49,13 @@ Run **`Multi-Model: Discover Available Models`** to auto-detect available models
 
 ### Vision Support
 
+Images are routed per model capability — models that accept image input natively forward them
+as OpenAI `image_url` blocks; models that don't describe them through the configurable vision
+proxy (or DeepSeek Vision Exp in auto mode) and forward the description as text.
+
 | Model | Image Support | Method |
 |---|---|---|
+| **DeepSeek V4 Flash Vision Exp** | Native | Images sent directly via OpenAI `image_url` format |
 | **MiMo V2.5** | Native | Images sent directly via OpenAI `image_url` format |
 | **Qwen VL Max/Plus/Turbo** | Native | Images sent directly via OpenAI `image_url` format |
 | **DeepSeek V4 Flash/Pro** | Proxy | Images described by another model, text sent to DeepSeek |
@@ -60,7 +65,9 @@ Supports JPEG, PNG, GIF, WebP, BMP (up to 50MB per image). Multi-image input sup
 
 ### Thinking Mode
 
-Use Copilot Chat's model picker to choose reasoning effort: `none` (off), `high` (default), or `max` (deep reasoning). Works across DeepSeek, MiMo, Qwen, and custom models.
+Use Copilot Chat's model picker to choose reasoning effort: `none` (off), `low`, `high`
+(default), or `max` (deep reasoning). DeepSeek models expose the extra `low` tier; other
+providers show the standard tiers.
 
 ### Full Copilot Stack
 
@@ -97,6 +104,7 @@ For custom models: `Multi-Model: Discover Available Models` → pick endpoint �
 |---|---|---|---|---|---|---|
 | **DeepSeek V4 Flash** | DeepSeek | 1M | 384K | Proxy | Yes | 128 |
 | **DeepSeek V4 Pro** | DeepSeek | 1M | 384K | Proxy | Yes | 128 |
+| **DeepSeek V4 Flash Vision Exp** | DeepSeek | 1M | 384K | Native | Yes | 128 |
 | **MiMo V2.5** | Xiaomi MiMo | 1M | 128K | Native | Yes | Yes |
 | **MiMo V2.5 Pro** | Xiaomi MiMo | 1M | 128K | No | Yes | Yes |
 
@@ -131,8 +139,10 @@ Add any OpenAI-compatible model via `settings.json`:
 | `maxInputTokens` | No | 128000 | Max input context |
 | `maxOutputTokens` | No | 8192 | Max output tokens |
 | `toolCalling` | No | false | Tool calling support |
-| `imageInput` | No | false | Native image input |
+| `imageInput` | No | false | Allow attaching images (picker capability) |
+| `nativeImageInput` | No | `imageInput` | API accepts images natively (`image_url`) |
 | `thinking` | No | false | Thinking mode |
+| `thinkingEfforts` | No | none/high/max | Ordered reasoning efforts (add `low` if supported) |
 | `requiresThinkingParam` | No | false | Send thinking wrapper |
 | `useMaxCompletionTokens` | No | false | Use `max_completion_tokens` |
 

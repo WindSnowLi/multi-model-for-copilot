@@ -1,6 +1,7 @@
 import vscode from 'vscode';
+import { DEFAULT_THINKING_EFFORTS } from '../consts';
 import { t } from '../i18n';
-import type { ModelDefinition, PricingCurrency } from '../types';
+import type { ModelDefinition, PricingCurrency, ThinkingEffort } from '../types';
 import { toModelCostInfo, type ModelCostInformation } from './pricing/costs';
 
 /**
@@ -13,8 +14,6 @@ import { toModelCostInfo, type ModelCostInformation } from './pricing/costs';
  * the same shape currently consumed by GitHub Copilot Chat to render model picker
  * metadata and per-model configuration controls.
  */
-
-export type ThinkingEffort = 'none' | 'high' | 'max';
 
 export type ModelConfigurationOptions = vscode.ProvideLanguageModelChatResponseOptions & {
 	readonly modelConfiguration?: Record<string, unknown>;
@@ -38,6 +37,7 @@ export function toChatInfo(
 ): ModelPickerChatInformation {
 	const modelDetail = resolveModelText(m, 'detail') ?? m.detail;
 	const modelTooltip = resolveModelText(m, 'tooltip');
+	const thinkingEfforts = getModelThinkingEfforts(m);
 	return {
 		id: m.id,
 		name: m.name,
@@ -55,39 +55,60 @@ export function toChatInfo(
 			imageInput: m.capabilities.imageInput,
 		},
 		...toModelCostInfo(m, pricingCurrency),
-		...(m.capabilities.thinking ? { configurationSchema: buildThinkingEffortSchema() } : {}),
+		...(m.capabilities.thinking
+			? { configurationSchema: buildThinkingEffortSchema(thinkingEfforts) }
+			: {}),
 	};
 }
 
-export function getConfiguredThinkingEffort(options: ModelConfigurationOptions): ThinkingEffort {
+/**
+ * Resolve the ordered reasoning efforts a model exposes. Falls back to the
+ * default set (none/high/max) when the model does not declare any.
+ */
+export function getModelThinkingEfforts(m: ModelDefinition | undefined): readonly ThinkingEffort[] {
+	return m?.thinkingEfforts ?? DEFAULT_THINKING_EFFORTS;
+}
+
+/**
+ * Read the reasoning effort the caller requested for this turn, normalized to
+ * the model's supported set. `none` means thinking is disabled.
+ */
+export function getConfiguredThinkingEffort(
+	options: ModelConfigurationOptions,
+	supportedEfforts: readonly ThinkingEffort[] = DEFAULT_THINKING_EFFORTS,
+): ThinkingEffort {
 	const configuredEffort =
 		options.modelConfiguration?.reasoningEffort ?? options.configuration?.reasoningEffort;
 
-	if (configuredEffort === 'none') {
+	if (configuredEffort === 'none' && supportedEfforts.includes('none')) {
 		return 'none';
 	}
-
-	if (configuredEffort === 'high') {
-		return 'high';
+	if (configuredEffort === 'low' && supportedEfforts.includes('low')) {
+		return 'low';
 	}
-
-	return configuredEffort === 'max' ? 'max' : 'high';
+	if (configuredEffort === 'max' && supportedEfforts.includes('max')) {
+		return 'max';
+	}
+	// Fall back to high when the model supports it (keeps the historical default),
+	// otherwise to the first non-disabled supported effort.
+	return (
+		supportedEfforts.includes('high')
+			? 'high'
+			: (supportedEfforts.find((effort) => effort !== 'none') ?? 'high')
+	) as ThinkingEffort;
 }
 
-function buildThinkingEffortSchema() {
+function buildThinkingEffortSchema(efforts: readonly ThinkingEffort[]) {
+	const activeEfforts = efforts.filter((effort) => effort !== 'none');
 	return {
 		properties: {
 			reasoningEffort: {
 				type: 'string',
 				title: t('status.thinking'),
-				enum: ['none', 'high', 'max'],
-				enumItemLabels: [t('thinking.none'), t('thinking.high'), t('thinking.max')],
-				enumDescriptions: [
-					t('thinking.none.desc'),
-					t('thinking.high.desc'),
-					t('thinking.max.desc'),
-				],
-				default: 'high',
+				enum: [...efforts],
+				enumItemLabels: efforts.map((effort) => t(`thinking.${effort}`)),
+				enumDescriptions: efforts.map((effort) => t(`thinking.${effort}.desc`)),
+				default: efforts.includes('high') ? 'high' : (activeEfforts[0] ?? 'high'),
 				group: 'navigation',
 			},
 		},

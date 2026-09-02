@@ -2,6 +2,12 @@
 export const DEFAULT_VISION_MODEL_ID = 'oswe-vscode-prime';
 
 /**
+ * Upper bound for a user-configured vision proxy request timeout. `setTimeout`
+ * treats delays above 2^31-1 ms as 1 ms, so clamp before scheduling.
+ */
+export const MAX_TIMEOUT_MS = 2_147_483_647;
+
+/**
  * Prompt sent to the vision proxy model when describing image attachments
  * before forwarding them to text-only models.
  *

@@ -1,6 +1,7 @@
 import vscode from 'vscode';
 import { t } from '../../i18n';
 import { toWellFormedString } from '../../json';
+import { isImageDataPart } from '../parts';
 import { parseFirstReplayMarker } from '../replay';
 import { createVisionProxyFailureNotice, createVisionProxyMissingNotice } from '../tools/notices';
 import {
@@ -339,10 +340,6 @@ function hasNonEmptyTextPart(parts: readonly vscode.LanguageModelInputPart[]): b
 	return parts.some(
 		(part) => part instanceof vscode.LanguageModelTextPart && part.value.trim().length > 0,
 	);
-}
-
-function isImageDataPart(part: unknown): part is vscode.LanguageModelDataPart {
-	return part instanceof vscode.LanguageModelDataPart && part.mimeType.startsWith('image/');
 }
 
 function toVisionImagePart(part: vscode.LanguageModelDataPart): VisionImagePart {

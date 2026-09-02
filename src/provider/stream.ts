@@ -82,12 +82,19 @@ export function streamChatCompletion({
 				},
 
 				onUsage: (usage) => {
-					const charsPerToken = updateCharsPerToken(
-						prepared.totalRequestChars,
-						usage,
-						getCharsPerToken(),
-					);
-					setCharsPerToken(charsPerToken);
+					// Native-image requests include image token cost that our
+					// char-based calibration cannot represent. Skip adapting the
+					// charsPerToken ratio so image-heavy requests do not skew it.
+					const charsPerToken = prepared.hasNativeImages
+						? getCharsPerToken()
+						: updateCharsPerToken(
+								prepared.totalRequestChars,
+								usage,
+								getCharsPerToken(),
+							);
+					if (!prepared.hasNativeImages) {
+						setCharsPerToken(charsPerToken);
+					}
 					prepared.cacheDiagnostics.onUsage(usage, charsPerToken);
 					reportCopilotContextUsage(progress, usage, prepared.requestKind);
 				},

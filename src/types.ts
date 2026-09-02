@@ -51,7 +51,7 @@ export interface ChatCompletionRequest {
 	tools?: ChatTool[];
 	tool_choice?: 'none' | 'auto' | 'required';
 	thinking?: { type: 'enabled' | 'disabled' };
-	reasoning_effort?: 'high' | 'max';
+	reasoning_effort?: Exclude<ThinkingEffort, 'none'>;
 	stream_options?: {
 		include_usage: boolean;
 	};
@@ -108,6 +108,9 @@ export interface ModelPricing {
 
 export type ApiProvider = 'deepseek' | 'mimo' | 'qwen' | 'custom';
 
+/** Reasoning effort levels exposed in the model picker. */
+export type ThinkingEffort = 'none' | 'low' | 'high' | 'max';
+
 export interface ModelDefinition {
 	id: string;
 	name: string;
@@ -119,9 +122,24 @@ export interface ModelDefinition {
 	maxOutputTokens: number;
 	capabilities: {
 		toolCalling: boolean | number;
+		/**
+		 * Whether the model picker exposes image input for this model. When `true`
+		 * the user may attach images; if `nativeImageInput` is `false` those images
+		 * are routed through the vision proxy (described to text) before the request
+		 * is sent, because the underlying API model does not accept images itself.
+		 */
 		imageInput: boolean;
+		/**
+		 * Whether the underlying API model natively accepts image data (OpenAI
+		 * `image_url` content blocks). Only native models have images forwarded
+		 * directly; non-native models with `imageInput: true` use the vision proxy.
+		 */
+		nativeImageInput?: boolean;
+		/** Whether the model supports a reasoning/thinking effort picker. */
 		thinking: boolean;
 	};
+	/** Ordered list of reasoning efforts the model supports (default: none/high/max). */
+	thinkingEfforts?: readonly ThinkingEffort[];
 	requiresThinkingParam: boolean;
 	pricing?: Readonly<Record<PricingCurrency, ModelPricing>>;
 	priceCategory?: PriceCategory;
@@ -156,8 +174,16 @@ export interface CustomModelConfig {
 	toolCalling?: boolean | number;
 	/** Image input support. Defaults to false. */
 	imageInput?: boolean;
+	/**
+	 * Whether the underlying API accepts images natively (image_url blocks).
+	 * Defaults to the value of `imageInput`. Set to `false` when `imageInput`
+	 * is true but images must be routed through the vision proxy instead.
+	 */
+	nativeImageInput?: boolean;
 	/** Thinking/reasoning mode support. Defaults to false. */
 	thinking?: boolean;
+	/** Ordered list of reasoning efforts the model supports (default: none/high/max). */
+	thinkingEfforts?: readonly ThinkingEffort[];
 	/** Whether to send thinking: { type: 'enabled' } param. Defaults to false. */
 	requiresThinkingParam?: boolean;
 	/** Use max_completion_tokens instead of max_tokens. Defaults to false. */
