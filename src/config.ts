@@ -133,6 +133,22 @@ export function getStabilizeToolListEnabled(): boolean {
 }
 
 /**
+ * Whether to show the live account balance in the status bar.
+ */
+export function getShowBalanceStatusBar(): boolean {
+	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
+	return config.get<boolean>('statusBar.balance', true);
+}
+
+/**
+ * Whether to show the live token generation speed in the status bar.
+ */
+export function getShowTokenSpeedStatusBar(): boolean {
+	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
+	return config.get<boolean>('statusBar.tokenSpeed', true);
+}
+
+/**
  * Migrate the legacy boolean `multi-model-for-copilot.debug` setting to `debugMode`.
  *
  * `debug: true` maps to `debugMode: metadata`; `debug: false` maps to the

@@ -218,6 +218,12 @@ const zh: Translations = {
 	'vision.proxy.error.testFailed': '视觉代理测试失败。',
 	'vision.proxy.error.unknown': '未知错误',
 
+	// Status bar
+	'statusBar.balance.label': '$(credit-card) 余额：{0}',
+	'statusBar.balance.tooltip': '账户余额 · {0} · 点击刷新',
+	'statusBar.tokenSpeed.label': '$(zap) {0} tok/s',
+	'statusBar.tokenSpeed.tooltip': '生成速度：{0} tokens/秒',
+
 	// Request
 	'request.toolsLimitExceeded':
 		'当前模型单次 tools 请求最多支持 {0} 个 functions，当前请求包含 {1} 个。请先用 VS Code 的 Configure Tools 关闭不常用的工具；如果正在使用实验性稳定工具列表设置，请关闭它。',
@@ -495,6 +501,12 @@ const en: Translations = {
 		'OpenAI-compatible vision response content has unsupported shape.',
 	'vision.proxy.error.testFailed': 'Vision proxy test failed.',
 	'vision.proxy.error.unknown': 'unknown',
+
+	// Status bar
+	'statusBar.balance.label': '$(credit-card) Balance: {0}',
+	'statusBar.balance.tooltip': 'Account balance · {0} · Click to refresh',
+	'statusBar.tokenSpeed.label': '$(zap) {0} tok/s',
+	'statusBar.tokenSpeed.tooltip': 'Generation speed: {0} tokens/s',
 
 	// Request
 	'request.toolsLimitExceeded':

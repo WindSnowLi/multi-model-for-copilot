@@ -3,17 +3,17 @@ import { createUserFacingError } from '../client';
 import { logger } from '../logger';
 import type { ChatToolCall, ChatUsage } from '../types';
 import {
-	observeCancellationToken,
-	type CacheDiagnosticsRun,
-	type ReplayMarkerReportTrigger,
+    observeCancellationToken,
+    type CacheDiagnosticsRun,
+    type ReplayMarkerReportTrigger,
 } from './debug';
-import { formatRequestLogLine, type RequestKind } from './routing';
 import {
-	createReplayMarkerPart,
-	hasReplayMarkerMetadata,
-	type ReplayMarkerMetadata,
+    createReplayMarkerPart,
+    hasReplayMarkerMetadata,
+    type ReplayMarkerMetadata,
 } from './replay';
 import type { PreparedChatRequest } from './request';
+import { formatRequestLogLine, type RequestKind } from './routing';
 
 interface ResponseStreamState {
 	accumulatedReasoning: string;
@@ -24,6 +24,19 @@ interface ResponseStreamState {
 
 const COPILOT_USAGE_DATA_PART_MIME = 'usage';
 
+/**
+ * Optional hook for surfacing real-time stream metrics (e.g. token generation
+ * speed) to the host UI while a response is being streamed.
+ */
+export interface StreamSpeedTracker {
+	/** Called once when the stream begins producing output. */
+	begin(): void;
+	/** Called with the character count of the latest content/thinking delta. */
+	onChars(chars: number): void;
+	/** Called when the stream finishes or is aborted with an error. */
+	finish(): void;
+}
+
 export interface StreamChatCompletionOptions {
 	prepared: PreparedChatRequest;
 	progress: vscode.Progress<vscode.LanguageModelResponsePart>;
@@ -31,6 +44,7 @@ export interface StreamChatCompletionOptions {
 	initialResponseNotice?: string;
 	getCharsPerToken: () => number;
 	setCharsPerToken: (charsPerToken: number) => void;
+	speedTracker?: StreamSpeedTracker;
 }
 
 export function streamChatCompletion({
@@ -40,6 +54,7 @@ export function streamChatCompletion({
 	initialResponseNotice,
 	getCharsPerToken,
 	setCharsPerToken,
+	speedTracker,
 }: StreamChatCompletionOptions): Promise<void> {
 	const state: ResponseStreamState = {
 		accumulatedReasoning: '',
@@ -48,6 +63,7 @@ export function streamChatCompletion({
 		replayMarkerReported: false,
 	};
 	const cancelListener = observeCancellationToken(token, prepared.cacheDiagnostics);
+	speedTracker?.begin();
 
 	return prepared.client
 		.streamChatCompletion(
@@ -56,16 +72,19 @@ export function streamChatCompletion({
 				onContent: (content: string) => {
 					reportInitialResponseNoticeOnce(progress, state, initialResponseNotice);
 					progress.report(new vscode.LanguageModelTextPart(content));
+					speedTracker?.onChars(content.length);
 				},
 
 				onThinking: (text: string) => {
 					reportInitialResponseNoticeOnce(progress, state, initialResponseNotice);
 					handleThinking(text, state, progress);
+					speedTracker?.onChars(text.length);
 				},
 
 				onToolCall: (toolCall: ChatToolCall) => {
 					reportInitialResponseNoticeOnce(progress, state, initialResponseNotice);
 					handleToolCall(toolCall, state, progress);
+					speedTracker?.onChars(toolCall.function.arguments.length);
 				},
 
 				onError: (error: Error) => {
@@ -116,6 +135,7 @@ export function streamChatCompletion({
 			}
 		})
 		.finally(() => {
+			speedTracker?.finish();
 			cancelListener.dispose();
 		});
 }

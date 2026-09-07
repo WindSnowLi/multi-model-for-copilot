@@ -3,8 +3,8 @@ import { AuthManager } from '../../auth';
 import { getBaseUrl } from '../../config';
 import { normalizeBaseUrl } from '../../endpoint';
 import { logger } from '../../logger';
-import { requireProviderDescriptor } from '../../provider-registry';
-import type { ApiProvider, PricingCurrency } from '../../types';
+import { getBalanceCapableProviders, requireProviderDescriptor } from '../../provider-registry';
+import type { PricingCurrency } from '../../types';
 
 const CACHE_KEY = 'multi-model-for-copilot.balanceCurrency.cache';
 const BALANCE_TIMEOUT_MS = 5000;
@@ -26,9 +26,6 @@ interface BalanceResponse {
 	readonly balance_infos?: unknown;
 }
 
-/** Providers whose balance endpoint can auto-detect display currency. */
-const BALANCE_PROVIDERS: Exclude<ApiProvider, 'custom'>[] = ['deepseek'];
-
 export class BalanceCurrencyResolver {
 	private inFlight: Promise<void> | undefined;
 	private controller: AbortController | undefined;
@@ -43,7 +40,7 @@ export class BalanceCurrencyResolver {
 
 	getDisplayCurrency(): PricingCurrency | undefined {
 		// Check all balance-capable providers in priority order.
-		for (const provider of BALANCE_PROVIDERS) {
+		for (const provider of getBalanceCapableProviders()) {
 			const desc = requireProviderDescriptor(provider);
 			const baseUrl = normalizeBaseUrl(getBaseUrl(provider));
 			const isOfficial = desc.officialHosts.includes(normalizeHostname(baseUrl));
@@ -99,7 +96,7 @@ export class BalanceCurrencyResolver {
 	}
 
 	private needsRefresh(): boolean {
-		for (const provider of BALANCE_PROVIDERS) {
+		for (const provider of getBalanceCapableProviders()) {
 			const desc = requireProviderDescriptor(provider);
 			const baseUrl = normalizeBaseUrl(getBaseUrl(provider));
 			if (!desc.officialHosts.includes(normalizeHostname(baseUrl))) {
@@ -114,7 +111,7 @@ export class BalanceCurrencyResolver {
 	}
 
 	private async refreshFromBalance(controller: AbortController, generation: number): Promise<void> {
-		for (const provider of BALANCE_PROVIDERS) {
+		for (const provider of getBalanceCapableProviders()) {
 			const desc = requireProviderDescriptor(provider);
 			const baseUrl = normalizeBaseUrl(getBaseUrl(provider));
 			if (!desc.officialHosts.includes(normalizeHostname(baseUrl))) {

@@ -173,6 +173,8 @@ Add any OpenAI-compatible model via `settings.json`:
 | `debugMode` | `minimal` | Diagnostic level |
 | `visionModel` | auto | Vision proxy model |
 | `visionPrompt` | built-in | Image description prompt |
+| `statusBar.balance` | `true` | Show live account balance in the status bar (DeepSeek; click to refresh) |
+| `statusBar.tokenSpeed` | `true` | Show live token generation speed (tokens/s) in the status bar while streaming |
 
 ## Compared to Alternatives
 

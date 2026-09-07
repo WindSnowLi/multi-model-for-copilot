@@ -136,6 +136,20 @@ export function requireProviderDescriptor(provider: Exclude<ApiProvider, 'custom
 }
 
 /**
+ * List the built-in providers that expose a balance / credit / quota endpoint.
+ *
+ * Driving this from the registry (instead of a hard-coded list in the balance
+ * service) means adding balance support for a new provider only requires:
+ *   1. setting `hasBalanceEndpoint: true` in its descriptor above, and
+ *   2. providing a `fetchBalance` implementation for its response shape.
+ */
+export function getBalanceCapableProviders(): ReadonlyArray<Exclude<ApiProvider, 'custom'>> {
+	return (Object.keys(PROVIDER_REGISTRY) as Exclude<ApiProvider, 'custom'>[]).filter(
+		(id) => PROVIDER_REGISTRY[id].hasBalanceEndpoint,
+	);
+}
+
+/**
  * Resolve the official hostname check for a base URL.
  * Returns `false` for 'custom' or unknown providers.
  */

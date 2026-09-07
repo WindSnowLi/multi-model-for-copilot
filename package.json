@@ -105,6 +105,10 @@
       {
         "command": "multi-model-for-copilot.openRequestDumpsFolder",
         "title": "%multi-model-for-copilot.command.openRequestDumpsFolder%"
+      },
+      {
+        "command": "multi-model-for-copilot.refreshBalance",
+        "title": "%multi-model-for-copilot.command.refreshBalance%"
       }
     ],
     "walkthroughs": [
@@ -307,6 +311,16 @@
             "%multi-model-for-copilot.config.debugMode.verbose.description%"
           ],
           "markdownDescription": "%multi-model-for-copilot.config.debugMode.description%"
+        },
+        "multi-model-for-copilot.statusBar.balance": {
+          "type": "boolean",
+          "default": true,
+          "description": "%multi-model-for-copilot.config.statusBar.balance.description%"
+        },
+        "multi-model-for-copilot.statusBar.tokenSpeed": {
+          "type": "boolean",
+          "default": true,
+          "description": "%multi-model-for-copilot.config.statusBar.tokenSpeed.description%"
         }
       }
     }

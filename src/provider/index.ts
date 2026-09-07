@@ -1,12 +1,14 @@
 import vscode from 'vscode';
 import { AuthManager } from '../auth';
-import { discoverModels, getBaseUrl, getCustomModels, getCustomModelSecretKey, getStabilizeToolListEnabled } from '../config';
+import { discoverModels, getBaseUrl, getCustomModels, getCustomModelSecretKey, getShowBalanceStatusBar, getShowTokenSpeedStatusBar, getStabilizeToolListEnabled } from '../config';
 import { CONFIG_SECTION, getAllModels, MODELS } from '../consts';
 import { t } from '../i18n';
 import { logger } from '../logger';
 import { getProviderDescriptor } from '../provider-registry';
+import { StatusBarController } from '../runtime/status-bar';
 import { createCacheDiagnosticsRecorder, dumpProviderInput } from './debug';
 import { toChatInfo } from './models';
+import { BalanceService } from './pricing/balance';
 import { BalanceCurrencyResolver } from './pricing/currency';
 import { prepareChatRequest } from './request';
 import { classifyProviderRequest } from './routing';
@@ -34,6 +36,8 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 	/** Vision proxy: internal bridge + VS Code LM fallback. */
 	private readonly vision: ReturnType<typeof createVisionService>;
 	private readonly balanceCurrencyResolver: BalanceCurrencyResolver;
+	private readonly balanceService: BalanceService;
+	private readonly statusBar: StatusBarController;
 
 	/**
 	 * Adaptive chars-per-token ratio, calibrated from actual usage data.
@@ -48,9 +52,20 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 		this.balanceCurrencyResolver = new BalanceCurrencyResolver(context, this.authManager, () =>
 			this.onDidChangeLanguageModelChatInformationEmitter.fire(),
 		);
+		this.balanceService = new BalanceService(this.authManager);
+		this.statusBar = new StatusBarController({
+			balanceService: this.balanceService,
+			getCharsPerToken: () => this.charsPerToken,
+			getShowBalance: getShowBalanceStatusBar,
+			getShowTokenSpeed: getShowTokenSpeedStatusBar,
+		});
+		this.balanceService.startPeriodicRefresh();
+		this.balanceService.refreshInBackground();
 
 		context.subscriptions.push(
 			this.onDidChangeLanguageModelChatInformationEmitter,
+			this.balanceService,
+			{ dispose: () => this.statusBar.dispose() },
 			// Settings-based fallback API key + base URL changes.
 			vscode.workspace.onDidChangeConfiguration((e) => {
 				if (
@@ -122,16 +137,28 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 		return this.authManager.hasApiKey();
 	}
 
+	/** Re-fetch the account balance shown in the status bar. */
+	refreshBalance(): void {
+		this.balanceService.refreshInBackground(true);
+	}
+
 	/** Force Copilot Chat to re-query model information (including configurationSchema). */
 	refreshModelPicker(): void {
 		this.onDidChangeLanguageModelChatInformationEmitter.fire();
 	}
 
 	private invalidateCurrencyAndRefreshModels(): void {
-		void this.balanceCurrencyResolver
-			.invalidate()
-			.catch((error) => logger.warn('Failed to invalidate balance currency', error))
-			.finally(() => this.onDidChangeLanguageModelChatInformationEmitter.fire());
+		void Promise.all([
+			this.balanceCurrencyResolver.invalidate().catch((error) =>
+				logger.warn('Failed to invalidate balance currency', error),
+			),
+			this.balanceService.invalidate().catch((error) =>
+				logger.warn('Failed to invalidate balance', error),
+			),
+		]).finally(() => {
+			this.balanceService.refreshInBackground(true);
+			this.onDidChangeLanguageModelChatInformationEmitter.fire();
+		});
 	}
 
 	async prepareForDeactivate(): Promise<void> {
@@ -435,6 +462,7 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 		const hasAnyKey = Object.values(keyAvailability).some(Boolean);
 		if (hasAnyKey) {
 			this.balanceCurrencyResolver.refreshInBackground();
+			this.balanceService.refreshInBackground();
 		}
 
 		const allModels = getAllModels(customConfigs);
@@ -503,6 +531,7 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 			setCharsPerToken: (charsPerToken) => {
 				this.charsPerToken = charsPerToken;
 			},
+			speedTracker: this.statusBar.createSpeedTracker(),
 		});
 	}
 

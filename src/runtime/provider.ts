@@ -34,6 +34,9 @@ export async function registerProvider(
 		vscode.commands.registerCommand('multi-model-for-copilot.discoverModels', () =>
 			provider.discoverAndAddModels(),
 		),
+		vscode.commands.registerCommand('multi-model-for-copilot.refreshBalance', () =>
+			provider.refreshBalance(),
+		),
 		vscode.lm.registerLanguageModelChatProvider('multi-model', provider),
 	);
 

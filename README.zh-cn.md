@@ -175,6 +175,8 @@ MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
 | `debugMode` | `minimal` | 诊断级别 |
 | `visionModel` | 自动 | 视觉代理模型 |
 | `visionPrompt` | 内置 | 图片描述提示词 |
+| `statusBar.balance` | `true` | 在状态栏实时显示账户余额（DeepSeek，点击可刷新） |
+| `statusBar.tokenSpeed` | `true` | 在流式生成时于状态栏实时显示 token 速度（tokens/秒） |
 
 ## 方案对比
 
