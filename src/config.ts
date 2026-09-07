@@ -141,6 +141,15 @@ export function getShowBalanceStatusBar(): boolean {
 }
 
 /**
+ * Whether to show the peak/off-peak pricing notice in the model picker for
+ * providers that expose period-aware rates (DeepSeek).
+ */
+export function getShowPricingNotice(): boolean {
+	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
+	return config.get<boolean>('showPricingNotice', true);
+}
+
+/**
  * Whether to show the live token generation speed in the status bar.
  */
 export function getShowTokenSpeedStatusBar(): boolean {

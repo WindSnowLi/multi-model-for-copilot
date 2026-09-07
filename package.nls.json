@@ -36,6 +36,7 @@
   "multi-model-for-copilot.config.debugMode.verbose.description": "⚠️ Contains sensitive prompt content. For local debugging only.",
   "multi-model-for-copilot.config.statusBar.balance.description": "Show the live account balance in the status bar. Click to refresh. Only applies to providers with a balance endpoint (DeepSeek).",
   "multi-model-for-copilot.config.statusBar.tokenSpeed.description": "Show the live token generation speed (tokens/second) in the status bar while a response is streaming.",
+  "multi-model-for-copilot.config.showPricingNotice.description": "Show the current peak/off-peak pricing notice in the model picker for providers with period-aware rates (DeepSeek). Off-peak prices are half of peak prices.",
   "multi-model-for-copilot.config.modelIdOverrides.description": "Override the API model ID sent for each model. Defaults are prefilled with official IDs; change them only when using a compatible third-party API that uses different model names.",
   "multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-flash.description": "API model ID for DeepSeek V4 Flash",
   "multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-pro.description": "API model ID for DeepSeek V4 Pro",

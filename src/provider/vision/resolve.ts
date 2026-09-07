@@ -5,28 +5,38 @@ import { isImageDataPart } from '../parts';
 import { parseFirstReplayMarker } from '../replay';
 import { createVisionProxyFailureNotice, createVisionProxyMissingNotice } from '../tools/notices';
 import {
-	formatVisionProxyErrorCode,
-	getVisionProxyErrorDisplayCode,
-	isVisionProxyError,
-} from './protocols/errors';
-import {
 	IMAGE_DESCRIPTION_PREFIX,
 	IMAGE_DESCRIPTION_SUFFIX,
 	IMAGE_DESCRIPTION_UNAVAILABLE,
 } from './consts';
+import { logVisionProxyDescribeFailed, logVisionProxyUnavailable } from './log';
+import {
+	formatVisionProxyErrorCode,
+	getVisionProxyErrorDisplayCode,
+	isVisionProxyError,
+} from './protocols/errors';
+import { getVisionPrompt } from './sources/vscode';
 import type {
 	VisionDescriber,
 	VisionImagePart,
 	VisionResolutionResult,
 	VisionResolutionStats,
 } from './types';
-import { getVisionPrompt } from './sources/vscode';
-import { logVisionProxyDescribeFailed, logVisionProxyUnavailable } from './log';
 
 interface CurrentVisionResolution {
 	text: string;
 	failureNotice?: string;
 }
+
+/**
+ * Per-session cache of tool-result image descriptions keyed by callId.
+ *
+ * Describing the same tool-result image bytes more than once wastes vision
+ * proxy tokens and can produce unstable text. This map stabilizes repeated
+ * descriptions within a session; persistence across reloads is handled by
+ * the assistant replay markers (see `parseFirstReplayMarker`).
+ */
+const toolVisionDescriptionCache = new Map<string, string>();
 
 /**
  * Resolve image parts without treating image bytes as persistent identity.
@@ -41,7 +51,8 @@ export async function resolveImageMessages(
 ): Promise<VisionResolutionResult> {
 	const stats = createVisionResolutionStats();
 	collectInputImageStats(messages, stats);
-	if (stats.inputImageParts === 0) {
+	const toolResultImageParts = countToolResultImageParts(messages);
+	if (stats.inputImageParts === 0 && toolResultImageParts === 0) {
 		return { messages, stats, replayMarkerMetadata: {} };
 	}
 
@@ -118,8 +129,13 @@ export async function resolveImageMessages(
 		result.push(createResolvedMessage(message, nonImageParts));
 	}
 
+	const resolvedMessages =
+		toolResultImageParts > 0
+			? await resolveToolResultImages(result, getDescriber, stats, token)
+			: result;
+
 	return {
-		messages: result,
+		messages: resolvedMessages,
 		stats,
 		replayMarkerMetadata: { visionText: markerVisionText },
 		visionModelId: visionDescriber?.id,
@@ -347,4 +363,118 @@ function toVisionImagePart(part: vscode.LanguageModelDataPart): VisionImagePart 
 		mimeType: part.mimeType,
 		data: part.data,
 	};
+}
+
+function countToolResultImageParts(
+	messages: readonly vscode.LanguageModelChatRequestMessage[],
+): number {
+	let count = 0;
+	for (const message of messages) {
+		for (const part of message.content as readonly unknown[]) {
+			if (part instanceof vscode.LanguageModelToolResultPart) {
+				count += getToolResultImageParts(part).length;
+			}
+		}
+	}
+	return count;
+}
+
+function isToolResultWithImage(part: unknown): part is vscode.LanguageModelToolResultPart {
+	return (
+		part instanceof vscode.LanguageModelToolResultPart &&
+		getToolResultImageParts(part).length > 0
+	);
+}
+
+function getToolResultImageParts(part: vscode.LanguageModelToolResultPart): vscode.LanguageModelDataPart[] {
+	return (part.content as readonly unknown[]).filter(isImageDataPart);
+}
+
+/**
+ * Describe images embedded in tool-result parts and replace them with text, so a
+ * text-only target model can still use tool-produced screenshots/figures.
+ */
+async function resolveToolResultImages(
+	messages: readonly vscode.LanguageModelChatRequestMessage[],
+	getDescriber: () => Promise<VisionDescriber | undefined>,
+	stats: VisionResolutionStats,
+	token: vscode.CancellationToken,
+): Promise<readonly vscode.LanguageModelChatRequestMessage[]> {
+	let visionDescriber: VisionDescriber | undefined;
+	let visionDescriberRequested = false;
+	let messagesChanged = false;
+	const resolvedMessages: vscode.LanguageModelChatRequestMessage[] = [];
+
+	for (const message of messages) {
+		if (message.role !== vscode.LanguageModelChatMessageRole.User) {
+			resolvedMessages.push(message);
+			continue;
+		}
+
+		let messageChanged = false;
+		const content: vscode.LanguageModelInputPart[] = [];
+		for (const part of message.content as readonly vscode.LanguageModelInputPart[]) {
+			if (!isToolResultWithImage(part)) {
+				content.push(part);
+				continue;
+			}
+
+			const imageParts = getToolResultImageParts(part);
+			const cached = toolVisionDescriptionCache.get(part.callId);
+			let description = cached;
+
+			if (description === undefined) {
+				if (!visionDescriberRequested) {
+					visionDescriberRequested = true;
+					visionDescriber = await getDescriber();
+				}
+				if (!visionDescriber || token.isCancellationRequested) {
+					content.push(part);
+					continue;
+				}
+				try {
+					const text = await visionDescriber.describe({
+						prompt: getVisionPrompt(),
+						images: imageParts.map(toVisionImagePart),
+						token,
+					});
+					description = text.length > 0 ? text : IMAGE_DESCRIPTION_UNAVAILABLE;
+				} catch (error) {
+					logVisionProxyDescribeFailed(error);
+					description = IMAGE_DESCRIPTION_UNAVAILABLE;
+					stats.failedImageMessages += 1;
+				}
+				toolVisionDescriptionCache.set(part.callId, description);
+			}
+
+			content.push(
+				new vscode.LanguageModelToolResultPart(
+					part.callId,
+					replaceToolResultImages(part, description),
+				),
+			);
+			messageChanged = true;
+			stats.droppedImageParts += imageParts.length;
+			stats.generatedImageMessages += 1;
+		}
+
+		if (messageChanged) {
+			messagesChanged = true;
+			resolvedMessages.push(createResolvedMessage(message, content));
+		} else {
+			resolvedMessages.push(message);
+		}
+	}
+
+	return messagesChanged ? resolvedMessages : messages;
+}
+
+function replaceToolResultImages(
+	part: vscode.LanguageModelToolResultPart,
+	description: string,
+): vscode.LanguageModelInputPart[] {
+	const wrapped = createImageDescriptionText(description);
+	return (part.content as readonly vscode.LanguageModelInputPart[]).map((item) =>
+		isImageDataPart(item) ? new vscode.LanguageModelTextPart(wrapped) : item,
+	);
 }

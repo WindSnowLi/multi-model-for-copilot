@@ -1,6 +1,6 @@
 import vscode from 'vscode';
 import { AuthManager } from '../auth';
-import { discoverModels, getBaseUrl, getCustomModels, getCustomModelSecretKey, getShowBalanceStatusBar, getShowTokenSpeedStatusBar, getStabilizeToolListEnabled } from '../config';
+import { discoverModels, getBaseUrl, getCustomModels, getCustomModelSecretKey, getShowBalanceStatusBar, getShowPricingNotice, getShowTokenSpeedStatusBar, getStabilizeToolListEnabled } from '../config';
 import { CONFIG_SECTION, getAllModels, MODELS } from '../consts';
 import { t } from '../i18n';
 import { logger } from '../logger';
@@ -10,6 +10,7 @@ import { createCacheDiagnosticsRecorder, dumpProviderInput } from './debug';
 import { toChatInfo } from './models';
 import { BalanceService } from './pricing/balance';
 import { BalanceCurrencyResolver } from './pricing/currency';
+import { PricingRefreshScheduler } from './pricing/schedule';
 import { prepareChatRequest } from './request';
 import { classifyProviderRequest } from './routing';
 import { resolveConversationSegment } from './segment';
@@ -38,6 +39,7 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 	private readonly balanceCurrencyResolver: BalanceCurrencyResolver;
 	private readonly balanceService: BalanceService;
 	private readonly statusBar: StatusBarController;
+	private readonly pricingRefreshScheduler: PricingRefreshScheduler;
 
 	/**
 	 * Adaptive chars-per-token ratio, calibrated from actual usage data.
@@ -61,10 +63,14 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 		});
 		this.balanceService.startPeriodicRefresh();
 		this.balanceService.refreshInBackground();
+		this.pricingRefreshScheduler = new PricingRefreshScheduler(() =>
+			this.onDidChangeLanguageModelChatInformationEmitter.fire(),
+		);
 
 		context.subscriptions.push(
 			this.onDidChangeLanguageModelChatInformationEmitter,
 			this.balanceService,
+			this.pricingRefreshScheduler,
 			{ dispose: () => this.statusBar.dispose() },
 			// Settings-based fallback API key + base URL changes.
 			vscode.workspace.onDidChangeConfiguration((e) => {
@@ -470,7 +476,7 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 			const hasKey = model.provider === 'custom'
 				? true // custom models always appear; missing key shown via detail
 				: keyAvailability[model.provider] ?? false;
-			return toChatInfo(model, hasKey, pricingCurrency);
+			return toChatInfo(model, hasKey, pricingCurrency, getShowPricingNotice());
 		});
 	}
 

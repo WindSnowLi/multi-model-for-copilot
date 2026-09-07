@@ -5,6 +5,8 @@
 ### Features
 
 * **statusbar:** add live token-generation speed (tokens/s) in the status bar while a response streams, and live account balance for DeepSeek (toggle via `multi-model-for-copilot.statusBar.tokenSpeed` / `statusBar.balance`)
+* **vision:** describe tool-result images through the vision proxy for non-native models, and forward them directly as `image_url` for native vision models
+* **pricing:** show DeepSeek peak/off-peak dynamic pricing in the model picker, auto-refreshing at each billing-period transition
 
 ## [0.7.0](https://github.com/WindSnowLi/multi-model-for-copilot/compare/v0.6.2...v0.7.0) (2026-07-20)
 

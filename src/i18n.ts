@@ -218,6 +218,18 @@ const zh: Translations = {
 	'vision.proxy.error.testFailed': '视觉代理测试失败。',
 	'vision.proxy.error.unknown': '未知错误',
 
+	// Model pricing
+	'model.pricing.currentPeak': '当前：高峰计费',
+	'model.pricing.currentOffPeak': '当前：低峰计费',
+	'model.pricing.unitSuffix': ' / 100 万 tokens',
+	'model.pricing.inputLabel': '输入',
+	'model.pricing.cacheHitInputLabel': '缓存命中输入',
+	'model.pricing.outputLabel': '输出',
+	'model.pricing.periodStarts': '{0} · {1} 开始',
+	'model.pricing.transitionTime.today': '今天 {0}',
+	'model.pricing.transitionTime.tomorrow': '明天 {0}',
+	'model.pricing.transitionTime.weekday': '{0} {1}',
+
 	// Status bar
 	'statusBar.balance.label': '$(credit-card) 余额：{0}',
 	'statusBar.balance.tooltip': '账户余额 · {0} · 点击刷新',
@@ -501,6 +513,18 @@ const en: Translations = {
 		'OpenAI-compatible vision response content has unsupported shape.',
 	'vision.proxy.error.testFailed': 'Vision proxy test failed.',
 	'vision.proxy.error.unknown': 'unknown',
+
+	// Model pricing
+	'model.pricing.currentPeak': 'Current: Peak pricing',
+	'model.pricing.currentOffPeak': 'Current: Off-peak pricing',
+	'model.pricing.unitSuffix': ' / 1M tokens',
+	'model.pricing.inputLabel': 'Input',
+	'model.pricing.cacheHitInputLabel': 'Cached input',
+	'model.pricing.outputLabel': 'Output',
+	'model.pricing.periodStarts': '{0} starts at {1}',
+	'model.pricing.transitionTime.today': 'Today at {0}',
+	'model.pricing.transitionTime.tomorrow': 'Tomorrow at {0}',
+	'model.pricing.transitionTime.weekday': '{0} at {1}',
 
 	// Status bar
 	'statusBar.balance.label': '$(credit-card) Balance: {0}',

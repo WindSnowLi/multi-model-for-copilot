@@ -22,7 +22,7 @@ export function convertMessages(
 		let content = '';
 		let thinkingContent = '';
 		const toolCalls: ChatToolCall[] = [];
-		const toolResults: Array<{ callId: string; content: string }> = [];
+		const toolResults: Array<{ callId: string; content: string; imageUrls?: string[] }> = [];
 		const imageUrls: string[] = [];
 
 		for (const part of message.content) {
@@ -43,6 +43,11 @@ export function convertMessages(
 				toolResults.push({
 					callId: part.callId,
 					content: collectToolResultText(part),
+					// Native vision models receive tool-result images directly as
+					// image_url content blocks instead of a proxy description.
+					imageUrls: supportsNativeVision
+						? collectToolResultImageUrls(part)
+						: undefined,
 				});
 			} else if (supportsNativeVision && isImageDataPart(part)) {
 				// Collect image data for native vision models
@@ -83,11 +88,15 @@ export function convertMessages(
 
 		// Tool result messages follow their associated assistant message
 		for (const tr of toolResults) {
-			result.push({
+			const toolMsg: ChatMessage = {
 				role: 'tool',
 				content: tr.content,
 				tool_call_id: tr.callId,
-			});
+			};
+			if (tr.imageUrls && tr.imageUrls.length > 0) {
+				toolMsg.imageUrls = tr.imageUrls;
+			}
+			result.push(toolMsg);
 		}
 	}
 
@@ -111,10 +120,11 @@ function normalizeThinkingPartText(value: string | string[]): string {
 /**
  * Extract the text payload of a tool result.
  *
- * Tool messages in OpenAI-compatible APIs carry a plain string, so nested image
- * data parts are deliberately excluded here — never serialize binary image
- * bytes into a request body. Images that the model must see are forwarded as
- * top-level user image parts instead.
+ * Tool messages in OpenAI-compatible APIs carry a plain string, so binary image
+ * bytes are never serialized directly here. Instead, image handling depends on
+ * the model route: native vision models forward tool-result images as
+ * `image_url` blocks (see {@link collectToolResultImageUrls}), while proxy
+ * models receive a text image description injected by the vision resolver.
  */
 function collectToolResultText(part: vscode.LanguageModelToolResultPart): string {
 	let toolContent = '';
@@ -136,6 +146,16 @@ function collectToolResultText(part: vscode.LanguageModelToolResultPart): string
 	// Fall back to a structural summary only when there is genuinely serializable
 	// (non-image) content to describe.
 	return serializableItems.length > 0 ? safeStringify(serializableItems) : '';
+}
+
+/**
+ * Collect image data parts embedded in a tool-result part as base64 data URLs
+ * so native vision models can receive them directly as `image_url` blocks.
+ */
+function collectToolResultImageUrls(part: vscode.LanguageModelToolResultPart): string[] {
+	return (part.content as readonly unknown[])
+		.filter(isImageDataPart)
+		.map(toImageDataUrl);
 }
 
 function mapRole(role: vscode.LanguageModelChatMessageRole): 'user' | 'assistant' {

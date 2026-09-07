@@ -100,10 +100,24 @@ export type PricingCurrency = 'USD' | 'CNY';
 
 export type PriceCategory = 'low' | 'medium' | 'high' | 'very_high';
 
+/** DeepSeek-style peak/off-peak billing period. */
+export type PricingPeriod = 'offPeak' | 'peak';
+
 export interface ModelPricing {
 	cacheHitInput: number;
 	cacheMissInput: number;
 	output: number;
+}
+
+/**
+ * Model pricing that differs by billing period. DeepSeek charges different
+ * rates during peak vs. off-peak hours (off-peak is half of peak).
+ */
+export interface ModelPricingSchedule {
+	/** Peak-period rates. */
+	readonly peak: ModelPricing;
+	/** Off-peak-period rates. */
+	readonly offPeak: ModelPricing;
 }
 
 export type ApiProvider = 'deepseek' | 'mimo' | 'qwen' | 'custom';
@@ -142,6 +156,8 @@ export interface ModelDefinition {
 	thinkingEfforts?: readonly ThinkingEffort[];
 	requiresThinkingParam: boolean;
 	pricing?: Readonly<Record<PricingCurrency, ModelPricing>>;
+	/** Period-aware pricing (peak/off-peak). When present it drives dynamic rate display. */
+	pricingSchedule?: Readonly<Record<PricingCurrency, ModelPricingSchedule>>;
 	priceCategory?: PriceCategory;
 }
 

@@ -177,6 +177,7 @@ MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
 | `visionPrompt` | 内置 | 图片描述提示词 |
 | `statusBar.balance` | `true` | 在状态栏实时显示账户余额（DeepSeek，点击可刷新） |
 | `statusBar.tokenSpeed` | `true` | 在流式生成时于状态栏实时显示 token 速度（tokens/秒） |
+| `showPricingNotice` | `true` | 在模型选择器中显示高峰/低峰计费提示（DeepSeek；低峰为高峰半价） |
 
 ## 方案对比
 

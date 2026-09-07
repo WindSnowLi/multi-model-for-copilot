@@ -36,6 +36,7 @@
   "multi-model-for-copilot.config.debugMode.verbose.description": "⚠️ 包含敏感的提示词内容，仅供本地调试。",
   "multi-model-for-copilot.config.statusBar.balance.description": "在状态栏中实时显示账户余额，点击可刷新。仅对提供余额接口的提供方（DeepSeek）生效。",
   "multi-model-for-copilot.config.statusBar.tokenSpeed.description": "在响应流式生成时，于状态栏实时显示 token 生成速度（tokens/秒）。",
+  "multi-model-for-copilot.config.showPricingNotice.description": "在模型选择器中显示当前高峰/低峰计费提示（针对 DeepSeek 等按时段计费的提供方）。低峰价格为高峰价格的一半。",
   "multi-model-for-copilot.config.modelIdOverrides.description": "覆盖各模型实际使用的 API 模型 ID，默认使用官方 ID，仅在对接不同模型名称的第三方 API 时需要修改。",
   "multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-flash.description": "DeepSeek V4 Flash 的 API 模型 ID。",
   "multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-pro.description": "DeepSeek V4 Pro 的 API 模型 ID。",

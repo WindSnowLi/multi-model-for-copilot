@@ -92,6 +92,16 @@ export const MODELS: ModelDefinition[] = [
 			USD: { cacheHitInput: 0.0028, cacheMissInput: 0.14, output: 0.28 },
 			CNY: { cacheHitInput: 0.02, cacheMissInput: 1, output: 2 },
 		},
+		pricingSchedule: {
+			USD: {
+				peak: { cacheHitInput: 0.014, cacheMissInput: 0.44, output: 1.32 },
+				offPeak: { cacheHitInput: 0.007, cacheMissInput: 0.22, output: 0.66 },
+			},
+			CNY: {
+				peak: { cacheHitInput: 0.02, cacheMissInput: 1, output: 2 },
+				offPeak: { cacheHitInput: 0.01, cacheMissInput: 0.5, output: 1 },
+			},
+		},
 		priceCategory: 'low',
 	},
 	{
@@ -114,6 +124,16 @@ export const MODELS: ModelDefinition[] = [
 		pricing: {
 			USD: { cacheHitInput: 0.003625, cacheMissInput: 0.435, output: 0.87 },
 			CNY: { cacheHitInput: 0.025, cacheMissInput: 3, output: 6 },
+		},
+		pricingSchedule: {
+			USD: {
+				peak: { cacheHitInput: 0.044, cacheMissInput: 1.32, output: 3.96 },
+				offPeak: { cacheHitInput: 0.022, cacheMissInput: 0.66, output: 1.98 },
+			},
+			CNY: {
+				peak: { cacheHitInput: 0.025, cacheMissInput: 3, output: 6 },
+				offPeak: { cacheHitInput: 0.0125, cacheMissInput: 1.5, output: 3 },
+			},
 		},
 		priceCategory: 'low',
 	},
@@ -138,6 +158,16 @@ export const MODELS: ModelDefinition[] = [
 		pricing: {
 			USD: { cacheHitInput: 0.0028, cacheMissInput: 0.14, output: 0.28 },
 			CNY: { cacheHitInput: 0.02, cacheMissInput: 1, output: 2 },
+		},
+		pricingSchedule: {
+			USD: {
+				peak: { cacheHitInput: 0.014, cacheMissInput: 0.44, output: 1.32 },
+				offPeak: { cacheHitInput: 0.007, cacheMissInput: 0.22, output: 0.66 },
+			},
+			CNY: {
+				peak: { cacheHitInput: 0.02, cacheMissInput: 1, output: 2 },
+				offPeak: { cacheHitInput: 0.01, cacheMissInput: 0.5, output: 1 },
+			},
 		},
 		priceCategory: 'low',
 	},

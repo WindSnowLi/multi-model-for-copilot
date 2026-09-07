@@ -34,6 +34,7 @@ export function toChatInfo(
 	m: ModelDefinition,
 	hasApiKey: boolean,
 	pricingCurrency?: PricingCurrency,
+	showPricingNotice = true,
 ): ModelPickerChatInformation {
 	const modelDetail = resolveModelText(m, 'detail') ?? m.detail;
 	const modelTooltip = resolveModelText(m, 'tooltip');
@@ -54,7 +55,7 @@ export function toChatInfo(
 			toolCalling: m.capabilities.toolCalling,
 			imageInput: m.capabilities.imageInput,
 		},
-		...toModelCostInfo(m, pricingCurrency),
+		...toModelCostInfo(m, pricingCurrency, new Date(), showPricingNotice),
 		...(m.capabilities.thinking
 			? { configurationSchema: buildThinkingEffortSchema(thinkingEfforts) }
 			: {}),

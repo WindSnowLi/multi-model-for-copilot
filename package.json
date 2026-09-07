@@ -321,6 +321,11 @@
           "type": "boolean",
           "default": true,
           "description": "%multi-model-for-copilot.config.statusBar.tokenSpeed.description%"
+        },
+        "multi-model-for-copilot.showPricingNotice": {
+          "type": "boolean",
+          "default": true,
+          "description": "%multi-model-for-copilot.config.showPricingNotice.description%"
         }
       }
     }
