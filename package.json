@@ -194,7 +194,7 @@
         "multi-model-for-copilot.modelIdOverrides": {
           "type": "object",
           "default": {
-            "deepseek-v4.1-flash": "deepseek-flash",
+            "deepseek-flash": "deepseek-flash",
             "deepseek-v4-pro": "deepseek-v4-pro",
             "mimo-v2.6-pro": "mimo-v2.6-pro",
             "mimo-v2.6-flash": "mimo-v2.6-flash",
@@ -209,9 +209,9 @@
           "description": "%multi-model-for-copilot.config.modelIdOverrides.description%",
           "additionalProperties": false,
           "properties": {
-            "deepseek-v4.1-flash": {
+            "deepseek-flash": {
               "type": "string",
-              "description": "%multi-model-for-copilot.config.modelIdOverrides.deepseek-v4.1-flash.description%"
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.deepseek-flash.description%"
             },
             "deepseek-v4-pro": {
               "type": "string",

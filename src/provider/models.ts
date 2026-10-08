@@ -138,7 +138,7 @@ function resolveModelText(m: ModelDefinition, field: 'detail' | 'tooltip'): stri
 }
 
 function extractModelSuffix(m: ModelDefinition): string {
-	// DeepSeek: deepseek-flash → flash, deepseek-v4.1-flash → flash, deepseek-v4-pro → pro
+	// DeepSeek: deepseek-flash → flash, deepseek-v4-pro → pro
 	const deepseek = /^deepseek-(?:v[\d.]+-)?(.+)$/u.exec(m.id);
 	if (deepseek) {
 		return deepseek[1];

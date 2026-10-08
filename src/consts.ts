@@ -26,10 +26,14 @@ export const DEEPSEEK_THINKING_EFFORTS: readonly ThinkingEffort[] = ['none', 'lo
 export const MIMO_THINKING_EFFORTS: readonly ThinkingEffort[] = ['none', 'low', 'high'];
 
 /**
- * DeepSeek V4.1 Flash: the current flagship, served under the `deepseek-flash`
- * model name, with native image input.
+ * DeepSeek V4.1 Flash: the current flagship, with native image input.
+ *
+ * The VS Code model ID stays `deepseek-flash` — the same ID the extension has
+ * always exposed and the same name the official API serves — so selections
+ * saved by Copilot Chat (`multi-model/deepseek-flash`) keep resolving after an
+ * update instead of silently dropping back to another model.
  */
-export const DEEPSEEK_FLASH_MODEL_ID = 'deepseek-v4.1-flash';
+export const DEEPSEEK_FLASH_MODEL_ID = 'deepseek-flash';
 
 export const EXTERNAL_URLS = {
 	deepseek: {
