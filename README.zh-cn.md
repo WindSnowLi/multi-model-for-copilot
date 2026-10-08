@@ -48,7 +48,7 @@ DeepSeek V4 Pro 是纯文本模型。将截图拖入聊天，本扩展会自动�
 </p>
 
 ### 思考模式与推理深度控制
-完整支持 DeepSeek V4 的 `reasoning_content`。通过 Copilot Chat 模型选择器的菜单选择思考档位：DeepSeek 提供 `停用`、`低`、`标准`（默认）、`深度`；MiMo 提供 `停用`、`低`、`标准`，因为 MiMo API 不接受 `reasoning_effort: max`；其他模型提供 `停用`、`标准`、`深度`。
+完整支持 DeepSeek 的 `reasoning_content`。通过 Copilot Chat 模型选择器的菜单选择思考档位：DeepSeek 提供 `停用`、`低`、`标准`（默认）、`深度`；MiMo 提供 `停用`、`低`、`标准`，因为 MiMo API 不接受 `reasoning_effort: max`；其他模型提供 `停用`、`标准`、`深度`。
 
 ### 继承全部 Copilot 能力
 由于本扩展接入的是 Copilot 的原生 provider API，你免费获得完整能力栈：
