@@ -114,6 +114,9 @@ The older `deepseek-v4-flash` and `deepseek-v4-flash-vision-exp` names are retir
 serves those requests from V4.1 Flash, so this extension no longer offers them as presets. If a
 third-party endpoint still exposes the old names, map them through `modelIdOverrides`.
 
+**DeepSeek V4 Pro** (`deepseek-v4-pro`) is the previous-generation model, which DeepSeek
+[decided to keep serving](https://api-docs.deepseek.com/updates) after the V4.1 Flash release.
+
 ## Custom Models
 
 Add any OpenAI-compatible model via `settings.json`:

@@ -1,4 +1,4 @@
-DeepSeek V4 for Copilot Chat 使用你自己的 DeepSeek API Key，让 Flash 和 Pro 模型出现在模型选择器中。
+本扩展使用你自己的 DeepSeek API Key，让 DeepSeek V4.1 Flash 与 DeepSeek V4 Pro 出现在 Copilot Chat 模型选择器中。
 
 只需粘贴一次，之后可通过命令面板更新或移除。
 

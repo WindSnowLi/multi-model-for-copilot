@@ -113,6 +113,8 @@ MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
 
 **DeepSeek V4.1 Flash** 为当前旗舰模型，请求使用的模型名为 `deepseek-flash`。旧的 `deepseek-v4-flash` 与 `deepseek-v4-flash-vision-exp` 名称已下线：官方 API 会用 V4.1 Flash 承接这些请求，因此本扩展不再提供这两个预设。若第三方端点仍暴露旧名称，可通过 `modelIdOverrides` 映射。
 
+**DeepSeek V4 Pro**（`deepseek-v4-pro`）为上一代模型，DeepSeek 在 V4.1 Flash 发布后[决定继续提供](https://api-docs.deepseek.com/updates)该模型的 API 服务。
+
 ## 自定义模型
 
 通过 `settings.json` 添加任意 OpenAI 兼容模型：
