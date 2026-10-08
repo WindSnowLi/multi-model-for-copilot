@@ -150,6 +150,13 @@ export function getBalanceCapableProviders(): ReadonlyArray<Exclude<ApiProvider,
 }
 
 /**
+ * List every built-in provider ID (excludes the user-defined 'custom' provider).
+ */
+export function getBuiltinProviderIds(): ReadonlyArray<Exclude<ApiProvider, 'custom'>> {
+	return Object.keys(PROVIDER_REGISTRY) as Exclude<ApiProvider, 'custom'>[];
+}
+
+/**
  * Resolve the official hostname check for a base URL.
  * Returns `false` for 'custom' or unknown providers.
  */

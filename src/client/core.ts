@@ -21,6 +21,7 @@ export class ApiClient {
 		private readonly apiKey: string,
 		private readonly provider: ApiProvider = 'deepseek',
 		private readonly customConfig?: CustomModelConfig,
+		private readonly requestHeaders?: Readonly<Record<string, string>>,
 	) {}
 
 	/**
@@ -60,6 +61,8 @@ export class ApiClient {
 			} else {
 				Object.assign(headers, buildAuthHeaders(this.provider, this.apiKey));
 			}
+
+			applyRequestHeaders(headers, this.requestHeaders);
 
 			const response = await fetch(`${this.baseUrl}/chat/completions`, {
 				method: 'POST',
@@ -196,6 +199,32 @@ export class ApiClient {
 		} finally {
 			cancelListener?.dispose();
 		}
+	}
+}
+
+/**
+ * Merge configured request headers into the built-in set.
+ *
+ * Header names are case-insensitive, so a configured value replaces any
+ * existing header with the same name regardless of casing, and the
+ * configured casing is what gets sent.
+ */
+function applyRequestHeaders(
+	headers: Record<string, string>,
+	configured: Readonly<Record<string, string>> | undefined,
+): void {
+	if (!configured) {
+		return;
+	}
+
+	for (const [name, value] of Object.entries(configured)) {
+		const normalizedName = name.toLowerCase();
+		for (const existing of Object.keys(headers)) {
+			if (existing.toLowerCase() === normalizedName) {
+				delete headers[existing];
+			}
+		}
+		headers[name] = value;
 	}
 }
 

@@ -8,10 +8,13 @@ export const DEFAULT_VISION_MODEL_ID = 'oswe-vscode-prime';
 export const MAX_TIMEOUT_MS = 2_147_483_647;
 
 /**
- * Prompt sent to the vision proxy model when describing image attachments
- * before forwarding them to text-only models.
+ * Fallback prompt sent to the vision proxy model when describing image
+ * attachments before forwarding them to text-only models.
  *
- * Keep in sync with `multi-model-for-copilot.visionPrompt.default` in package.json.
+ * The prompt shipped with the extension lives in
+ * `multi-model-for-copilot.visionPrompt` (package.json) and normally wins;
+ * this constant is only used when that contribution is unavailable, so it
+ * intentionally stays short.
  */
 export const IMAGE_DESCRIPTION_PROMPT =
 	'Describe all image attachments in this message.\n\n' +

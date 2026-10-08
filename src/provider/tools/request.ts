@@ -1,20 +1,14 @@
 import vscode from 'vscode';
-import { t } from '../../i18n';
 import type { ChatMessage, ChatTool } from '../../types';
 import { convertTools } from '../convert';
-import { DEFAULT_TOOLS_LIMIT } from './consts';
 
 export function prepareRequestTools(
 	toolCallingCapability: boolean | number | undefined,
 	options: vscode.ProvideLanguageModelChatResponseOptions,
 ): ChatTool[] | undefined {
-	const tools = toolCallingCapability ? convertTools(options.tools) : undefined;
-	const toolLimit = getToolCallingLimit(toolCallingCapability);
-	const toolsCount = tools?.length ?? 0;
-	if (toolsCount > toolLimit) {
-		throw new Error(t('request.toolsLimitExceeded', toolLimit, toolsCount));
-	}
-	return tools;
+	// A numeric capability only advertises the model's own tool limit to VS Code.
+	// The host trims the tool list, so the provider never rejects a request.
+	return toolCallingCapability ? convertTools(options.tools) : undefined;
 }
 
 export function collectTrailingToolResultIds(messages: readonly ChatMessage[]): string[] {
@@ -27,8 +21,4 @@ export function collectTrailingToolResultIds(messages: readonly ChatMessage[]): 
 		trailingToolResultIds.push(message.tool_call_id);
 	}
 	return trailingToolResultIds.reverse();
-}
-
-function getToolCallingLimit(toolCallingCapability: boolean | number | undefined): number {
-	return typeof toolCallingCapability === 'number' ? toolCallingCapability : DEFAULT_TOOLS_LIMIT;
 }

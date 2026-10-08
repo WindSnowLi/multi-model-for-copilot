@@ -135,6 +135,11 @@ export interface ModelDefinition {
 	maxInputTokens: number;
 	maxOutputTokens: number;
 	capabilities: {
+		/**
+		 * Tool calling support. `true` enables tools; a number additionally
+		 * advertises the model's own per-request tool limit to VS Code, which
+		 * trims the tool list before the request reaches this provider.
+		 */
 		toolCalling: boolean | number;
 		/**
 		 * Whether the model picker exposes image input for this model. When `true`

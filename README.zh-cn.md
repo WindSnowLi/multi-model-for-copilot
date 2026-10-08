@@ -34,14 +34,14 @@
 
 ## 功能特性
 
-### DeepSeek V4 Pro & Flash 出现在模型选择器中
-两个模型与 GPT-4o、Claude 等并列在 Copilot Chat 的模型选择器中。均支持 1M Token 上下文。可在对话中途切换模型，不丢失聊天历史。
+### DeepSeek V4.1 Flash 与 V4 Pro 出现在模型选择器中
+模型与 GPT-4o、Claude 等并列在 Copilot Chat 的模型选择器中，可在对话中途切换模型，不丢失聊天历史。
 
 ### 透明视觉代理
 
 DeepSeek V4 Flash/Pro 是纯文本模型。将截图拖入聊天，本扩展会自动将图片交给视觉代理模型（默认自动选择，或你配置的代理）进行描述，再将描述结果反馈给模型。**零配置**——只需在首次使用时配置一次视觉代理来源即可。
 
-新增的 **DeepSeek V4 Flash Vision Exp** 为官方原生视觉模型，图片会以 OpenAI `image_url` 格式直接发送，无需代理描述。
+**DeepSeek V4.1 Flash** 与 **DeepSeek V4 Flash Vision Exp** 为官方原生视觉模型，图片会以 OpenAI `image_url` 格式直接发送，无需代理描述。旧的 V4 Flash 入口在官方 API 上已由 V4.1 Flash 提供服务，选择器中会显示下线提示。
 
 <p align="center">
   <img src="resources/screenshots/03-vision.png" alt="将图片拖入 Copilot Chat，DeepSeek 通过视觉代理响应" width="800">
@@ -99,9 +99,10 @@ MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
 
 | 模型 | 提供商 | 上下文 | 最大输出 | 视觉 | 思考 | 工具 |
 |---|---|---|---|---|---|---|
-| **DeepSeek V4 Flash** | DeepSeek | 1M | 384K | 代理 | 支持 | 128 |
-| **DeepSeek V4 Pro** | DeepSeek | 1M | 384K | 代理 | 支持 | 128 |
-| **DeepSeek V4 Flash Vision Exp** | DeepSeek | 1M | 384K | 原生 | 支持 | 128 |
+| **DeepSeek V4.1 Flash** | DeepSeek | 640K | 384K | 原生 | 支持 | 支持 |
+| **DeepSeek V4 Flash** | DeepSeek | 1M | 384K | 代理 | 支持 | 支持 |
+| **DeepSeek V4 Pro** | DeepSeek | 1M | 384K | 代理 | 支持 | 支持 |
+| **DeepSeek V4 Flash Vision Exp** | DeepSeek | 1M | 384K | 原生 | 支持 | 支持 |
 | **MiMo V2.5** | 小米 MiMo | 1M | 128K | 原生 | 支持 | 支持 |
 | **MiMo V2.5 Pro** | 小米 MiMo | 1M | 128K | 不支持 | 支持 | 支持 |
 | **Qwen Max** | 千问 AI | 1M | 128K | 不支持 | 支持 | 支持 |
@@ -156,6 +157,7 @@ MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
 | `Multi-Model: 设置 MiMo API Key` | 设置 MiMo Key |
 | `Multi-Model: 清除 API Key` | 移除 DeepSeek Key |
 | `Multi-Model: 清除 MiMo API Key` | 移除 MiMo Key |
+| `Multi-Model: 重置 API 基础 URL` | 将服务商基础 URL 重置为默认值（可选择范围） |
 | `Multi-Model: 发现可用模型` | 自动发现模型 |
 | `Multi-Model: 添加自定义模型` | 手动添加 |
 | `Multi-Model: 移除自定义模型` | 移除自定义模型 |
@@ -169,6 +171,8 @@ MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
 |---|---|---|
 | `baseUrl` | `https://api.deepseek.com` | DeepSeek API 端点 |
 | `mimoBaseUrl` | `https://token-plan-cn.xiaomimimo.com/v1` | MiMo API 端点 |
+| `qwenBaseUrl` | `https://dashscope.aliyuncs.com/compatible-mode/v1` | 千问（DashScope）API 端点 |
+| `requestHeaders` | `{}` | 聊天补全请求的额外请求头，支持 `${conversationId}`（[文档](docs/settings/request-headers.zh.md)） |
 | `maxTokens` | `0` | 全局最大输出（0 = 不限制） |
 | `customModels` | `[]` | 自定义模型定义 |
 | `modelIdOverrides` | 官方 ID | 覆盖内置模型 ID |

@@ -6,14 +6,13 @@ import { getPricingPeriod, type PricingPeriod } from './schedule';
 /**
  * Cost metadata for the model picker.
  *
- * Models with a `pricingSchedule` expose period-aware rates through `infoText`
- * (VS Code 1.135+ forwards this; earlier hosts ignore it and degrade to a plain
- * model card). Models without a schedule keep the legacy formatted cost fields.
+ * All rates are rendered into `infoText`, which VS Code forwards from extension
+ * providers since 1.135; earlier supported hosts ignore it and degrade to a plain
+ * model card. Do not restore formatted currency strings as the
+ * `inputCost`/`outputCost`/`cacheCost` fields: the credit-based model picker
+ * accepts only numbers there and renders strings as `Unknown`.
  */
 export interface ModelCostInformation {
-	readonly inputCost?: string;
-	readonly outputCost?: string;
-	readonly cacheCost?: string;
 	readonly priceCategory?: PriceCategory;
 	readonly infoText?: Readonly<Record<string, string>>;
 }
@@ -24,27 +23,21 @@ export function toModelCostInfo(
 	now = new Date(),
 	showPricingNotice = true,
 ): ModelCostInformation {
-	if (!currency) {
+	if (!currency || !showPricingNotice) {
 		return {};
 	}
 
 	const schedule = model.pricingSchedule?.[currency];
 	if (!schedule) {
-		// Back-compat: static pricing rendered as formatted cost fields.
+		// Static per-model rates (providers without peak/off-peak billing).
 		const pricing = model.pricing?.[currency];
 		if (!pricing) {
 			return {};
 		}
 		return {
 			...(model.priceCategory ? { priceCategory: model.priceCategory } : {}),
-			inputCost: formatPriceValue(pricing.cacheMissInput, currency),
-			outputCost: formatPriceValue(pricing.output, currency),
-			cacheCost: formatPriceValue(pricing.cacheHitInput, currency),
+			infoText: { pricing: formatStaticPricingNotice(pricing, currency) },
 		};
-	}
-
-	if (!showPricingNotice) {
-		return {};
 	}
 
 	const period = getPricingPeriod(now);
@@ -63,6 +56,13 @@ export function toModelCostInfo(
 	};
 }
 
+function formatStaticPricingNotice(pricing: ModelPricing, currency: PricingCurrency): string {
+	return [
+		`**${t('model.pricing.ratesTitle')}**`,
+		formatPricingBlock(pricing, currency),
+	].join('\n');
+}
+
 function formatPricingNotice(
 	period: PricingPeriod,
 	pricing: ModelPricing,
@@ -77,17 +77,22 @@ function formatPricingNotice(
 	const nextPeriodLabel = t(
 		nextPeriod === 'peak' ? 'model.pricing.currentPeak' : 'model.pricing.currentOffPeak',
 	);
-	const unitSuffix = t('model.pricing.unitSuffix');
 	const transitionTime = formatTransitionTime(now, nextTransitionAt);
+	const transitionNotice = t('model.pricing.periodStarts', nextPeriodLabel, transitionTime);
+
+	return [`**${periodLabel}** · ${transitionNotice}`, formatPricingBlock(pricing, currency)].join(
+		'\n',
+	);
+}
+
+function formatPricingBlock(pricing: ModelPricing, currency: PricingCurrency): string {
+	const unitSuffix = t('model.pricing.unitSuffix');
 	const priceLines = [
 		`${t('model.pricing.inputLabel')}: ${formatPriceValue(pricing.cacheMissInput, currency)}${unitSuffix}`,
 		`${t('model.pricing.cacheHitInputLabel')}: ${formatPriceValue(pricing.cacheHitInput, currency)}${unitSuffix}`,
 		`${t('model.pricing.outputLabel')}: ${formatPriceValue(pricing.output, currency)}${unitSuffix}`,
 	].join('\n');
-	const priceBlock = ['```bash', priceLines, '```'].join('\n');
-	const transitionNotice = t('model.pricing.periodStarts', nextPeriodLabel, transitionTime);
-
-	return [`**${periodLabel}** · ${transitionNotice}`, priceBlock].join('\n');
+	return ['```bash', priceLines, '```'].join('\n');
 }
 
 function formatPriceValue(value: number, currency: PricingCurrency): string {

@@ -19,12 +19,18 @@ type Translations = Record<string, string>;
 
 const zh: Translations = {
 	// Model descriptions
+	'model.deepseek.v4.1-flash.detail': '原生图片理解与思考模式',
+	'model.deepseek.v4.1-flash.tooltip': 'DeepSeek V4.1 Flash，支持图片与文本输入、思考模式和工具调用。',
 	'model.deepseek.flash.detail': '快速高效',
 	'model.deepseek.pro.detail': '深度推理',
 	'model.deepseek.flash-vision-exp.detail': '实验性原生视觉模型',
 	'model.deepseek.flash.tooltip': '快速高效的 DeepSeek V4 模型，推理能力接近 V4 Pro，API 定价更经济。',
 	'model.deepseek.pro.tooltip': 'DeepSeek V4 模型，面向 Agent 编程、广泛世界知识和高阶推理任务。',
 	'model.deepseek.flash-vision-exp.tooltip': 'DeepSeek 实验性原生视觉模型，可直接理解图片内容（图片直发，不经代理描述）。',
+	'model.retirement.custom':
+		'**旧模型入口。**  \n请先确认服务商支持 DeepSeek V4.1 Flash。  \n选择“DeepSeek V4.1 Flash”以使用新模型。',
+	'model.retirement.flashRetired':
+		'**已下线。**  \n请求由 DeepSeek V4.1 Flash 提供服务，并按 Flash 价格计费。  \n选择“DeepSeek V4.1 Flash”以使用新模型。',
 
 	// MiMo model descriptions
 	'model.mimo.pro.detail': '旗舰推理模型，支持深度思考',
@@ -59,6 +65,9 @@ const zh: Translations = {
 	'auth.removed': 'API Key 已移除。',
 	'auth.notConfigured': 'API Key 未配置，请在命令面板运行 "Multi-Model: 设置 API Key"。',
 	'auth.notConfiguredForModel': '模型 "{0}" 的 API Key 未配置，请在命令面板运行 "Multi-Model: 设置 API Key"。',
+	'auth.clearConfirm': '确定要清除 {0} 的 API Key 吗？',
+	'auth.clearDetail': '删除后需要重新配置 API Key 才能继续使用该服务商的模型。',
+	'auth.clearAction': '清除',
 
 	// Custom Model
 	'customModel.prompt.id': '输入模型唯一标识（英文、数字、连字符）',
@@ -221,6 +230,7 @@ const zh: Translations = {
 	// Model pricing
 	'model.pricing.currentPeak': '当前：高峰计费',
 	'model.pricing.currentOffPeak': '当前：低峰计费',
+	'model.pricing.ratesTitle': '价格',
 	'model.pricing.unitSuffix': ' / 100 万 tokens',
 	'model.pricing.inputLabel': '输入',
 	'model.pricing.cacheHitInputLabel': '缓存命中输入',
@@ -237,8 +247,6 @@ const zh: Translations = {
 	'statusBar.tokenSpeed.tooltip': '生成速度：{0} tokens/秒',
 
 	// Request
-	'request.toolsLimitExceeded':
-		'当前模型单次 tools 请求最多支持 {0} 个 functions，当前请求包含 {1} 个。请先用 VS Code 的 Configure Tools 关闭不常用的工具；如果正在使用实验性稳定工具列表设置，请关闭它。',
 	'request.preflightRoundLimitExceeded':
 		'实验性稳定工具列表设置已尝试 {0} 轮，仍无法得到稳定的已启用工具列表。请关闭该实验性设置，或先用 VS Code 的 Configure Tools 关闭不常用的工具。',
 	'notice.visionProxyMissing': '⚠️ 视觉代理不可用，目标模型无法看到图片。[配置视觉代理]({0})',
@@ -281,9 +289,21 @@ const zh: Translations = {
 		'[{0}] 网络请求失败。请检查网络连接、防火墙或代理设置，以及自定义 baseUrl。',
 	'error.unknown': '模型请求失败：{0}',
 
+	// Settings
+	'settings.resetBaseUrl.title': '重置 API 基础 URL',
+	'settings.resetBaseUrl.chooseProvider': '选择要重置基础 URL 的服务商',
+	'settings.resetBaseUrl.chooseScope': '选择要重置的设置范围',
+	'settings.resetBaseUrl.user': '用户设置',
+	'settings.resetBaseUrl.workspace': '工作区设置',
+	'settings.resetBaseUrl.notConfigured': '未配置',
+	'settings.resetBaseUrl.current': '当前值：{0}',
+	'settings.resetBaseUrl.after': '重置后使用：{0}',
+	'settings.resetBaseUrl.afterInherited': '重置后继承远程用户设置中的值。',
+	'settings.resetBaseUrl.none': '当前没有自定义的 API 基础 URL。',
+	'settings.resetBaseUrl.failed': '重置 API 基础 URL 失败，请运行 "Multi-Model: 显示日志" 查看详情。',
+
 	// Extension
 	'extension.activateFailed': '扩展激活失败，请运行 "Multi-Model: 显示日志" 查看详情。',
-	'extension.deactivateFailed': '扩展停用异常',
 	'extension.welcomeFailed': '欢迎引导加载异常',
 	'extension.openRequestDumpsFolderFailed':
 		'打开请求 dump 目录失败，请运行 "Multi-Model: 显示日志" 查看详情。',
@@ -291,6 +311,13 @@ const zh: Translations = {
 
 const en: Translations = {
 	// Model descriptions
+	'model.deepseek.v4.1-flash.detail': 'Vision and thinking mode',
+	'model.deepseek.v4.1-flash.tooltip':
+		'DeepSeek V4.1 Flash with image and text input, thinking mode, and tool calling.',
+	'model.retirement.custom':
+		'**Legacy model entry.**  \nCheck that your provider supports DeepSeek V4.1 Flash.  \nSelect “DeepSeek V4.1 Flash” to use the new model.',
+	'model.retirement.flashRetired':
+		'**Retired.**  \nRequests are served by DeepSeek V4.1 Flash and billed at the Flash price.  \nSelect “DeepSeek V4.1 Flash” to use the new model.',
 	'model.deepseek.flash.detail': 'Fast, general-purpose model',
 	'model.deepseek.pro.detail': 'Most capable reasoning model',
 	'model.deepseek.flash-vision-exp.detail': 'Experimental native vision model',
@@ -341,6 +368,9 @@ const en: Translations = {
 		'API key not configured. Run "Multi-Model: Set API Key" from the Command Palette.',
 	'auth.notConfiguredForModel':
 		'API key for model "{0}" is not configured. Run "Multi-Model: Set API Key" from the Command Palette.',
+	'auth.clearConfirm': 'Clear the {0} API key?',
+	'auth.clearDetail': 'The provider stops working until a new API key is configured.',
+	'auth.clearAction': 'Clear',
 
 	// Custom Model
 	'customModel.prompt.id': 'Enter a unique model identifier (letters, numbers, hyphens)',
@@ -517,6 +547,7 @@ const en: Translations = {
 	// Model pricing
 	'model.pricing.currentPeak': 'Current: Peak pricing',
 	'model.pricing.currentOffPeak': 'Current: Off-peak pricing',
+	'model.pricing.ratesTitle': 'Pricing',
 	'model.pricing.unitSuffix': ' / 1M tokens',
 	'model.pricing.inputLabel': 'Input',
 	'model.pricing.cacheHitInputLabel': 'Cached input',
@@ -533,8 +564,6 @@ const en: Translations = {
 	'statusBar.tokenSpeed.tooltip': 'Generation speed: {0} tokens/s',
 
 	// Request
-	'request.toolsLimitExceeded':
-		'The current model supports at most {0} functions in a single `tools` request, but this request contains {1}. Use VS Code Configure Tools to disable tools you rarely use. If the experimental tool-list stabilization setting is enabled, turn it off.',
 	'request.preflightRoundLimitExceeded':
 		'Experimental tool-list stabilization tried {0} rounds but still could not get a stable enabled-tools list. Turn this experimental setting off, or use VS Code Configure Tools to disable tools you rarely use first.',
 	'notice.visionProxyMissing':
@@ -590,9 +619,22 @@ const en: Translations = {
 		'[{0}] Network request failed. Check your network connection, firewall, or proxy settings, and your custom baseUrl.',
 	'error.unknown': 'Model request failed: {0}',
 
+	// Settings
+	'settings.resetBaseUrl.title': 'Reset API Base URL',
+	'settings.resetBaseUrl.chooseProvider': 'Select the provider whose base URL should be reset',
+	'settings.resetBaseUrl.chooseScope': 'Select the settings scope to reset',
+	'settings.resetBaseUrl.user': 'User settings',
+	'settings.resetBaseUrl.workspace': 'Workspace settings',
+	'settings.resetBaseUrl.notConfigured': 'Not configured',
+	'settings.resetBaseUrl.current': 'Current: {0}',
+	'settings.resetBaseUrl.after': 'After reset: {0}',
+	'settings.resetBaseUrl.afterInherited': 'Inherits the remote user setting after reset.',
+	'settings.resetBaseUrl.none': 'No custom API base URL is configured.',
+	'settings.resetBaseUrl.failed':
+		'Failed to reset the API base URL. Run "Multi-Model: Show Logs" for details.',
+
 	// Extension
 	'extension.activateFailed': 'Extension failed to activate. Run "Multi-Model: Show Logs" for details.',
-	'extension.deactivateFailed': 'Failed to prepare provider for deactivate',
 	'extension.welcomeFailed': 'Failed to show welcome prompt',
 	'extension.openRequestDumpsFolderFailed':
 		'Failed to open request dumps folder. Run "Multi-Model: Show Logs" for details.',

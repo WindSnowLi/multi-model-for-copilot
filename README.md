@@ -32,7 +32,7 @@ This extension brings **multiple AI model providers** into GitHub Copilot Chat's
 
 | Provider | Models | Auth | API Key |
 |---|---|---|---|
-| **DeepSeek** | V4 Flash, V4 Pro, V4 Flash Vision Exp | `Authorization: Bearer` | `sk-...` |
+| **DeepSeek** | V4.1 Flash, V4 Pro, V4 Flash (legacy), V4 Flash Vision Exp (legacy) | `Authorization: Bearer` | `sk-...` |
 | **Xiaomi MiMo** | V2.5, V2.5 Pro | `api-key` header | `tp-...` (Token Plan) |
 | **Qwen (千问)** | Max, Plus, Turbo, VL Max, VL Plus, VL Turbo | `Authorization: Bearer` | `sk-...` |
 | **Custom** | Any OpenAI-compatible | Configurable | Any |
@@ -55,6 +55,7 @@ proxy (or DeepSeek Vision Exp in auto mode) and forward the description as text.
 
 | Model | Image Support | Method |
 |---|---|---|
+| **DeepSeek V4.1 Flash** | Native | Images sent directly via OpenAI `image_url` format |
 | **DeepSeek V4 Flash Vision Exp** | Native | Images sent directly via OpenAI `image_url` format |
 | **MiMo V2.5** | Native | Images sent directly via OpenAI `image_url` format |
 | **Qwen VL Max/Plus/Turbo** | Native | Images sent directly via OpenAI `image_url` format |
@@ -102,11 +103,16 @@ For custom models: `Multi-Model: Discover Available Models` → pick endpoint �
 
 | Model | Provider | Context | Max Output | Vision | Thinking | Tools |
 |---|---|---|---|---|---|---|
-| **DeepSeek V4 Flash** | DeepSeek | 1M | 384K | Proxy | Yes | 128 |
-| **DeepSeek V4 Pro** | DeepSeek | 1M | 384K | Proxy | Yes | 128 |
-| **DeepSeek V4 Flash Vision Exp** | DeepSeek | 1M | 384K | Native | Yes | 128 |
+| **DeepSeek V4.1 Flash** | DeepSeek | 640K | 384K | Native | Yes | Yes |
+| **DeepSeek V4 Flash** | DeepSeek | 1M | 384K | Proxy | Yes | Yes |
+| **DeepSeek V4 Pro** | DeepSeek | 1M | 384K | Proxy | Yes | Yes |
+| **DeepSeek V4 Flash Vision Exp** | DeepSeek | 1M | 384K | Native | Yes | Yes |
 | **MiMo V2.5** | Xiaomi MiMo | 1M | 128K | Native | Yes | Yes |
 | **MiMo V2.5 Pro** | Xiaomi MiMo | 1M | 128K | No | Yes | Yes |
+
+The DeepSeek V4 Flash entries are legacy names: on the official API they are served by
+DeepSeek V4.1 Flash and show a retirement notice in the model picker. Pick
+**DeepSeek V4.1 Flash** for the current model.
 
 ## Custom Models
 
@@ -154,6 +160,7 @@ Add any OpenAI-compatible model via `settings.json`:
 | `Multi-Model: Set MiMo API Key` | Set MiMo API key |
 | `Multi-Model: Clear API Key` | Remove DeepSeek key |
 | `Multi-Model: Clear MiMo API Key` | Remove MiMo key |
+| `Multi-Model: Reset API Base URL` | Reset a provider base URL to its default (choose scope) |
 | `Multi-Model: Discover Available Models` | Auto-discover from any provider |
 | `Multi-Model: Add Custom Model` | Manually add custom model |
 | `Multi-Model: Remove Custom Model` | Remove custom model |
@@ -167,6 +174,8 @@ Add any OpenAI-compatible model via `settings.json`:
 |---|---|---|
 | `baseUrl` | `https://api.deepseek.com` | DeepSeek API endpoint |
 | `mimoBaseUrl` | `https://token-plan-cn.xiaomimimo.com/v1` | MiMo API endpoint |
+| `qwenBaseUrl` | `https://dashscope.aliyuncs.com/compatible-mode/v1` | Qwen (DashScope) API endpoint |
+| `requestHeaders` | `{}` | Extra headers for chat completion requests; supports `${conversationId}` ([docs](docs/settings/request-headers.en.md)) |
 | `maxTokens` | `0` | Global max output tokens (0 = no limit) |
 | `customModels` | `[]` | Custom model definitions |
 | `modelIdOverrides` | official IDs | Override built-in model IDs |

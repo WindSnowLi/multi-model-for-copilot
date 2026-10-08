@@ -2,9 +2,11 @@ import vscode from 'vscode';
 import { AuthManager } from '../auth';
 import { discoverModels, getBaseUrl, getCustomModels, getCustomModelSecretKey, getShowBalanceStatusBar, getShowPricingNotice, getShowTokenSpeedStatusBar, getStabilizeToolListEnabled } from '../config';
 import { CONFIG_SECTION, getAllModels, MODELS } from '../consts';
+import { isOfficialProviderBaseUrl } from '../endpoint';
 import { t } from '../i18n';
 import { logger } from '../logger';
 import { getProviderDescriptor } from '../provider-registry';
+import type { ApiProvider } from '../types';
 import { StatusBarController } from '../runtime/status-bar';
 import { createCacheDiagnosticsRecorder, dumpProviderInput } from './debug';
 import { toChatInfo } from './models';
@@ -20,14 +22,14 @@ import { processToolFlow } from './tools/flow';
 import { createVisionService } from './vision';
 
 /**
- * DeepSeek Chat Provider — implements vscode.LanguageModelChatProvider so
- * Models appear directly in the Copilot Chat model picker.
+ * Multi-Model Chat Provider — implements vscode.LanguageModelChatProvider so
+ * models from every configured provider appear in the Copilot Chat model picker.
  */
 export class ChatProvider implements vscode.LanguageModelChatProvider {
 	private readonly authManager: AuthManager;
 	private readonly globalStorageUri: vscode.Uri;
+	private readonly storageUri: vscode.Uri | undefined;
 	private readonly onDidChangeLanguageModelChatInformationEmitter = new vscode.EventEmitter<void>();
-	private isActive = true;
 
 	readonly onDidChangeLanguageModelChatInformation =
 		this.onDidChangeLanguageModelChatInformationEmitter.event;
@@ -50,6 +52,7 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 	constructor(context: vscode.ExtensionContext) {
 		this.authManager = new AuthManager(context);
 		this.globalStorageUri = context.globalStorageUri;
+		this.storageUri = context.storageUri;
 		this.vision = createVisionService(context);
 		this.balanceCurrencyResolver = new BalanceCurrencyResolver(context, this.authManager, () =>
 			this.onDidChangeLanguageModelChatInformationEmitter.fire(),
@@ -115,12 +118,14 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 	}
 
 	async clearApiKey(): Promise<void> {
+		if (!(await this.confirmClearApiKey('deepseek'))) return;
 		await this.authManager.deleteApiKey();
 		this.invalidateCurrencyAndRefreshModels();
 		vscode.window.showInformationMessage(t('auth.removed'));
 	}
 
 	async clearMiMoApiKey(): Promise<void> {
+		if (!(await this.confirmClearApiKey('mimo'))) return;
 		await this.authManager.deleteApiKey('mimo');
 		this.invalidateCurrencyAndRefreshModels();
 		vscode.window.showInformationMessage(t('auth.removed'));
@@ -134,9 +139,21 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 	}
 
 	async clearQwenApiKey(): Promise<void> {
+		if (!(await this.confirmClearApiKey('qwen'))) return;
 		await this.authManager.deleteApiKey('qwen');
 		this.invalidateCurrencyAndRefreshModels();
 		vscode.window.showInformationMessage(t('auth.removed'));
+	}
+
+	private async confirmClearApiKey(provider: Exclude<ApiProvider, 'custom'>): Promise<boolean> {
+		const descriptor = getProviderDescriptor(provider);
+		const clearAction = t('auth.clearAction');
+		const selected = await vscode.window.showWarningMessage(
+			t('auth.clearConfirm', descriptor?.displayName ?? provider),
+			{ modal: true, detail: t('auth.clearDetail') },
+			clearAction,
+		);
+		return selected === clearAction;
 	}
 
 	async hasApiKey(): Promise<boolean> {
@@ -165,22 +182,6 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 			this.balanceService.refreshInBackground(true);
 			this.onDidChangeLanguageModelChatInformationEmitter.fire();
 		});
-	}
-
-	async prepareForDeactivate(): Promise<void> {
-		this.isActive = false;
-		this.onDidChangeLanguageModelChatInformationEmitter.fire();
-
-		// Force the host to re-pull `provideLanguageModelChatInformation` synchronously
-		// before the extension unloads. With `isActive = false` we now return [],
-		// which makes Copilot Chat drop models from the picker immediately
-		// instead of leaving stale entries behind after deactivate.
-		// This is best-effort — Canceled errors are expected during VS Code shutdown.
-		try {
-			await vscode.lm.selectChatModels({ vendor: 'deepseek' });
-		} catch {
-			// Silently ignore — VS Code may already be shutting down
-		}
 	}
 
 	async setVisionModel(): Promise<void> {
@@ -450,10 +451,6 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 		_options: vscode.PrepareLanguageModelChatModelOptions,
 		_token: vscode.CancellationToken,
 	): Promise<vscode.LanguageModelChatInformation[]> {
-		if (!this.isActive) {
-			return [];
-		}
-
 		const pricingCurrency = this.balanceCurrencyResolver.getDisplayCurrency();
 		const customConfigs = getCustomModels();
 
@@ -476,7 +473,14 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 			const hasKey = model.provider === 'custom'
 				? true // custom models always appear; missing key shown via detail
 				: keyAvailability[model.provider] ?? false;
-			return toChatInfo(model, hasKey, pricingCurrency, getShowPricingNotice());
+			// Retirement notices only make sense while the request goes to the
+			// provider's own endpoint: a custom base URL may still serve the
+			// original model.
+			const usesOfficialModel = isOfficialProviderBaseUrl(
+				getBaseUrl(model.provider),
+				model.provider,
+			);
+			return toChatInfo(model, hasKey, pricingCurrency, getShowPricingNotice(), usesOfficialModel);
 		});
 	}
 
@@ -516,6 +520,7 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 		const prepared = await prepareChatRequest({
 			authManager: this.authManager,
 			globalStorageUri: this.globalStorageUri,
+			storageUri: this.storageUri,
 			modelInfo,
 			segment,
 			messages: toolFlow.messages,

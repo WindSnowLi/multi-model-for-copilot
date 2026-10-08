@@ -1,16 +1,16 @@
 import vscode from 'vscode';
 import { AuthManager } from '../auth';
-import { ApiClient } from '../client';
+import { ApiClient, createApiKeyNotConfiguredError } from '../client';
 import {
 	getApiModelId,
 	getBaseUrl,
 	getCustomModels,
 	getCustomModelSecretKey,
 	getMaxTokens,
+	getRequestHeaders,
 } from '../config';
 import { getAllModels } from '../consts';
 import { isOfficialProviderBaseUrl } from '../endpoint';
-import { t } from '../i18n';
 import { getProviderDescriptor } from '../provider-registry';
 import type { ChatCompletionRequest } from '../types';
 import { convertMessages, countMessageChars } from './convert';
@@ -19,6 +19,7 @@ import {
 	type CacheDiagnosticsRecorder,
 	type CacheDiagnosticsRun,
 } from './debug';
+import { resolveRequestHeaders } from './headers';
 import {
 	getConfiguredThinkingEffort,
 	getModelThinkingEfforts,
@@ -53,6 +54,8 @@ export interface PreparedChatRequest {
 export interface PrepareChatRequestOptions {
 	authManager: AuthManager;
 	globalStorageUri: vscode.Uri;
+	/** Workspace-scoped storage URI, used to derive a stable conversation ID. */
+	storageUri?: vscode.Uri;
 	modelInfo: vscode.LanguageModelChatInformation;
 	segment: ConversationSegment;
 	messages: readonly vscode.LanguageModelChatRequestMessage[];
@@ -65,6 +68,7 @@ export interface PrepareChatRequestOptions {
 export async function prepareChatRequest({
 	authManager,
 	globalStorageUri,
+	storageUri,
 	modelInfo,
 	segment,
 	messages,
@@ -84,7 +88,7 @@ export async function prepareChatRequest({
 		? await authManager.getApiKeyForSecret(secretKey!)
 		: await authManager.getApiKey(modelDef?.provider);
 	if (!apiKey) {
-		throw new Error(t('auth.notConfiguredForModel', modelInfo.name || modelInfo.id));
+		throw createApiKeyNotConfiguredError(modelInfo.name || modelInfo.id);
 	}
 
 	// Custom models use their own baseUrl; built-in models use settings
@@ -92,7 +96,8 @@ export async function prepareChatRequest({
 		? customCfg.baseUrl.replace(/\/+$/u, '')
 		: getBaseUrl(modelDef?.provider);
 	const provider = customCfg ? 'deepseek' : (modelDef?.provider ?? 'deepseek'); // custom models use DeepSeek-style auth by default
-	const client = new ApiClient(baseUrl, apiKey, provider, customCfg);
+	const requestHeaders = resolveRequestHeaders(getRequestHeaders(), options, storageUri);
+	const client = new ApiClient(baseUrl, apiKey, provider, customCfg, requestHeaders);
 	const isThinkingModel = modelDef?.capabilities.thinking ?? false;
 	const nativeImageInput = modelDef?.capabilities.nativeImageInput === true;
 	const supportedThinkingEfforts = getModelThinkingEfforts(modelDef);
@@ -121,7 +126,14 @@ export async function prepareChatRequest({
 		messages: ChatMessages,
 		stream: true,
 		tools,
-		tool_choice: tools && tools.length > 0 ? ('auto' as const) : undefined,
+		// Respect the host's tool-selection mode: `Required` asks the model to call
+		// one of the provided tools instead of answering directly.
+		tool_choice:
+			tools && tools.length > 0
+				? options.toolMode === vscode.LanguageModelChatToolMode.Required
+					? ('required' as const)
+					: ('auto' as const)
+				: undefined,
 		// Some providers use OpenAI-style max_completion_tokens instead of max_tokens
 		...(useMaxCompletionTokens ? { max_completion_tokens: maxTokens } : { max_tokens: maxTokens }),
 	};

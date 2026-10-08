@@ -1,17 +1,18 @@
 import vscode from 'vscode';
-import { DEFAULT_THINKING_EFFORTS } from '../consts';
+import { DEFAULT_THINKING_EFFORTS, DEEPSEEK_V41_FLASH_MODEL_ID } from '../consts';
 import { t } from '../i18n';
 import type { ModelDefinition, PricingCurrency, ThinkingEffort } from '../types';
 import { toModelCostInfo, type ModelCostInformation } from './pricing/costs';
+import { getModelRetirementNotice } from './retirement';
 
 /**
  * NOTE: Non-public API surface.
  *
  * The fields below (`configurationSchema` on chat info, cost metadata,
- * `modelConfiguration` on response options, plus `isBYOK` / `isUserSelectable` /
- * `statusIcon`)
- * are not part of the stable `vscode.LanguageModelChat*` typings yet. They are
- * the same shape currently consumed by GitHub Copilot Chat to render model picker
+ * `warningText` / `infoText` model picker banners, `modelConfiguration` on
+ * response options, plus `isBYOK` / `isUserSelectable` / `statusIcon`) are not
+ * part of the stable `vscode.LanguageModelChat*` typings yet. They are the same
+ * shape currently consumed by GitHub Copilot Chat to render model picker
  * metadata and per-model configuration controls.
  */
 
@@ -27,18 +28,33 @@ export type ModelPickerChatInformation = vscode.LanguageModelChatInformation &
 		readonly isUserSelectable: boolean;
 		readonly isBYOK: true;
 		readonly statusIcon?: vscode.ThemeIcon;
+		/** Warning banner shown in the model picker hover (e.g. retirement notices). */
+		readonly warningText?: Readonly<Record<string, string>>;
+		readonly capabilities: vscode.LanguageModelChatCapabilities & {
+			/**
+			 * Request protocol used by this provider (1 = Chat Completions). Declared
+			 * through the proposed `languageModelCapabilities` API so the host knows
+			 * which reasoning blocks can be replayed.
+			 */
+			readonly apiType?: number;
+		};
 		readonly configurationSchema?: ThinkingEffortConfigurationSchema;
 	};
+
+/** Chat Completions protocol marker for `LanguageModelChatCapabilities.apiType`. */
+const CHAT_COMPLETIONS_API_TYPE = 1;
 
 export function toChatInfo(
 	m: ModelDefinition,
 	hasApiKey: boolean,
 	pricingCurrency?: PricingCurrency,
 	showPricingNotice = true,
+	usesOfficialModel = true,
 ): ModelPickerChatInformation {
 	const modelDetail = resolveModelText(m, 'detail') ?? m.detail;
 	const modelTooltip = resolveModelText(m, 'tooltip');
 	const thinkingEfforts = getModelThinkingEfforts(m);
+	const retirement = getModelRetirementNotice(m.id, usesOfficialModel);
 	return {
 		id: m.id,
 		name: m.name,
@@ -46,7 +62,8 @@ export function toChatInfo(
 		version: m.version,
 		detail: hasApiKey ? modelDetail : t('auth.apiKeyRequiredDetail'),
 		tooltip: hasApiKey ? modelTooltip : t('auth.apiKeyRequiredDetail'),
-		statusIcon: hasApiKey ? undefined : new vscode.ThemeIcon('warning'),
+		statusIcon: !hasApiKey || retirement ? new vscode.ThemeIcon('warning') : undefined,
+		...(retirement ? { warningText: { [retirement.code]: retirement.message } } : {}),
 		maxInputTokens: m.maxInputTokens,
 		maxOutputTokens: m.maxOutputTokens,
 		isBYOK: true,
@@ -54,6 +71,9 @@ export function toChatInfo(
 		capabilities: {
 			toolCalling: m.capabilities.toolCalling,
 			imageInput: m.capabilities.imageInput,
+			// Every built-in provider and custom model speaks the OpenAI-compatible
+			// Chat Completions protocol.
+			apiType: CHAT_COMPLETIONS_API_TYPE,
 		},
 		...toModelCostInfo(m, pricingCurrency, new Date(), showPricingNotice),
 		...(m.capabilities.thinking
@@ -124,6 +144,10 @@ function resolveModelText(m: ModelDefinition, field: 'detail' | 'tooltip'): stri
 }
 
 function extractModelSuffix(m: ModelDefinition): string {
+	// DeepSeek V4.1: deepseek-v4.1-flash → v4.1-flash (distinct from the legacy V4 Flash keys)
+	if (m.id === DEEPSEEK_V41_FLASH_MODEL_ID) {
+		return 'v4.1-flash';
+	}
 	// DeepSeek: deepseek-v4-flash → flash, deepseek-v4-pro → pro
 	if (m.id.startsWith('deepseek-v4-')) {
 		return m.id.slice('deepseek-v4-'.length);

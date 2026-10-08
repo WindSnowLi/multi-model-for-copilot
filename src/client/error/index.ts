@@ -158,6 +158,23 @@ export function createUserFacingError(error: Error, modelName?: string): Error {
 	return displayError;
 }
 
+/**
+ * Error shown when no API key is configured for the selected model.
+ *
+ * Reuses the chat error surface so the message links straight to the
+ * configuration command instead of only naming it.
+ */
+export function createApiKeyNotConfiguredError(modelName: string): Error {
+	const displayError = new Error(
+		formatMarkdownMessage(
+			t('auth.notConfiguredForModel', modelName),
+			getConfigureApiKeyActions(errorActionUrlStore.get()),
+		),
+	);
+	displayError.stack = undefined;
+	return displayError;
+}
+
 function getHttpErrorMessage(status: number, createApiKeyUrl?: string): string {
 	switch (status) {
 		case 400:
@@ -255,8 +272,12 @@ function getUniversalHttpErrorActions(
 	status: number,
 	actionUrls: ErrorActionUrls,
 ): readonly ErrorActionLink[] {
+	return status === 401 ? getConfigureApiKeyActions(actionUrls) : [];
+}
+
+function getConfigureApiKeyActions(actionUrls: ErrorActionUrls): readonly ErrorActionLink[] {
 	const url = actionUrls.configureApiKey;
-	return status === 401 && url ? [{ labelKey: 'error.action.setApiKey', url }] : [];
+	return url ? [{ labelKey: 'error.action.setApiKey', url }] : [];
 }
 
 function getProviderHttpErrorActions(status: number, baseUrl: string): readonly ErrorActionLink[] {

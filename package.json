@@ -1,7 +1,7 @@
 {
   "name": "multi-model-for-copilot",
   "displayName": "Multi-Model BYOK for Copilot Chat",
-  "description": "Pick DeepSeek V4, MiMo V2.5, and Qwen models from the Copilot Chat model picker. Vision, thinking mode, agent tools — zero config, BYOK.",
+  "description": "Pick DeepSeek V4.1, MiMo V2.5, and Qwen models from the Copilot Chat model picker. Vision, thinking mode, agent tools — zero config, BYOK.",
   "icon": "resources/icon.png",
   "version": "0.7.0",
   "publisher": "WindSnowLi",
@@ -79,6 +79,10 @@
         "title": "%multi-model-for-copilot.command.clearQwenApiKey%"
       },
       {
+        "command": "multi-model-for-copilot.resetBaseUrl",
+        "title": "%multi-model-for-copilot.command.resetBaseUrl%"
+      },
+      {
         "command": "multi-model-for-copilot.addCustomModel",
         "title": "%multi-model-for-copilot.command.addCustomModel%"
       },
@@ -153,12 +157,25 @@
         "multi-model-for-copilot.baseUrl": {
           "type": "string",
           "default": "https://api.deepseek.com",
-          "description": "%multi-model-for-copilot.config.baseUrl.description%"
+          "markdownDescription": "%multi-model-for-copilot.config.baseUrl.description%"
         },
         "multi-model-for-copilot.mimoBaseUrl": {
           "type": "string",
           "default": "https://token-plan-cn.xiaomimimo.com/v1",
-          "description": "%multi-model-for-copilot.config.mimoBaseUrl.description%"
+          "markdownDescription": "%multi-model-for-copilot.config.mimoBaseUrl.description%"
+        },
+        "multi-model-for-copilot.qwenBaseUrl": {
+          "type": "string",
+          "default": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+          "markdownDescription": "%multi-model-for-copilot.config.qwenBaseUrl.description%"
+        },
+        "multi-model-for-copilot.requestHeaders": {
+          "type": "object",
+          "default": {},
+          "additionalProperties": {
+            "type": "string"
+          },
+          "markdownDescription": "%multi-model-for-copilot.config.requestHeaders.description%"
         },
         "multi-model-for-copilot.maxTokens": {
           "type": "number",
@@ -177,14 +194,26 @@
         "multi-model-for-copilot.modelIdOverrides": {
           "type": "object",
           "default": {
+            "deepseek-v4.1-flash": "deepseek-flash",
             "deepseek-v4-flash": "deepseek-v4-flash",
             "deepseek-v4-pro": "deepseek-v4-pro",
+            "deepseek-v4-flash-vision-exp": "deepseek-v4-flash-vision-exp",
             "mimo-v2.5-pro": "mimo-v2.5-pro",
-            "mimo-v2.5": "mimo-v2.5"
+            "mimo-v2.5": "mimo-v2.5",
+            "qwen-max": "qwen-max",
+            "qwen-plus": "qwen-plus",
+            "qwen-turbo": "qwen-turbo",
+            "qwen-vl-max": "qwen-vl-max",
+            "qwen-vl-plus": "qwen-vl-plus",
+            "qwen-vl-turbo": "qwen-vl-turbo"
           },
           "description": "%multi-model-for-copilot.config.modelIdOverrides.description%",
           "additionalProperties": false,
           "properties": {
+            "deepseek-v4.1-flash": {
+              "type": "string",
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.deepseek-v4.1-flash.description%"
+            },
             "deepseek-v4-flash": {
               "type": "string",
               "description": "%multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-flash.description%"
@@ -193,6 +222,10 @@
               "type": "string",
               "description": "%multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-pro.description%"
             },
+            "deepseek-v4-flash-vision-exp": {
+              "type": "string",
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-flash-vision-exp.description%"
+            },
             "mimo-v2.5-pro": {
               "type": "string",
               "description": "%multi-model-for-copilot.config.modelIdOverrides.mimo-v2.5-pro.description%"
@@ -200,6 +233,30 @@
             "mimo-v2.5": {
               "type": "string",
               "description": "%multi-model-for-copilot.config.modelIdOverrides.mimo-v2.5.description%"
+            },
+            "qwen-max": {
+              "type": "string",
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.qwen-max.description%"
+            },
+            "qwen-plus": {
+              "type": "string",
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.qwen-plus.description%"
+            },
+            "qwen-turbo": {
+              "type": "string",
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.qwen-turbo.description%"
+            },
+            "qwen-vl-max": {
+              "type": "string",
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.qwen-vl-max.description%"
+            },
+            "qwen-vl-plus": {
+              "type": "string",
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.qwen-vl-plus.description%"
+            },
+            "qwen-vl-turbo": {
+              "type": "string",
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.qwen-vl-turbo.description%"
             }
           }
         },
@@ -289,7 +346,7 @@
         "multi-model-for-copilot.visionPrompt": {
           "type": "string",
           "editPresentation": "multilineText",
-          "default": "Describe all image attachments in this message.\n\nIf there is one image, describe it directly.\nIf there are multiple images:\n1. Describe each image separately, preserving their order.\n2. Then provide a combined description explaining the overall context and relationships across the images.\n\nReturn one concise factual description suitable for inserting into a text-only chat prompt. Include visible text, objects, UI elements, people, and relevant context. Do not invent details.",
+          "default": "Text extraction is mandatory. Visual description required except T2.5. See OUTPUT FORMAT.\n\n---\n\nTASK 1 - TEXT EXTRACTION (always):\n\n1. Transcribe every detectable character verbatim - all text, symbols, and glyphs of any kind, in any location. Never correct, alter, summarize, paraphrase, or truncate the source.\n\n2. Preserve formatting and spatial grouping:\n   - Monospaced → code block (hint if known). Triple backticks in source → 4-backtick fence.\n   - Proportional → plain text, paragraph breaks.\n   - Tabular → Markdown table.\n   - Ambiguous → code block.\n\n3. Annotate spatial position:\n   - Isolated elements: label + colon.\n   - Multi-region: `[Region: name]` headers (avoids T1.4 collision).\n     [Region: name]\n     (content)\n\n4. Uncertainty markers (place at position):\n   [?] = uncertain char.\n   [unclear] = uncertain span.\n   [possible-artifact] = may not be text.\n   [unreadable] = illegible.\n   [truncated] = cut off at edge (place after last readable char).\n   Never guess or fabricate. If source contains a marker literally, backslash-escape it.\n\n5. Low-quality image: place after `--- Extracted Text ---`, before code block or transcription:\n   (Low image quality - confidence reduced.)\n\n6. No text: output \"No text detected.\" No code block, no other text.\n\n---\n\nTASK 2 - VISUAL DESCRIPTION (unless T2.5):\n\n1. Describe all non-text visual content.\n\n2. Text-heavy: describe application, window chrome, UI state, and color coding.\n\n3. Visual-primary: describe concisely but fully. Note color coding. Do not invent.\n\n4. Diagrams: describe structure - what labels represent, how elements connect. Diagram should be understandable from both sections.\n\n5. Omit Visual Context only for tightly cropped text. If any visual element beyond text is visible, include.\n\n---\n\nMULTIPLE IMAGES:\n\n- Label \"Image 1:\", \"Image 2:\", etc. Single image: skip label.\n- Combined summary only if images are related. If unsure, skip.\n\n---\n\nOUTPUT FORMAT:\n\nSingle image:\n--- Extracted Text ---\n[transcription]\n--- Visual Context ---\n[description]\n\nIf Visual Context omitted (T2.5), drop it.\n\nMultiple images (repeat for each):\nImage 1:\n--- Extracted Text ---\n[transcription]\n--- Visual Context ---\n[description]\n\n--- Combined Summary ---\n[summary - if applicable]\n\n---\n\nSPECIAL CASES:\n\n- Handwriting: best-effort; prepend \"(Handwriting - lower confidence.)\".\n- RTL: preserve direction; note in Visual Context.\n- Overlapping layers: extract all; flag [Foreground:] / [Background:].\n- Color: describe scheme in Visual Context only. Never encode in Extracted Text.\n- Image-in-image: treat as flat; note nesting in Visual Context.\n- Long lines: transcribe fully, no wrap; note overflow in Visual Context.\n\n---\n\nESCAPING - if source text contains a line exactly matching any format marker, backslash-escape it:\n\n- \\--- Extracted Text ---\n- \\--- Visual Context ---\n- \\--- Combined Summary ---\n- \\Image N: (standalone line immediately before a `---` marker)\n\nIf source contains any T1.4 marker literally, backslash-escape it.",
           "markdownDescription": "%multi-model-for-copilot.config.visionPrompt.description%"
         },
         "multi-model-for-copilot.debugMode": {

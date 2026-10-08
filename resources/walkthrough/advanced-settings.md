@@ -5,8 +5,7 @@ First, open VS Code's Tools configuration and check how many tools are enabled f
 [Configure Tools](command:workbench.action.chat.configureTools)
 
 - 64 or fewer enabled tools: there is usually no need to turn this on unless the tool list still changes across turns.
-- More than 128 enabled tools: not recommended. DeepSeek supports at most 128 functions in one `tools` request, so DeepSeek Copilot cannot guarantee a stable `tools` list above that limit. Disable rarely used tools first, then consider enabling this setting.
-- Between 64 and 128 enabled tools: consider this setting only if the tools list changes between turns and DeepSeek context-cache hits are poor.
+- Many enabled tools: disable the ones you rarely use first. Every enabled tool adds function definitions to each request, so the tool list is more likely to change across turns.
 
 This setting may improve cache hits by making the DeepSeek API `tools` parameter more complete and stable across turns. It may also increase input tokens because more function definitions can be included in each request.
 

@@ -1,10 +1,8 @@
 # Unstable Tools List
 
-DeepSeek V4 for Copilot Chat detected that the Tools list in the current chat may be unstable across turns.
+Multi-Model for Copilot Chat detected that the Tools list in the current chat may be unstable across turns.
 
 ## Why This Happens
-
-The DeepSeek Chat Completions API supports at most **128 tools** in one request. VS Code's Language Model API also lets a model declare the maximum number of tools it can receive per request.
 
 When the experimental `multi-model-for-copilot.experimental.stabilizeToolList` setting is enabled, the extension tries to pre-activate VS Code/Copilot `activate_*` virtual tools before sending the request, so the DeepSeek API `tools` parameter is more complete and stable across turns.
 
@@ -14,7 +12,7 @@ If too many tools are available in the current environment, Copilot may trim, gr
 
 DeepSeek uses a context KVCache for the input prefix. The Tools array is part of the request input; if it changes, the cache may not hit.
 
-With this experimental setting enabled, each request may include more function definitions (names, descriptions, and JSON schemas), so **input tokens** can increase. Cache-hit input tokens are billed at a lower price but still count toward usage. It is usually unnecessary with fewer than **64 enabled tools**. Do not enable it with more than **128 enabled tools**, because DeepSeek supports at most **128 functions** in one `tools` request.
+With this experimental setting enabled, each request may include more function definitions (names, descriptions, and JSON schemas), so **input tokens** can increase. Cache-hit input tokens are billed at a lower price but still count toward usage. It is usually unnecessary with fewer than **64 enabled tools**.
 
 ## What You Can Do
 

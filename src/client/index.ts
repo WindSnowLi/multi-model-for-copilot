@@ -1,5 +1,6 @@
 export { ApiClient } from './core';
 export {
+	createApiKeyNotConfiguredError,
 	createHttpError,
 	createUserFacingError,
 	ApiRequestError,

@@ -18,6 +18,15 @@ export function getBaseUrl(provider?: ApiProvider): string {
 }
 
 /**
+ * Get custom request headers to merge into every chat completion request.
+ * Values may contain `${name}` placeholders resolved per provider call.
+ */
+export function getRequestHeaders(): Record<string, string> {
+	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
+	return config.get<Record<string, string>>('requestHeaders', {});
+}
+
+/**
  * Resolve the API model ID to send to the endpoint.
  *
  * Users can override model IDs via the `modelIdOverrides` setting object
