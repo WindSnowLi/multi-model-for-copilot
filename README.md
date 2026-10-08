@@ -32,7 +32,7 @@ This extension brings **multiple AI model providers** into GitHub Copilot Chat's
 
 | Provider | Models | Auth | API Key |
 |---|---|---|---|
-| **DeepSeek** | V4.1 Flash, V4 Pro, V4 Flash (legacy), V4 Flash Vision Exp (legacy) | `Authorization: Bearer` | `sk-...` |
+| **DeepSeek** | V4.1 Flash, V4 Pro | `Authorization: Bearer` | `sk-...` |
 | **Xiaomi MiMo** | V2.6 Pro, V2.6 Flash, V2.6 Pro Ultraspeed | `api-key` header | `tp-...` (Token Plan) |
 | **Qwen (千问)** | Max, Plus, Turbo, VL Max, VL Plus, VL Turbo | `Authorization: Bearer` | `sk-...` |
 | **Custom** | Any OpenAI-compatible | Configurable | Any |
@@ -51,15 +51,14 @@ Run **`Multi-Model: Discover Available Models`** to auto-detect available models
 
 Images are routed per model capability — models that accept image input natively forward them
 as OpenAI `image_url` blocks; models that don't describe them through the configurable vision
-proxy (or DeepSeek Vision Exp in auto mode) and forward the description as text.
+proxy and forward the description as text.
 
 | Model | Image Support | Method |
 |---|---|---|
 | **DeepSeek V4.1 Flash** | Native | Images sent directly via OpenAI `image_url` format |
-| **DeepSeek V4 Flash Vision Exp** | Native | Images sent directly via OpenAI `image_url` format |
 | **MiMo V2.6 Pro / Flash / Pro Ultraspeed** | Native | Images sent directly via OpenAI `image_url` format |
 | **Qwen VL Max/Plus/Turbo** | Native | Images sent directly via OpenAI `image_url` format |
-| **DeepSeek V4 Flash/Pro** | Proxy | Images described by another model, text sent to DeepSeek |
+| **DeepSeek V4 Pro** | Proxy | Images described by another model, text sent to DeepSeek |
 | **Custom models** | Configurable | Set `imageInput: true` for native support |
 
 Supports JPEG, PNG, GIF, WebP, BMP (up to 50MB per image). Multi-image input supported.
@@ -104,17 +103,16 @@ For custom models: `Multi-Model: Discover Available Models` → pick endpoint �
 
 | Model | Provider | Context | Max Output | Vision | Thinking | Tools |
 |---|---|---|---|---|---|---|
-| **DeepSeek V4.1 Flash** | DeepSeek | 640K | 384K | Native | Yes | Yes |
-| **DeepSeek V4 Flash** | DeepSeek | 1M | 384K | Proxy | Yes | Yes |
+| **DeepSeek V4.1 Flash** | DeepSeek | 1M | 384K | Native | Yes | Yes |
 | **DeepSeek V4 Pro** | DeepSeek | 1M | 384K | Proxy | Yes | Yes |
-| **DeepSeek V4 Flash Vision Exp** | DeepSeek | 1M | 384K | Native | Yes | Yes |
 | **MiMo V2.6 Pro** | Xiaomi MiMo | 1M | 128K | Native | Yes | Yes |
 | **MiMo V2.6 Flash** | Xiaomi MiMo | 1M | 128K | Native | Yes | Yes |
 | **MiMo V2.6 Pro Ultraspeed** | Xiaomi MiMo | 1M | 128K | Native | Yes | Yes |
 
-The DeepSeek V4 Flash entries are legacy names: on the official API they are served by
-DeepSeek V4.1 Flash and show a retirement notice in the model picker. Pick
-**DeepSeek V4.1 Flash** for the current model.
+**DeepSeek V4.1 Flash** is the current flagship and is sent to the `deepseek-flash` model name.
+The older `deepseek-v4-flash` and `deepseek-v4-flash-vision-exp` names are retired: DeepSeek
+serves those requests from V4.1 Flash, so this extension no longer offers them as presets. If a
+third-party endpoint still exposes the old names, map them through `modelIdOverrides`.
 
 ## Custom Models
 

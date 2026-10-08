@@ -25,11 +25,11 @@ export const DEEPSEEK_THINKING_EFFORTS: readonly ThinkingEffort[] = ['none', 'lo
  */
 export const MIMO_THINKING_EFFORTS: readonly ThinkingEffort[] = ['none', 'low', 'high'];
 
-/** DeepSeek native vision model ID (experimental, accepts image_url input). */
-export const DEEPSEEK_VISION_EXP_MODEL_ID = 'deepseek-v4-flash-vision-exp';
-
-/** DeepSeek V4.1 Flash: the current flagship, with native image input. */
-export const DEEPSEEK_V41_FLASH_MODEL_ID = 'deepseek-v4.1-flash';
+/**
+ * DeepSeek V4.1 Flash: the current flagship, served under the `deepseek-flash`
+ * model name, with native image input.
+ */
+export const DEEPSEEK_FLASH_MODEL_ID = 'deepseek-v4.1-flash';
 
 export const EXTERNAL_URLS = {
 	deepseek: {
@@ -78,14 +78,19 @@ export const WALKTHROUGH_ID = 'Vizards.multi-model-for-copilot#gettingStarted';
 
 /** Available models exposed through the language model provider. */
 export const MODELS: ModelDefinition[] = [
+	// DeepSeek's current lineup. V4.1 Flash is natively multimodal and accepts
+	// image_url input; V4 Pro does not accept images, so its images are described
+	// by the vision proxy. The retired `deepseek-v4-flash` and
+	// `deepseek-v4-flash-vision-exp` names are no longer offered as presets —
+	// DeepSeek serves those requests from V4.1 Flash.
 	{
-		id: DEEPSEEK_V41_FLASH_MODEL_ID,
+		id: DEEPSEEK_FLASH_MODEL_ID,
 		name: 'DeepSeek V4.1 Flash',
 		provider: 'deepseek',
 		family: 'deepseek',
 		version: 'v4.1',
 		detail: 'Vision and thinking mode',
-		maxInputTokens: 655360,
+		maxInputTokens: 1048576,
 		maxOutputTokens: 393216,
 		capabilities: {
 			toolCalling: true,
@@ -104,41 +109,6 @@ export const MODELS: ModelDefinition[] = [
 			CNY: {
 				peak: { cacheHitInput: 0.04, cacheMissInput: 2, output: 8 },
 				offPeak: { cacheHitInput: 0.02, cacheMissInput: 1, output: 4 },
-			},
-		},
-		priceCategory: 'low',
-	},
-	{
-		id: 'deepseek-v4-flash',
-		name: 'DeepSeek V4 Flash',
-		provider: 'deepseek',
-		family: 'deepseek',
-		version: 'v4',
-		detail: 'Fast, general-purpose model',
-		maxInputTokens: 1048576,
-		maxOutputTokens: 393216,
-		capabilities: {
-			toolCalling: true,
-			imageInput: true,
-			// Flash does not accept image_url input natively; images are described
-			// by the vision proxy before the request is sent to the model.
-			nativeImageInput: false,
-			thinking: true,
-		},
-		thinkingEfforts: DEEPSEEK_THINKING_EFFORTS,
-		requiresThinkingParam: true,
-		pricing: {
-			USD: { cacheHitInput: 0.0028, cacheMissInput: 0.14, output: 0.28 },
-			CNY: { cacheHitInput: 0.02, cacheMissInput: 1, output: 2 },
-		},
-		pricingSchedule: {
-			USD: {
-				peak: { cacheHitInput: 0.014, cacheMissInput: 0.44, output: 1.32 },
-				offPeak: { cacheHitInput: 0.007, cacheMissInput: 0.22, output: 0.66 },
-			},
-			CNY: {
-				peak: { cacheHitInput: 0.02, cacheMissInput: 1, output: 2 },
-				offPeak: { cacheHitInput: 0.01, cacheMissInput: 0.5, output: 1 },
 			},
 		},
 		priceCategory: 'low',
@@ -172,40 +142,6 @@ export const MODELS: ModelDefinition[] = [
 			CNY: {
 				peak: { cacheHitInput: 0.3, cacheMissInput: 9, output: 27 },
 				offPeak: { cacheHitInput: 0.15, cacheMissInput: 4.5, output: 13.5 },
-			},
-		},
-		priceCategory: 'low',
-	},
-	{
-		id: DEEPSEEK_VISION_EXP_MODEL_ID,
-		name: 'DeepSeek V4 Flash Vision Exp',
-		provider: 'deepseek',
-		family: 'deepseek',
-		version: 'v4',
-		detail: 'Experimental native vision model',
-		maxInputTokens: 1048576,
-		maxOutputTokens: 393216,
-		capabilities: {
-			toolCalling: true,
-			imageInput: true,
-			// DeepSeek's only model that accepts image_url input natively.
-			nativeImageInput: true,
-			thinking: true,
-		},
-		thinkingEfforts: DEEPSEEK_THINKING_EFFORTS,
-		requiresThinkingParam: true,
-		pricing: {
-			USD: { cacheHitInput: 0.0028, cacheMissInput: 0.14, output: 0.28 },
-			CNY: { cacheHitInput: 0.02, cacheMissInput: 1, output: 2 },
-		},
-		pricingSchedule: {
-			USD: {
-				peak: { cacheHitInput: 0.014, cacheMissInput: 0.44, output: 1.32 },
-				offPeak: { cacheHitInput: 0.007, cacheMissInput: 0.22, output: 0.66 },
-			},
-			CNY: {
-				peak: { cacheHitInput: 0.02, cacheMissInput: 1, output: 2 },
-				offPeak: { cacheHitInput: 0.01, cacheMissInput: 0.5, output: 1 },
 			},
 		},
 		priceCategory: 'low',

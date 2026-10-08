@@ -42,8 +42,6 @@
   "multi-model-for-copilot.config.showPricingNotice.description": "Show the current peak/off-peak pricing notice in the model picker for providers with period-aware rates (DeepSeek). Off-peak prices are half of peak prices.",
   "multi-model-for-copilot.config.modelIdOverrides.description": "Override the API model ID sent for each model. Defaults are prefilled with official IDs; change them only when using a compatible third-party API that uses different model names.",
   "multi-model-for-copilot.config.modelIdOverrides.deepseek-v4.1-flash.description": "API model ID for DeepSeek V4.1 Flash",
-  "multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-flash.description": "API model ID for DeepSeek V4 Flash",
-  "multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-flash-vision-exp.description": "API model ID for DeepSeek V4 Flash Vision Exp",
   "multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-pro.description": "API model ID for DeepSeek V4 Pro",
   "multi-model-for-copilot.config.modelIdOverrides.mimo-v2.6-pro.description": "API model ID for MiMo V2.6 Pro",
   "multi-model-for-copilot.config.modelIdOverrides.mimo-v2.6-flash.description": "API model ID for MiMo V2.6 Flash",

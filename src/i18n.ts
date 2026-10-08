@@ -19,18 +19,11 @@ type Translations = Record<string, string>;
 
 const zh: Translations = {
 	// Model descriptions
-	'model.deepseek.v4.1-flash.detail': '原生图片理解与思考模式',
-	'model.deepseek.v4.1-flash.tooltip': 'DeepSeek V4.1 Flash，支持图片与文本输入、思考模式和工具调用。',
-	'model.deepseek.flash.detail': '快速高效',
+	'model.deepseek.flash.detail': '原生图片理解与思考模式',
+	'model.deepseek.flash.tooltip': 'DeepSeek V4.1 Flash，支持图片与文本输入、思考模式和工具调用。',
 	'model.deepseek.pro.detail': '深度推理',
-	'model.deepseek.flash-vision-exp.detail': '实验性原生视觉模型',
-	'model.deepseek.flash.tooltip': '快速高效的 DeepSeek V4 模型，推理能力接近 V4 Pro，API 定价更经济。',
-	'model.deepseek.pro.tooltip': 'DeepSeek V4 模型，面向 Agent 编程、广泛世界知识和高阶推理任务。',
-	'model.deepseek.flash-vision-exp.tooltip': 'DeepSeek 实验性原生视觉模型，可直接理解图片内容（图片直发，不经代理描述）。',
-	'model.retirement.custom':
-		'**旧模型入口。**  \n请先确认服务商支持 DeepSeek V4.1 Flash。  \n选择“DeepSeek V4.1 Flash”以使用新模型。',
-	'model.retirement.flashRetired':
-		'**已下线。**  \n请求由 DeepSeek V4.1 Flash 提供服务，并按 Flash 价格计费。  \n选择“DeepSeek V4.1 Flash”以使用新模型。',
+	'model.deepseek.pro.tooltip':
+		'DeepSeek V4 Pro 模型，面向 Agent 编程、广泛世界知识和高阶推理任务，图片由视觉代理转述后发送。',
 
 	// MiMo model descriptions
 	'model.mimo.pro.detail': '旗舰推理模型，支持深度思考',
@@ -314,22 +307,12 @@ const zh: Translations = {
 
 const en: Translations = {
 	// Model descriptions
-	'model.deepseek.v4.1-flash.detail': 'Vision and thinking mode',
-	'model.deepseek.v4.1-flash.tooltip':
-		'DeepSeek V4.1 Flash with image and text input, thinking mode, and tool calling.',
-	'model.retirement.custom':
-		'**Legacy model entry.**  \nCheck that your provider supports DeepSeek V4.1 Flash.  \nSelect “DeepSeek V4.1 Flash” to use the new model.',
-	'model.retirement.flashRetired':
-		'**Retired.**  \nRequests are served by DeepSeek V4.1 Flash and billed at the Flash price.  \nSelect “DeepSeek V4.1 Flash” to use the new model.',
-	'model.deepseek.flash.detail': 'Fast, general-purpose model',
-	'model.deepseek.pro.detail': 'Most capable reasoning model',
-	'model.deepseek.flash-vision-exp.detail': 'Experimental native vision model',
+	'model.deepseek.flash.detail': 'Vision and thinking mode',
 	'model.deepseek.flash.tooltip':
-		'Fast, efficient DeepSeek V4 model with reasoning close to V4 Pro and economical API pricing.',
+		'DeepSeek V4.1 Flash with image and text input, thinking mode, and tool calling.',
+	'model.deepseek.pro.detail': 'Most capable reasoning model',
 	'model.deepseek.pro.tooltip':
-		'DeepSeek V4 model for agentic coding, broad world knowledge, and high-end reasoning.',
-	'model.deepseek.flash-vision-exp.tooltip':
-		'DeepSeek experimental native vision model. Understands images directly (forwarded natively, not proxy-described).',
+		'DeepSeek V4 Pro for agentic coding, broad world knowledge, and high-end reasoning; images are described by the vision proxy.',
 
 	// MiMo model descriptions
 	'model.mimo.pro.detail': 'Flagship reasoning model with deep thinking',

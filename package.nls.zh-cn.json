@@ -42,8 +42,6 @@
   "multi-model-for-copilot.config.showPricingNotice.description": "在模型选择器中显示当前高峰/低峰计费提示（针对 DeepSeek 等按时段计费的提供方）。低峰价格为高峰价格的一半。",
   "multi-model-for-copilot.config.modelIdOverrides.description": "覆盖各模型实际使用的 API 模型 ID，默认使用官方 ID，仅在对接不同模型名称的第三方 API 时需要修改。",
   "multi-model-for-copilot.config.modelIdOverrides.deepseek-v4.1-flash.description": "DeepSeek V4.1 Flash 的 API 模型 ID。",
-  "multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-flash.description": "DeepSeek V4 Flash 的 API 模型 ID。",
-  "multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-flash-vision-exp.description": "DeepSeek V4 Flash Vision Exp 的 API 模型 ID。",
   "multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-pro.description": "DeepSeek V4 Pro 的 API 模型 ID。",
   "multi-model-for-copilot.config.modelIdOverrides.mimo-v2.6-pro.description": "MiMo V2.6 Pro 的 API 模型 ID。",
   "multi-model-for-copilot.config.modelIdOverrides.mimo-v2.6-flash.description": "MiMo V2.6 Flash 的 API 模型 ID。",

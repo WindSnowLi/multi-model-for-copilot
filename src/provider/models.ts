@@ -1,19 +1,18 @@
 import vscode from 'vscode';
-import { DEFAULT_THINKING_EFFORTS, DEEPSEEK_V41_FLASH_MODEL_ID } from '../consts';
+import { DEFAULT_THINKING_EFFORTS } from '../consts';
 import { t } from '../i18n';
 import type { ModelDefinition, PricingCurrency, ThinkingEffort } from '../types';
 import { toModelCostInfo, type ModelCostInformation } from './pricing/costs';
-import { getModelRetirementNotice } from './retirement';
 
 /**
  * NOTE: Non-public API surface.
  *
  * The fields below (`configurationSchema` on chat info, cost metadata,
- * `warningText` / `infoText` model picker banners, `modelConfiguration` on
- * response options, plus `isBYOK` / `isUserSelectable` / `statusIcon`) are not
- * part of the stable `vscode.LanguageModelChat*` typings yet. They are the same
- * shape currently consumed by GitHub Copilot Chat to render model picker
- * metadata and per-model configuration controls.
+ * `infoText` model picker banners, `modelConfiguration` on response options,
+ * plus `isBYOK` / `isUserSelectable` / `statusIcon`) are not part of the stable
+ * `vscode.LanguageModelChat*` typings yet. They are the same shape currently
+ * consumed by GitHub Copilot Chat to render model picker metadata and per-model
+ * configuration controls.
  */
 
 export type ModelConfigurationOptions = vscode.ProvideLanguageModelChatResponseOptions & {
@@ -28,8 +27,6 @@ export type ModelPickerChatInformation = vscode.LanguageModelChatInformation &
 		readonly isUserSelectable: boolean;
 		readonly isBYOK: true;
 		readonly statusIcon?: vscode.ThemeIcon;
-		/** Warning banner shown in the model picker hover (e.g. retirement notices). */
-		readonly warningText?: Readonly<Record<string, string>>;
 		readonly capabilities: vscode.LanguageModelChatCapabilities & {
 			/**
 			 * Request protocol used by this provider (1 = Chat Completions). Declared
@@ -49,12 +46,10 @@ export function toChatInfo(
 	hasApiKey: boolean,
 	pricingCurrency?: PricingCurrency,
 	showPricingNotice = true,
-	usesOfficialModel = true,
 ): ModelPickerChatInformation {
 	const modelDetail = resolveModelText(m, 'detail') ?? m.detail;
 	const modelTooltip = resolveModelText(m, 'tooltip');
 	const thinkingEfforts = getModelThinkingEfforts(m);
-	const retirement = getModelRetirementNotice(m.id, usesOfficialModel);
 	return {
 		id: m.id,
 		name: m.name,
@@ -62,8 +57,7 @@ export function toChatInfo(
 		version: m.version,
 		detail: hasApiKey ? modelDetail : t('auth.apiKeyRequiredDetail'),
 		tooltip: hasApiKey ? modelTooltip : t('auth.apiKeyRequiredDetail'),
-		statusIcon: !hasApiKey || retirement ? new vscode.ThemeIcon('warning') : undefined,
-		...(retirement ? { warningText: { [retirement.code]: retirement.message } } : {}),
+		statusIcon: hasApiKey ? undefined : new vscode.ThemeIcon('warning'),
 		maxInputTokens: m.maxInputTokens,
 		maxOutputTokens: m.maxOutputTokens,
 		isBYOK: true,
@@ -144,19 +138,16 @@ function resolveModelText(m: ModelDefinition, field: 'detail' | 'tooltip'): stri
 }
 
 function extractModelSuffix(m: ModelDefinition): string {
-	// DeepSeek V4.1: deepseek-v4.1-flash → v4.1-flash (distinct from the legacy V4 Flash keys)
-	if (m.id === DEEPSEEK_V41_FLASH_MODEL_ID) {
-		return 'v4.1-flash';
-	}
-	// DeepSeek: deepseek-v4-flash → flash, deepseek-v4-pro → pro
-	if (m.id.startsWith('deepseek-v4-')) {
-		return m.id.slice('deepseek-v4-'.length);
+	// DeepSeek: deepseek-flash → flash, deepseek-v4.1-flash → flash, deepseek-v4-pro → pro
+	const deepseek = /^deepseek-(?:v[\d.]+-)?(.+)$/u.exec(m.id);
+	if (deepseek) {
+		return deepseek[1];
 	}
 	// MiMo: mimo-v2.6-pro → pro, mimo-v2.6-flash → flash,
 	// mimo-v2.6-pro-ultraspeed → pro-ultraspeed
-	const mimoSuffix = /^mimo-v[\d.]+-(.+)$/u.exec(m.id);
-	if (mimoSuffix) {
-		return mimoSuffix[1];
+	const mimo = /^mimo-v[\d.]+-(.+)$/u.exec(m.id);
+	if (mimo) {
+		return mimo[1];
 	}
 	return m.id;
 }

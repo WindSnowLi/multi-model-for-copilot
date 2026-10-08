@@ -39,9 +39,9 @@
 
 ### 透明视觉代理
 
-DeepSeek V4 Flash/Pro 是纯文本模型。将截图拖入聊天，本扩展会自动将图片交给视觉代理模型（默认自动选择，或你配置的代理）进行描述，再将描述结果反馈给模型。**零配置**——只需在首次使用时配置一次视觉代理来源即可。
+DeepSeek V4 Pro 是纯文本模型。将截图拖入聊天，本扩展会自动将图片交给视觉代理模型（默认自动选择，或你配置的代理）进行描述，再将描述结果反馈给模型。**零配置**——只需在首次使用时配置一次视觉代理来源即可。
 
-**DeepSeek V4.1 Flash** 与 **DeepSeek V4 Flash Vision Exp** 为官方原生视觉模型，图片会以 OpenAI `image_url` 格式直接发送，无需代理描述。旧的 V4 Flash 入口在官方 API 上已由 V4.1 Flash 提供服务，选择器中会显示下线提示。
+**DeepSeek V4.1 Flash** 为官方原生视觉模型，图片会以 OpenAI `image_url` 格式直接发送，无需代理描述。
 
 <p align="center">
   <img src="resources/screenshots/03-vision.png" alt="将图片拖入 Copilot Chat，DeepSeek 通过视觉代理响应" width="800">
@@ -99,10 +99,8 @@ MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
 
 | 模型 | 提供商 | 上下文 | 最大输出 | 视觉 | 思考 | 工具 |
 |---|---|---|---|---|---|---|
-| **DeepSeek V4.1 Flash** | DeepSeek | 640K | 384K | 原生 | 支持 | 支持 |
-| **DeepSeek V4 Flash** | DeepSeek | 1M | 384K | 代理 | 支持 | 支持 |
+| **DeepSeek V4.1 Flash** | DeepSeek | 1M | 384K | 原生 | 支持 | 支持 |
 | **DeepSeek V4 Pro** | DeepSeek | 1M | 384K | 代理 | 支持 | 支持 |
-| **DeepSeek V4 Flash Vision Exp** | DeepSeek | 1M | 384K | 原生 | 支持 | 支持 |
 | **MiMo V2.6 Pro** | 小米 MiMo | 1M | 128K | 原生 | 支持 | 支持 |
 | **MiMo V2.6 Flash** | 小米 MiMo | 1M | 128K | 原生 | 支持 | 支持 |
 | **MiMo V2.6 Pro Ultraspeed** | 小米 MiMo | 1M | 128K | 原生 | 支持 | 支持 |
@@ -112,6 +110,8 @@ MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
 | **Qwen VL Max** | 千问 AI | 1M | 128K | 原生 | 支持 | 支持 |
 | **Qwen VL Plus** | 千问 AI | 1M | 128K | 原生 | 支持 | 支持 |
 | **Qwen VL Turbo** | 千问 AI | 1M | 128K | 原生 | 支持 | 支持 |
+
+**DeepSeek V4.1 Flash** 为当前旗舰模型，请求使用的模型名为 `deepseek-flash`。旧的 `deepseek-v4-flash` 与 `deepseek-v4-flash-vision-exp` 名称已下线：官方 API 会用 V4.1 Flash 承接这些请求，因此本扩展不再提供这两个预设。若第三方端点仍暴露旧名称，可通过 `modelIdOverrides` 映射。
 
 ## 自定义模型
 

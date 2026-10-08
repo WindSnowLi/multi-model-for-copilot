@@ -2,7 +2,6 @@ import vscode from 'vscode';
 import { AuthManager } from '../auth';
 import { discoverModels, getBaseUrl, getCustomModels, getCustomModelSecretKey, getShowBalanceStatusBar, getShowPricingNotice, getShowTokenSpeedStatusBar, getStabilizeToolListEnabled } from '../config';
 import { CONFIG_SECTION, getAllModels, MODELS } from '../consts';
-import { isOfficialProviderBaseUrl } from '../endpoint';
 import { t } from '../i18n';
 import { logger } from '../logger';
 import { getProviderDescriptor } from '../provider-registry';
@@ -473,14 +472,7 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 			const hasKey = model.provider === 'custom'
 				? true // custom models always appear; missing key shown via detail
 				: keyAvailability[model.provider] ?? false;
-			// Retirement notices only make sense while the request goes to the
-			// provider's own endpoint: a custom base URL may still serve the
-			// original model.
-			const usesOfficialModel = isOfficialProviderBaseUrl(
-				getBaseUrl(model.provider),
-				model.provider,
-			);
-			return toChatInfo(model, hasKey, pricingCurrency, getShowPricingNotice(), usesOfficialModel);
+			return toChatInfo(model, hasKey, pricingCurrency, getShowPricingNotice());
 		});
 	}
 
