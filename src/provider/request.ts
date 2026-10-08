@@ -153,8 +153,8 @@ export async function prepareChatRequest({
 	const thinkingEffort = forceNoneThinking ? 'none' : configuredThinkingEffort;
 
 	// Thinking parameter format is provider-specific:
-	//   'reasoning_effort' → only reasoning_effort param (MiMo, Qwen)
-	//   'thinking_type'    → thinking: { type } + reasoning_effort (DeepSeek)
+	//   'reasoning_effort' → only reasoning_effort param (Qwen)
+	//   'thinking_type'    → thinking: { type } + reasoning_effort (DeepSeek, MiMo)
 	const thinkingFormat =
 		customCfg?.requiresThinkingParam === false
 			? 'reasoning_effort'

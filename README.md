@@ -33,7 +33,7 @@ This extension brings **multiple AI model providers** into GitHub Copilot Chat's
 | Provider | Models | Auth | API Key |
 |---|---|---|---|
 | **DeepSeek** | V4.1 Flash, V4 Pro, V4 Flash (legacy), V4 Flash Vision Exp (legacy) | `Authorization: Bearer` | `sk-...` |
-| **Xiaomi MiMo** | V2.5, V2.5 Pro | `api-key` header | `tp-...` (Token Plan) |
+| **Xiaomi MiMo** | V2.6 Pro, V2.6 Flash, V2.6 Pro Ultraspeed | `api-key` header | `tp-...` (Token Plan) |
 | **Qwen (千问)** | Max, Plus, Turbo, VL Max, VL Plus, VL Turbo | `Authorization: Bearer` | `sk-...` |
 | **Custom** | Any OpenAI-compatible | Configurable | Any |
 
@@ -57,7 +57,7 @@ proxy (or DeepSeek Vision Exp in auto mode) and forward the description as text.
 |---|---|---|
 | **DeepSeek V4.1 Flash** | Native | Images sent directly via OpenAI `image_url` format |
 | **DeepSeek V4 Flash Vision Exp** | Native | Images sent directly via OpenAI `image_url` format |
-| **MiMo V2.5** | Native | Images sent directly via OpenAI `image_url` format |
+| **MiMo V2.6 Pro / Flash / Pro Ultraspeed** | Native | Images sent directly via OpenAI `image_url` format |
 | **Qwen VL Max/Plus/Turbo** | Native | Images sent directly via OpenAI `image_url` format |
 | **DeepSeek V4 Flash/Pro** | Proxy | Images described by another model, text sent to DeepSeek |
 | **Custom models** | Configurable | Set `imageInput: true` for native support |
@@ -66,9 +66,10 @@ Supports JPEG, PNG, GIF, WebP, BMP (up to 50MB per image). Multi-image input sup
 
 ### Thinking Mode
 
-Use Copilot Chat's model picker to choose reasoning effort: `none` (off), `low`, `high`
-(default), or `max` (deep reasoning). DeepSeek models expose the extra `low` tier; other
-providers show the standard tiers.
+Use Copilot Chat's model picker to choose reasoning effort. DeepSeek models support `none`,
+`low`, `high` (default), and `max` (deep reasoning). MiMo models support `none`, `low`, and
+`high` — the MiMo API rejects `reasoning_effort: max`. Other providers show the default tiers
+(`none`, `high`, `max`).
 
 ### Full Copilot Stack
 
@@ -107,8 +108,9 @@ For custom models: `Multi-Model: Discover Available Models` → pick endpoint �
 | **DeepSeek V4 Flash** | DeepSeek | 1M | 384K | Proxy | Yes | Yes |
 | **DeepSeek V4 Pro** | DeepSeek | 1M | 384K | Proxy | Yes | Yes |
 | **DeepSeek V4 Flash Vision Exp** | DeepSeek | 1M | 384K | Native | Yes | Yes |
-| **MiMo V2.5** | Xiaomi MiMo | 1M | 128K | Native | Yes | Yes |
-| **MiMo V2.5 Pro** | Xiaomi MiMo | 1M | 128K | No | Yes | Yes |
+| **MiMo V2.6 Pro** | Xiaomi MiMo | 1M | 128K | Native | Yes | Yes |
+| **MiMo V2.6 Flash** | Xiaomi MiMo | 1M | 128K | Native | Yes | Yes |
+| **MiMo V2.6 Pro Ultraspeed** | Xiaomi MiMo | 1M | 128K | Native | Yes | Yes |
 
 The DeepSeek V4 Flash entries are legacy names: on the official API they are served by
 DeepSeek V4.1 Flash and show a retirement notice in the model picker. Pick

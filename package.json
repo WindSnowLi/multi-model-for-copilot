@@ -1,7 +1,7 @@
 {
   "name": "multi-model-for-copilot",
   "displayName": "Multi-Model BYOK for Copilot Chat",
-  "description": "Pick DeepSeek V4.1, MiMo V2.5, and Qwen models from the Copilot Chat model picker. Vision, thinking mode, agent tools — zero config, BYOK.",
+  "description": "Pick DeepSeek V4.1, MiMo V2.6, and Qwen models from the Copilot Chat model picker. Vision, thinking mode, agent tools — zero config, BYOK.",
   "icon": "resources/icon.png",
   "version": "0.7.0",
   "publisher": "WindSnowLi",
@@ -198,8 +198,9 @@
             "deepseek-v4-flash": "deepseek-v4-flash",
             "deepseek-v4-pro": "deepseek-v4-pro",
             "deepseek-v4-flash-vision-exp": "deepseek-v4-flash-vision-exp",
-            "mimo-v2.5-pro": "mimo-v2.5-pro",
-            "mimo-v2.5": "mimo-v2.5",
+            "mimo-v2.6-pro": "mimo-v2.6-pro",
+            "mimo-v2.6-flash": "mimo-v2.6-flash",
+            "mimo-v2.6-pro-ultraspeed": "mimo-v2.6-pro-ultraspeed",
             "qwen-max": "qwen-max",
             "qwen-plus": "qwen-plus",
             "qwen-turbo": "qwen-turbo",
@@ -226,13 +227,17 @@
               "type": "string",
               "description": "%multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-flash-vision-exp.description%"
             },
-            "mimo-v2.5-pro": {
+            "mimo-v2.6-pro": {
               "type": "string",
-              "description": "%multi-model-for-copilot.config.modelIdOverrides.mimo-v2.5-pro.description%"
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.mimo-v2.6-pro.description%"
             },
-            "mimo-v2.5": {
+            "mimo-v2.6-flash": {
               "type": "string",
-              "description": "%multi-model-for-copilot.config.modelIdOverrides.mimo-v2.5.description%"
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.mimo-v2.6-flash.description%"
+            },
+            "mimo-v2.6-pro-ultraspeed": {
+              "type": "string",
+              "description": "%multi-model-for-copilot.config.modelIdOverrides.mimo-v2.6-pro-ultraspeed.description%"
             },
             "qwen-max": {
               "type": "string",

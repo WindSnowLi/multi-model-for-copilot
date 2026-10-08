@@ -15,8 +15,8 @@ import type { ApiProvider } from './types';
 /**
  * How a provider expects thinking/reasoning to be signaled in the request body.
  *
- * - `'reasoning_effort'`     → only `reasoning_effort` param (MiMo, Qwen-style)
- * - `'thinking_type'`        → `thinking: { type: 'enabled'|'disabled' }` + `reasoning_effort` (DeepSeek)
+ * - `'reasoning_effort'`     → only `reasoning_effort` param (Qwen-style)
+ * - `'thinking_type'`        → `thinking: { type: 'enabled'|'disabled' }` + `reasoning_effort` (DeepSeek, MiMo)
  */
 export type ThinkingFormat = 'reasoning_effort' | 'thinking_type';
 
@@ -96,7 +96,7 @@ const PROVIDER_REGISTRY: Record<Exclude<ApiProvider, 'custom'>, ProviderDescript
 			'token-plan-ams.xiaomimimo.com',
 		],
 		authStyle: 'api-key',
-		thinkingFormat: 'reasoning_effort',
+		thinkingFormat: 'thinking_type',
 		useMaxCompletionTokens: true,
 		hasBalanceEndpoint: false,
 	},

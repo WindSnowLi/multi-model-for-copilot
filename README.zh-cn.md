@@ -21,13 +21,13 @@
   <img src="resources/screenshots/01-picker.png" alt="DeepSeek V4 Pro 和 Flash 出现在 Copilot Chat 模型选择器中，带有可按模型独立设置的思考深度下拉菜单（停用 / 标准 / 深度）" width="800">
 </p>
 
-喜欢 DeepSeek、MiMo 和千问的性价比，但不想放弃 GitHub Copilot 的 Agent 模式、工具调用和成熟的交互体验？本扩展将 **DeepSeek V4**、**MiMo V2.5** 和**千问 AI** 直接接入 Copilot Chat 模型选择器，并支持**任意 OpenAI 兼容端点**。
+喜欢 DeepSeek、MiMo 和千问的性价比，但不想放弃 GitHub Copilot 的 Agent 模式、工具调用和成熟的交互体验？本扩展将 **DeepSeek V4.1**、**MiMo V2.6** 和**千问 AI** 直接接入 Copilot Chat 模型选择器，并支持**任意 OpenAI 兼容端点**。
 
 ## 为什么选这个扩展？
 
 - **不是替换 Copilot，而是增强它。** 没有新的侧边栏，没有新的聊天界面。只是在模型选择器中多了更多选项。
 - **Agent 模式、工具调用、Instructions、MCP、Skills——全部正常运作。** Copilot 的完整能力栈，现在可以跑在 DeepSeek、MiMo 或任意自定义模型上。
-- **视觉支持。** MiMo V2.5 原生支持图片输入；DeepSeek V4 通过视觉代理间接支持。
+- **视觉支持。** DeepSeek V4.1 Flash 和 MiMo V2.6 原生支持图片输入；DeepSeek V4 Pro 通过视觉代理间接支持。
 - **模型发现。** 一键从任意 `/v1/models` 端点发现并添加可用模型。
 - **BYOK。** 你的 API Key，你的账单。存储在 OS 钥匙串中。
 - **需自行提供 API Key，直接向 DeepSeek 付费。** 你的 API Key，你的账单，你的速率限制。密钥存储在操作系统密钥链中，不会以明文形式写入磁盘。
@@ -48,7 +48,7 @@ DeepSeek V4 Flash/Pro 是纯文本模型。将截图拖入聊天，本扩展会�
 </p>
 
 ### 思考模式与推理深度控制
-完整支持 DeepSeek V4 的 `reasoning_content`。通过 Copilot Chat 模型选择器的菜单选择 `停用`、`标准`（均衡，默认）或 `深度`（适用于复杂 Agent 任务）。
+完整支持 DeepSeek V4 的 `reasoning_content`。通过 Copilot Chat 模型选择器的菜单选择思考档位：DeepSeek 提供 `停用`、`低`、`标准`（默认）、`深度`；MiMo 提供 `停用`、`低`、`标准`，因为 MiMo API 不接受 `reasoning_effort: max`；其他模型提供 `停用`、`标准`、`深度`。
 
 ### 继承全部 Copilot 能力
 由于本扩展接入的是 Copilot 的原生 provider API，你免费获得完整能力栈：
@@ -103,8 +103,9 @@ MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
 | **DeepSeek V4 Flash** | DeepSeek | 1M | 384K | 代理 | 支持 | 支持 |
 | **DeepSeek V4 Pro** | DeepSeek | 1M | 384K | 代理 | 支持 | 支持 |
 | **DeepSeek V4 Flash Vision Exp** | DeepSeek | 1M | 384K | 原生 | 支持 | 支持 |
-| **MiMo V2.5** | 小米 MiMo | 1M | 128K | 原生 | 支持 | 支持 |
-| **MiMo V2.5 Pro** | 小米 MiMo | 1M | 128K | 不支持 | 支持 | 支持 |
+| **MiMo V2.6 Pro** | 小米 MiMo | 1M | 128K | 原生 | 支持 | 支持 |
+| **MiMo V2.6 Flash** | 小米 MiMo | 1M | 128K | 原生 | 支持 | 支持 |
+| **MiMo V2.6 Pro Ultraspeed** | 小米 MiMo | 1M | 128K | 原生 | 支持 | 支持 |
 | **Qwen Max** | 千问 AI | 1M | 128K | 不支持 | 支持 | 支持 |
 | **Qwen Plus** | 千问 AI | 1M | 128K | 不支持 | 支持 | 支持 |
 | **Qwen Turbo** | 千问 AI | 1M | 128K | 不支持 | 支持 | 支持 |

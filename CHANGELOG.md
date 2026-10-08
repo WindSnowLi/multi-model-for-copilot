@@ -4,9 +4,15 @@
 
 ### Features
 
+* **provider:** replace the MiMo V2.5 presets with the V2.6 series (Pro, Flash, Pro Ultraspeed); all three are natively omni-modal and accept image input
 * **statusbar:** add live token-generation speed (tokens/s) in the status bar while a response streams, and live account balance for DeepSeek (toggle via `multi-model-for-copilot.statusBar.tokenSpeed` / `statusBar.balance`)
 * **vision:** describe tool-result images through the vision proxy for non-native models, and forward them directly as `image_url` for native vision models
 * **pricing:** show DeepSeek peak/off-peak dynamic pricing in the model picker, auto-refreshing at each billing-period transition
+
+### Bug Fixes
+
+* **provider:** fix HTTP 400 "Invalid request parameters" from MiMo when thinking effort was set to `max` — the MiMo API rejects `reasoning_effort: max`, so MiMo models now offer `none`/`low`/`high` and send the documented `thinking: { type }` switch alongside `reasoning_effort`
+* **pricing:** correct DeepSeek V4 Pro's CNY peak/off-peak rates and flat fallback price so they match the USD schedule
 
 ## [0.7.0](https://github.com/WindSnowLi/multi-model-for-copilot/compare/v0.6.2...v0.7.0) (2026-07-20)
 

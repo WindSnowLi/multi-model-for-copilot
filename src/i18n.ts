@@ -34,9 +34,12 @@ const zh: Translations = {
 
 	// MiMo model descriptions
 	'model.mimo.pro.detail': '旗舰推理模型，支持深度思考',
-	'model.mimo.standard.detail': '全模态理解模型，支持视觉与思考',
-	'model.mimo.pro.tooltip': 'MiMo V2.5 Pro 旗舰模型，专为复杂推理、深度分析和长文档处理设计。',
-	'model.mimo.standard.tooltip': 'MiMo V2.5 全模态模型，支持图片、音频、视频内容理解，同时具备深度思考能力。',
+	'model.mimo.flash.detail': '高效推理模型，支持视觉与思考',
+	'model.mimo.pro-ultraspeed.detail': '旗舰推理模型，输出速度最高提升 20 倍',
+	'model.mimo.pro.tooltip': 'MiMo V2.6 Pro 旗舰模型，专为复杂推理、深度分析和长文档处理设计。',
+	'model.mimo.flash.tooltip': 'MiMo V2.6 Flash 全模态模型，支持图片、音频、视频内容理解，同时具备深度思考能力。',
+	'model.mimo.pro-ultraspeed.tooltip':
+		'MiMo V2.6 Pro 的超高速模式，保持旗舰推理能力，输出速度最高提升 20 倍，价格为 Pro 的 10 倍。',
 
 	// Qwen model descriptions
 	'model.qwen.max.detail': '旗舰模型，最强大的能力',
@@ -330,11 +333,14 @@ const en: Translations = {
 
 	// MiMo model descriptions
 	'model.mimo.pro.detail': 'Flagship reasoning model with deep thinking',
-	'model.mimo.standard.detail': 'Omni-modal model with vision and thinking',
+	'model.mimo.flash.detail': 'Efficient reasoning model with vision and thinking',
+	'model.mimo.pro-ultraspeed.detail': 'Flagship reasoning at up to 20x output speed',
 	'model.mimo.pro.tooltip':
-		'MiMo V2.5 Pro flagship model, designed for complex reasoning, deep analysis, and long-document processing.',
-	'model.mimo.standard.tooltip':
-		'MiMo V2.5 omni-modal model with image, audio, and video understanding plus deep thinking.',
+		'MiMo V2.6 Pro flagship model, designed for complex reasoning, deep analysis, and long-document processing.',
+	'model.mimo.flash.tooltip':
+		'MiMo V2.6 Flash omni-modal model with image, audio, and video understanding plus deep thinking.',
+	'model.mimo.pro-ultraspeed.tooltip':
+		'MiMo V2.6 Pro UltraSpeed mode: flagship reasoning with up to 20x output speed, priced at 10x the Pro rate.',
 
 	// Qwen model descriptions
 	'model.qwen.max.detail': 'Flagship model with the strongest capabilities',

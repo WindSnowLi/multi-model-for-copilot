@@ -18,6 +18,13 @@ export const DEFAULT_THINKING_EFFORTS: readonly ThinkingEffort[] = ['none', 'hig
 /** DeepSeek V4 family additionally supports a low reasoning tier. */
 export const DEEPSEEK_THINKING_EFFORTS: readonly ThinkingEffort[] = ['none', 'low', 'high', 'max'];
 
+/**
+ * MiMo V2.6 reasoning efforts. The API accepts the documented `thinking.type`
+ * switch together with the `low`/`high` reasoning efforts; `max` is rejected
+ * with HTTP 400 "Invalid request parameters".
+ */
+export const MIMO_THINKING_EFFORTS: readonly ThinkingEffort[] = ['none', 'low', 'high'];
+
 /** DeepSeek native vision model ID (experimental, accepts image_url input). */
 export const DEEPSEEK_VISION_EXP_MODEL_ID = 'deepseek-v4-flash-vision-exp';
 
@@ -154,8 +161,8 @@ export const MODELS: ModelDefinition[] = [
 		thinkingEfforts: DEEPSEEK_THINKING_EFFORTS,
 		requiresThinkingParam: true,
 		pricing: {
-			USD: { cacheHitInput: 0.003625, cacheMissInput: 0.435, output: 0.87 },
-			CNY: { cacheHitInput: 0.025, cacheMissInput: 3, output: 6 },
+			USD: { cacheHitInput: 0.022, cacheMissInput: 0.66, output: 1.98 },
+			CNY: { cacheHitInput: 0.15, cacheMissInput: 4.5, output: 13.5 },
 		},
 		pricingSchedule: {
 			USD: {
@@ -163,8 +170,8 @@ export const MODELS: ModelDefinition[] = [
 				offPeak: { cacheHitInput: 0.022, cacheMissInput: 0.66, output: 1.98 },
 			},
 			CNY: {
-				peak: { cacheHitInput: 0.025, cacheMissInput: 3, output: 6 },
-				offPeak: { cacheHitInput: 0.0125, cacheMissInput: 1.5, output: 3 },
+				peak: { cacheHitInput: 0.3, cacheMissInput: 9, output: 27 },
+				offPeak: { cacheHitInput: 0.15, cacheMissInput: 4.5, output: 13.5 },
 			},
 		},
 		priceCategory: 'low',
@@ -203,35 +210,15 @@ export const MODELS: ModelDefinition[] = [
 		},
 		priceCategory: 'low',
 	},
+	// MiMo V2.6 models. All three are natively omni-modal, so image input is
+	// forwarded as image_url instead of being described by the vision proxy.
 	{
-		id: 'mimo-v2.5-pro',
-		name: 'MiMo V2.5 Pro',
+		id: 'mimo-v2.6-pro',
+		name: 'MiMo V2.6 Pro',
 		provider: 'mimo',
 		family: 'mimo',
-		version: 'v2.5',
+		version: 'v2.6',
 		detail: 'Flagship reasoning model with deep thinking',
-		maxInputTokens: 1000000,
-		maxOutputTokens: 128000,
-		capabilities: {
-			toolCalling: true,
-			imageInput: false,
-			nativeImageInput: false,
-			thinking: true,
-		},
-		requiresThinkingParam: false,
-		pricing: {
-			USD: { cacheHitInput: 0.0036, cacheMissInput: 0.435, output: 0.87 },
-			CNY: { cacheHitInput: 0.025, cacheMissInput: 3, output: 6 },
-		},
-		priceCategory: 'low',
-	},
-	{
-		id: 'mimo-v2.5',
-		name: 'MiMo V2.5',
-		provider: 'mimo',
-		family: 'mimo',
-		version: 'v2.5',
-		detail: 'Omni-modal model with vision and thinking',
 		maxInputTokens: 1000000,
 		maxOutputTokens: 128000,
 		capabilities: {
@@ -240,10 +227,57 @@ export const MODELS: ModelDefinition[] = [
 			nativeImageInput: true,
 			thinking: true,
 		},
+		thinkingEfforts: MIMO_THINKING_EFFORTS,
+		requiresThinkingParam: false,
+		pricing: {
+			USD: { cacheHitInput: 0.0036, cacheMissInput: 0.435, output: 0.87 },
+			CNY: { cacheHitInput: 0.025, cacheMissInput: 3, output: 6 },
+		},
+		priceCategory: 'low',
+	},
+	{
+		id: 'mimo-v2.6-flash',
+		name: 'MiMo V2.6 Flash',
+		provider: 'mimo',
+		family: 'mimo',
+		version: 'v2.6',
+		detail: 'Efficient omni-modal model with vision and thinking',
+		maxInputTokens: 1000000,
+		maxOutputTokens: 128000,
+		capabilities: {
+			toolCalling: true,
+			imageInput: true,
+			nativeImageInput: true,
+			thinking: true,
+		},
+		thinkingEfforts: MIMO_THINKING_EFFORTS,
 		requiresThinkingParam: false,
 		pricing: {
 			USD: { cacheHitInput: 0.0028, cacheMissInput: 0.14, output: 0.28 },
 			CNY: { cacheHitInput: 0.02, cacheMissInput: 1, output: 2 },
+		},
+		priceCategory: 'low',
+	},
+	{
+		id: 'mimo-v2.6-pro-ultraspeed',
+		name: 'MiMo V2.6 Pro Ultraspeed',
+		provider: 'mimo',
+		family: 'mimo',
+		version: 'v2.6',
+		detail: 'Flagship reasoning at up to 20x output speed',
+		maxInputTokens: 1000000,
+		maxOutputTokens: 128000,
+		capabilities: {
+			toolCalling: true,
+			imageInput: true,
+			nativeImageInput: true,
+			thinking: true,
+		},
+		thinkingEfforts: MIMO_THINKING_EFFORTS,
+		requiresThinkingParam: false,
+		pricing: {
+			USD: { cacheHitInput: 0.036, cacheMissInput: 4.35, output: 8.7 },
+			CNY: { cacheHitInput: 0.25, cacheMissInput: 30, output: 60 },
 		},
 		priceCategory: 'low',
 	},

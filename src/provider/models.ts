@@ -152,12 +152,11 @@ function extractModelSuffix(m: ModelDefinition): string {
 	if (m.id.startsWith('deepseek-v4-')) {
 		return m.id.slice('deepseek-v4-'.length);
 	}
-	// MiMo: mimo-v2.5-pro → pro, mimo-v2.5 → standard
-	if (m.id === 'mimo-v2.5') {
-		return 'standard';
-	}
-	if (m.id.startsWith('mimo-v2.5-')) {
-		return m.id.slice('mimo-v2.5-'.length);
+	// MiMo: mimo-v2.6-pro → pro, mimo-v2.6-flash → flash,
+	// mimo-v2.6-pro-ultraspeed → pro-ultraspeed
+	const mimoSuffix = /^mimo-v[\d.]+-(.+)$/u.exec(m.id);
+	if (mimoSuffix) {
+		return mimoSuffix[1];
 	}
 	return m.id;
 }
