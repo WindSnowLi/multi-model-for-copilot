@@ -45,13 +45,10 @@ export interface ProviderDescriptor {
 	/** VS Code settings key for fallback API key storage. */
 	readonly settingsKey: string;
 
-	/** Default base URL (used when no user override is configured). */
+	/** Official API base URL. */
 	readonly defaultBaseUrl: string;
 
-	/** VS Code settings key for user-overridden base URL. Empty string = no override setting. */
-	readonly baseUrlSettingsKey: string;
-
-	/** Official API hostnames (for `isOfficialProviderBaseUrl` checks). */
+	/** Official API hostnames (used to map a base URL back to its provider). */
 	readonly officialHosts: readonly string[];
 
 	/** Authentication header style. */
@@ -76,7 +73,6 @@ const PROVIDER_REGISTRY: Record<ApiProvider, ProviderDescriptor> = {
 		secretKey: 'multi-model-for-copilot.apiKey',
 		settingsKey: 'apiKey',
 		defaultBaseUrl: 'https://api.deepseek.com',
-		baseUrlSettingsKey: 'baseUrl',
 		officialHosts: ['api.deepseek.com'],
 		authStyle: 'bearer',
 		thinkingFormat: 'thinking_type',
@@ -89,7 +85,6 @@ const PROVIDER_REGISTRY: Record<ApiProvider, ProviderDescriptor> = {
 		secretKey: 'multi-model-for-copilot.mimoApiKey',
 		settingsKey: 'mimoApiKey',
 		defaultBaseUrl: 'https://token-plan-cn.xiaomimimo.com/v1',
-		baseUrlSettingsKey: 'mimoBaseUrl',
 		officialHosts: [
 			'token-plan-cn.xiaomimimo.com',
 			'token-plan-sgp.xiaomimimo.com',
@@ -106,7 +101,6 @@ const PROVIDER_REGISTRY: Record<ApiProvider, ProviderDescriptor> = {
 		secretKey: 'multi-model-for-copilot.qwenApiKey',
 		settingsKey: 'qwenApiKey',
 		defaultBaseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-		baseUrlSettingsKey: 'qwenBaseUrl',
 		officialHosts: ['dashscope.aliyuncs.com'],
 		authStyle: 'bearer',
 		thinkingFormat: 'reasoning_effort',
@@ -147,13 +141,6 @@ export function getBalanceCapableProviders(): ReadonlyArray<ApiProvider> {
 	return (Object.keys(PROVIDER_REGISTRY) as ApiProvider[]).filter(
 		(id) => PROVIDER_REGISTRY[id].hasBalanceEndpoint,
 	);
-}
-
-/**
- * List every built-in provider ID.
- */
-export function getBuiltinProviderIds(): ReadonlyArray<ApiProvider> {
-	return Object.keys(PROVIDER_REGISTRY) as ApiProvider[];
 }
 
 /**

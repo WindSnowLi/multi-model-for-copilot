@@ -1,6 +1,5 @@
 import vscode from 'vscode';
 import { AuthManager } from '../../auth';
-import { getBaseUrl } from '../../config';
 import { normalizeBaseUrl } from '../../endpoint';
 import { logger } from '../../logger';
 import { buildAuthHeaders, getBalanceCapableProviders, requireProviderDescriptor } from '../../provider-registry';
@@ -118,11 +117,7 @@ export class BalanceService {
 		generation: number,
 	): Promise<void> {
 		for (const provider of getBalanceCapableProviders()) {
-			const desc = requireProviderDescriptor(provider);
-			const baseUrl = normalizeBaseUrl(getBaseUrl(provider));
-			if (!desc.officialHosts.includes(normalizeHostname(baseUrl))) {
-				continue;
-			}
+			const baseUrl = normalizeBaseUrl(requireProviderDescriptor(provider).defaultBaseUrl);
 
 			const apiKey = await this.authManager.getApiKey(provider);
 			if (!apiKey) {
@@ -152,14 +147,6 @@ export class BalanceService {
 			}
 			return;
 		}
-	}
-}
-
-function normalizeHostname(url: string): string {
-	try {
-		return new URL(url).hostname.toLowerCase();
-	} catch {
-		return '';
 	}
 }
 

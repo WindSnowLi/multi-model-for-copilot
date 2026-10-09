@@ -1,6 +1,5 @@
 import vscode from 'vscode';
 import { AuthManager } from '../../auth';
-import { getBaseUrl } from '../../config';
 import { normalizeBaseUrl } from '../../endpoint';
 import { logger } from '../../logger';
 import { getBalanceCapableProviders, requireProviderDescriptor } from '../../provider-registry';
@@ -42,12 +41,7 @@ export class BalanceCurrencyResolver {
 		// Check all balance-capable providers in priority order.
 		for (const provider of getBalanceCapableProviders()) {
 			const desc = requireProviderDescriptor(provider);
-			const baseUrl = normalizeBaseUrl(getBaseUrl(provider));
-			const isOfficial = desc.officialHosts.includes(normalizeHostname(baseUrl));
-
-			if (!isOfficial) {
-				continue;
-			}
+			const baseUrl = normalizeBaseUrl(desc.defaultBaseUrl);
 
 			if (this.resolved?.provider === provider && this.resolved?.baseUrl === baseUrl) {
 				return this.resolved.currency;
@@ -97,11 +91,7 @@ export class BalanceCurrencyResolver {
 
 	private needsRefresh(): boolean {
 		for (const provider of getBalanceCapableProviders()) {
-			const desc = requireProviderDescriptor(provider);
-			const baseUrl = normalizeBaseUrl(getBaseUrl(provider));
-			if (!desc.officialHosts.includes(normalizeHostname(baseUrl))) {
-				continue;
-			}
+			const baseUrl = normalizeBaseUrl(requireProviderDescriptor(provider).defaultBaseUrl);
 			if (this.resolved?.baseUrl === baseUrl || this.readCache()?.baseUrl === baseUrl) {
 				return false;
 			}
@@ -112,11 +102,7 @@ export class BalanceCurrencyResolver {
 
 	private async refreshFromBalance(controller: AbortController, generation: number): Promise<void> {
 		for (const provider of getBalanceCapableProviders()) {
-			const desc = requireProviderDescriptor(provider);
-			const baseUrl = normalizeBaseUrl(getBaseUrl(provider));
-			if (!desc.officialHosts.includes(normalizeHostname(baseUrl))) {
-				continue;
-			}
+			const baseUrl = normalizeBaseUrl(requireProviderDescriptor(provider).defaultBaseUrl);
 
 			const apiKey = await this.authManager.getApiKey(provider);
 			if (!apiKey) {
@@ -144,14 +130,6 @@ export class BalanceCurrencyResolver {
 			return undefined;
 		}
 		return value;
-	}
-}
-
-function normalizeHostname(url: string): string {
-	try {
-		return new URL(url).hostname.toLowerCase();
-	} catch {
-		return '';
 	}
 }
 

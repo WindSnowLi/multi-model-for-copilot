@@ -1,4 +1,3 @@
-import type { ApiProvider } from './types';
 import { isOfficialHost } from './provider-registry';
 
 export function isOfficialDeepSeekBaseUrl(baseUrl: string): boolean {
@@ -11,14 +10,6 @@ export function isOfficialMiMoBaseUrl(baseUrl: string): boolean {
 
 export function isOfficialQwenBaseUrl(baseUrl: string): boolean {
 	return isOfficialHost(baseUrl, 'qwen');
-}
-
-/**
- * Check if a base URL belongs to the official endpoint for a given provider.
- * Driven entirely by the Provider Registry — no per-provider branching.
- */
-export function isOfficialProviderBaseUrl(baseUrl: string, provider: ApiProvider): boolean {
-	return isOfficialHost(baseUrl, provider);
 }
 
 export function normalizeBaseUrl(baseUrl: string): string {

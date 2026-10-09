@@ -78,9 +78,7 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 			vscode.workspace.onDidChangeConfiguration((e) => {
 				if (
 					e.affectsConfiguration('multi-model-for-copilot.apiKey') ||
-					e.affectsConfiguration('multi-model-for-copilot.baseUrl') ||
-					e.affectsConfiguration('multi-model-for-copilot.mimoApiKey') ||
-					e.affectsConfiguration('multi-model-for-copilot.mimoBaseUrl')
+					e.affectsConfiguration('multi-model-for-copilot.mimoApiKey')
 				) {
 					this.invalidateCurrencyAndRefreshModels();
 				}

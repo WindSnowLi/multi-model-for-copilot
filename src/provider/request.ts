@@ -2,13 +2,10 @@ import vscode from 'vscode';
 import { AuthManager } from '../auth';
 import { ApiClient, createApiKeyNotConfiguredError } from '../client';
 import {
-	getApiModelId,
-	getBaseUrl,
 	getMaxTokens,
 	getRequestHeaders,
 } from '../config';
 import { MODELS } from '../consts';
-import { isOfficialProviderBaseUrl } from '../endpoint';
 import { getProviderDescriptor } from '../provider-registry';
 import type { ChatCompletionRequest } from '../types';
 import { convertMessages, countMessageChars } from './convert';
@@ -82,7 +79,8 @@ export async function prepareChatRequest({
 		throw createApiKeyNotConfiguredError(modelInfo.name || modelInfo.id);
 	}
 
-	const baseUrl = getBaseUrl(modelDef?.provider);
+	const baseUrl = getProviderDescriptor(modelDef?.provider ?? 'deepseek')?.defaultBaseUrl
+		?? 'https://api.deepseek.com';
 	const provider = modelDef?.provider ?? 'deepseek';
 	const requestHeaders = resolveRequestHeaders(getRequestHeaders(), options, storageUri);
 	const client = new ApiClient(baseUrl, apiKey, provider, requestHeaders);
@@ -109,7 +107,7 @@ export async function prepareChatRequest({
 	const providerDesc = getProviderDescriptor(modelDef?.provider ?? 'deepseek');
 	const useMaxCompletionTokens = providerDesc?.useMaxCompletionTokens ?? false;
 	const baseRequest: ChatCompletionRequest = {
-		model: getApiModelId(modelInfo.id),
+		model: modelInfo.id,
 		messages: ChatMessages,
 		stream: true,
 		tools,
@@ -132,11 +130,8 @@ export async function prepareChatRequest({
 		options as ModelConfigurationOptions,
 		supportedThinkingEfforts,
 	);
-	// Helper requests on the official API run with thinking disabled.
-	const forceNoneThinking =
-		shouldForceThinkingNone(requestKind) &&
-		isOfficialProviderBaseUrl(baseUrl, modelDef?.provider ?? 'deepseek');
-	const thinkingEffort = forceNoneThinking ? 'none' : configuredThinkingEffort;
+	// Helper requests run with thinking disabled.
+	const thinkingEffort = shouldForceThinkingNone(requestKind) ? 'none' : configuredThinkingEffort;
 
 	// Thinking parameter format is provider-specific:
 	//   'reasoning_effort' → only reasoning_effort param (Qwen)

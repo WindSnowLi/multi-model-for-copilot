@@ -79,10 +79,6 @@
         "title": "%multi-model-for-copilot.command.clearQwenApiKey%"
       },
       {
-        "command": "multi-model-for-copilot.resetBaseUrl",
-        "title": "%multi-model-for-copilot.command.resetBaseUrl%"
-      },
-      {
         "command": "multi-model-for-copilot.setVisionModel",
         "title": "%multi-model-for-copilot.command.setVisionModel%"
       },
@@ -142,21 +138,6 @@
     "configuration": {
       "title": "%multi-model-for-copilot.config.title%",
       "properties": {
-        "multi-model-for-copilot.baseUrl": {
-          "type": "string",
-          "default": "https://api.deepseek.com",
-          "markdownDescription": "%multi-model-for-copilot.config.baseUrl.description%"
-        },
-        "multi-model-for-copilot.mimoBaseUrl": {
-          "type": "string",
-          "default": "https://token-plan-cn.xiaomimimo.com/v1",
-          "markdownDescription": "%multi-model-for-copilot.config.mimoBaseUrl.description%"
-        },
-        "multi-model-for-copilot.qwenBaseUrl": {
-          "type": "string",
-          "default": "https://dashscope.aliyuncs.com/compatible-mode/v1",
-          "markdownDescription": "%multi-model-for-copilot.config.qwenBaseUrl.description%"
-        },
         "multi-model-for-copilot.requestHeaders": {
           "type": "object",
           "default": {},
@@ -178,70 +159,6 @@
           "tags": [
             "experimental"
           ]
-        },
-        "multi-model-for-copilot.modelIdOverrides": {
-          "type": "object",
-          "default": {
-            "deepseek-flash": "deepseek-flash",
-            "deepseek-v4-pro": "deepseek-v4-pro",
-            "mimo-v2.6-pro": "mimo-v2.6-pro",
-            "mimo-v2.6-flash": "mimo-v2.6-flash",
-            "mimo-v2.6-pro-ultraspeed": "mimo-v2.6-pro-ultraspeed",
-            "qwen-max": "qwen-max",
-            "qwen-plus": "qwen-plus",
-            "qwen-turbo": "qwen-turbo",
-            "qwen-vl-max": "qwen-vl-max",
-            "qwen-vl-plus": "qwen-vl-plus",
-            "qwen-vl-turbo": "qwen-vl-turbo"
-          },
-          "description": "%multi-model-for-copilot.config.modelIdOverrides.description%",
-          "additionalProperties": false,
-          "properties": {
-            "deepseek-flash": {
-              "type": "string",
-              "description": "%multi-model-for-copilot.config.modelIdOverrides.deepseek-flash.description%"
-            },
-            "deepseek-v4-pro": {
-              "type": "string",
-              "description": "%multi-model-for-copilot.config.modelIdOverrides.deepseek-v4-pro.description%"
-            },
-            "mimo-v2.6-pro": {
-              "type": "string",
-              "description": "%multi-model-for-copilot.config.modelIdOverrides.mimo-v2.6-pro.description%"
-            },
-            "mimo-v2.6-flash": {
-              "type": "string",
-              "description": "%multi-model-for-copilot.config.modelIdOverrides.mimo-v2.6-flash.description%"
-            },
-            "mimo-v2.6-pro-ultraspeed": {
-              "type": "string",
-              "description": "%multi-model-for-copilot.config.modelIdOverrides.mimo-v2.6-pro-ultraspeed.description%"
-            },
-            "qwen-max": {
-              "type": "string",
-              "description": "%multi-model-for-copilot.config.modelIdOverrides.qwen-max.description%"
-            },
-            "qwen-plus": {
-              "type": "string",
-              "description": "%multi-model-for-copilot.config.modelIdOverrides.qwen-plus.description%"
-            },
-            "qwen-turbo": {
-              "type": "string",
-              "description": "%multi-model-for-copilot.config.modelIdOverrides.qwen-turbo.description%"
-            },
-            "qwen-vl-max": {
-              "type": "string",
-              "description": "%multi-model-for-copilot.config.modelIdOverrides.qwen-vl-max.description%"
-            },
-            "qwen-vl-plus": {
-              "type": "string",
-              "description": "%multi-model-for-copilot.config.modelIdOverrides.qwen-vl-plus.description%"
-            },
-            "qwen-vl-turbo": {
-              "type": "string",
-              "description": "%multi-model-for-copilot.config.modelIdOverrides.qwen-vl-turbo.description%"
-            }
-          }
         },
         "multi-model-for-copilot.visionModel": {
           "type": "string",

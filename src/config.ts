@@ -1,21 +1,7 @@
 import vscode from 'vscode';
 import { CONFIG_SECTION } from './consts';
-import { getProviderDescriptor } from './provider-registry';
-import type { ApiProvider } from './types';
 
 export type DebugMode = 'minimal' | 'metadata' | 'verbose';
-
-/**
- * Get API base URL from settings.
- * Falls back to the official endpoint when not configured.
- */
-export function getBaseUrl(provider?: ApiProvider): string {
-	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
-	const desc = getProviderDescriptor(provider ?? 'deepseek');
-	const settingsKey = desc?.baseUrlSettingsKey ?? 'baseUrl';
-	const defaultUrl = desc?.defaultBaseUrl ?? 'https://api.deepseek.com';
-	return config.get<string>(settingsKey) || defaultUrl;
-}
 
 /**
  * Get custom request headers to merge into every chat completion request.
@@ -24,20 +10,6 @@ export function getBaseUrl(provider?: ApiProvider): string {
 export function getRequestHeaders(): Record<string, string> {
 	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
 	return config.get<Record<string, string>>('requestHeaders', {});
-}
-
-/**
- * Resolve the API model ID to send to the endpoint.
- *
- * Users can override model IDs via the `modelIdOverrides` setting object
- * (e.g. for third-party API proxies). Falls back to the VS Code model ID
- * when no override is configured.
- */
-export function getApiModelId(vscodeModelId: string): string {
-	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
-	const overrides = config.get<Record<string, string>>('modelIdOverrides');
-	const override = overrides?.[vscodeModelId]?.trim();
-	return override || vscodeModelId;
 }
 
 /**

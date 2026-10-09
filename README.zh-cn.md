@@ -111,7 +111,7 @@ MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
 | **Qwen VL Plus** | 千问 AI | 1M | 128K | 原生 | 支持 | 支持 |
 | **Qwen VL Turbo** | 千问 AI | 1M | 128K | 原生 | 支持 | 支持 |
 
-**DeepSeek V4.1 Flash** 为当前旗舰模型，请求使用的模型名为 `deepseek-flash`。旧的 `deepseek-v4-flash` 与 `deepseek-v4-flash-vision-exp` 名称已下线：官方 API 会用 V4.1 Flash 承接这些请求，因此本扩展不再提供这两个预设。若第三方端点仍暴露旧名称，可通过 `modelIdOverrides` 映射。
+**DeepSeek V4.1 Flash** 为当前旗舰模型，请求使用的模型名为 `deepseek-flash`。旧的 `deepseek-v4-flash` 与 `deepseek-v4-flash-vision-exp` 名称已下线：官方 API 会用 V4.1 Flash 承接这些请求，因此本扩展不再提供这两个预设。
 
 **DeepSeek V4 Pro**（`deepseek-v4-pro`）为上一代模型，DeepSeek 在 V4.1 Flash 发布后[决定继续提供](https://api-docs.deepseek.com/updates)该模型的 API 服务。
 
@@ -133,7 +133,6 @@ VS Code 内置的 Copilot Chat 自己也能接入这三家：**管理语言模�
 | `Multi-Model: 设置 MiMo API Key` | 设置 MiMo Key |
 | `Multi-Model: 清除 API Key` | 移除 DeepSeek Key |
 | `Multi-Model: 清除 MiMo API Key` | 移除 MiMo Key |
-| `Multi-Model: 重置 API 基础 URL` | 将服务商基础 URL 重置为默认值（可选择范围） |
 | `Multi-Model: 配置视觉代理` | 配置图片代理 |
 | `Multi-Model: 打开设置` | 打开设置 |
 | `Multi-Model: 显示日志` | 显示日志 |
@@ -142,12 +141,8 @@ VS Code 内置的 Copilot Chat 自己也能接入这三家：**管理语言模�
 
 | 设置项 | 默认值 | 说明 |
 |---|---|---|
-| `baseUrl` | `https://api.deepseek.com` | DeepSeek API 端点 |
-| `mimoBaseUrl` | `https://token-plan-cn.xiaomimimo.com/v1` | MiMo API 端点 |
-| `qwenBaseUrl` | `https://dashscope.aliyuncs.com/compatible-mode/v1` | 千问（DashScope）API 端点 |
 | `requestHeaders` | `{}` | 聊天补全请求的额外请求头，支持 `${conversationId}`（[文档](docs/settings/request-headers.zh.md)） |
 | `maxTokens` | `0` | 全局最大输出（0 = 不限制） |
-| `modelIdOverrides` | 官方 ID | 覆盖内置模型 ID |
 | `debugMode` | `minimal` | 诊断级别 |
 | `visionModel` | 自动 | 视觉代理模型 |
 | `visionPrompt` | 内置 | 图片描述提示词 |

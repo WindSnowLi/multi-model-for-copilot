@@ -102,8 +102,7 @@ For any other endpoint (OpenAI, Azure, a gateway, Ollama, …), use Copilot's bu
 
 **DeepSeek V4.1 Flash** is the current flagship and is sent to the `deepseek-flash` model name.
 The older `deepseek-v4-flash` and `deepseek-v4-flash-vision-exp` names are retired: DeepSeek
-serves those requests from V4.1 Flash, so this extension no longer offers them as presets. If a
-third-party endpoint still exposes the old names, map them through `modelIdOverrides`.
+serves those requests from V4.1 Flash, so this extension no longer offers them as presets.
 
 **DeepSeek V4 Pro** (`deepseek-v4-pro`) is the previous-generation model, which DeepSeek
 [decided to keep serving](https://api-docs.deepseek.com/updates) after the V4.1 Flash release.
@@ -134,7 +133,6 @@ supported path; this extension deliberately keeps no custom-model editor of its 
 | `Multi-Model: Set MiMo API Key` | Set MiMo API key |
 | `Multi-Model: Clear API Key` | Remove DeepSeek key |
 | `Multi-Model: Clear MiMo API Key` | Remove MiMo key |
-| `Multi-Model: Reset API Base URL` | Reset a provider base URL to its default (choose scope) |
 | `Multi-Model: Configure Vision Proxy` | Configure image proxy |
 | `Multi-Model: Open Settings` | Open settings |
 | `Multi-Model: Show Logs` | Show diagnostics |
@@ -143,12 +141,8 @@ supported path; this extension deliberately keeps no custom-model editor of its 
 
 | Setting | Default | Description |
 |---|---|---|
-| `baseUrl` | `https://api.deepseek.com` | DeepSeek API endpoint |
-| `mimoBaseUrl` | `https://token-plan-cn.xiaomimimo.com/v1` | MiMo API endpoint |
-| `qwenBaseUrl` | `https://dashscope.aliyuncs.com/compatible-mode/v1` | Qwen (DashScope) API endpoint |
 | `requestHeaders` | `{}` | Extra headers for chat completion requests; supports `${conversationId}` ([docs](docs/settings/request-headers.en.md)) |
 | `maxTokens` | `0` | Global max output tokens (0 = no limit) |
-| `modelIdOverrides` | official IDs | Override built-in model IDs |
 | `debugMode` | `minimal` | Diagnostic level |
 | `visionModel` | auto | Vision proxy model |
 | `visionPrompt` | built-in | Image description prompt |

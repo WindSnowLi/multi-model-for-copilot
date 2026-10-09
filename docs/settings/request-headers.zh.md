@@ -1,16 +1,15 @@
 # 自定义请求头
 
-`multi-model-for-copilot.requestHeaders` 用于为发送到已配置的服务商基础 URL（`multi-model-for-copilot.baseUrl`、`multi-model-for-copilot.mimoBaseUrl`、`multi-model-for-copilot.qwenBaseUrl`）的聊天补全请求添加或覆盖请求头，默认值为 `{}`。
+`multi-model-for-copilot.requestHeaders` 用于为发送到官方服务商端点（DeepSeek、MiMo、千问）的聊天补全请求添加或覆盖请求头，默认值为 `{}`。
 
 ## 配置方式
 
 在 VS Code 原生 Settings 编辑器中添加请求头名称和字符串值，或编辑 `settings.json`。
 
-以 OpenAI 兼容网关为例：
+示例：
 
 ```json
 {
-  "multi-model-for-copilot.baseUrl": "https://gateway.example.com/v1",
   "multi-model-for-copilot.requestHeaders": {
     "User-Agent": "multi-model-for-copilot",
     "x-session-id": "${conversationId}"

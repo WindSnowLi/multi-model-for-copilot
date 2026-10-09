@@ -237,33 +237,20 @@ const zh: Translations = {
 	'error.action.checkMiMoStatus': '查看 MiMo 状态',
 	'error.action.checkStatus': '查看服务状态',
 	'error.action.viewDetails': '错误详情',
-	'error.network.dns': '[{0}] DNS 解析失败。请检查网络连接、防火墙或代理设置，以及自定义 baseUrl。',
+	'error.network.dns': '[{0}] DNS 解析失败。请检查网络连接、防火墙或代理设置。',
 	'error.network.unreachable':
-		'[{0}] 目标不可达或拒绝连接。请检查自定义 baseUrl、代理服务、网络连接或防火墙设置。',
+		'[{0}] 目标不可达或拒绝连接。请检查代理服务、网络连接或防火墙设置。',
 	'error.network.interrupted': '[{0}] 连接被中断。请检查网络连接、防火墙或代理设置，或稍后重试。',
 	'error.network.timeout': '[{0}] 连接超时。请稍后重试，或检查网络连接、防火墙或代理设置。',
-	'error.network.tls': '[{0}] TLS/证书校验失败。请检查代理、证书配置或自定义 baseUrl。',
+	'error.network.tls': '[{0}] TLS/证书校验失败。请检查代理或证书配置。',
 	'error.network.aborted':
 		'[{0}] 请求已中止。如果不是主动取消，请检查网络连接或代理设置，或稍后重试。',
 	'error.network.protocol':
-		'[{0}] HTTP 连接或响应解析失败。请检查代理设置、自定义 baseUrl 或服务响应。',
-	'error.network.configuration': '[{0}] 请求配置无效。请检查自定义 baseUrl 或扩展设置。',
+		'[{0}] HTTP 连接或响应解析失败。请检查代理设置或服务响应。',
+	'error.network.configuration': '[{0}] 请求配置无效。请检查扩展设置。',
 	'error.network.generic':
-		'[{0}] 网络请求失败。请检查网络连接、防火墙或代理设置，以及自定义 baseUrl。',
+		'[{0}] 网络请求失败。请检查网络连接、防火墙或代理设置。',
 	'error.unknown': '模型请求失败：{0}',
-
-	// Settings
-	'settings.resetBaseUrl.title': '重置 API 基础 URL',
-	'settings.resetBaseUrl.chooseProvider': '选择要重置基础 URL 的服务商',
-	'settings.resetBaseUrl.chooseScope': '选择要重置的设置范围',
-	'settings.resetBaseUrl.user': '用户设置',
-	'settings.resetBaseUrl.workspace': '工作区设置',
-	'settings.resetBaseUrl.notConfigured': '未配置',
-	'settings.resetBaseUrl.current': '当前值：{0}',
-	'settings.resetBaseUrl.after': '重置后使用：{0}',
-	'settings.resetBaseUrl.afterInherited': '重置后继承远程用户设置中的值。',
-	'settings.resetBaseUrl.none': '当前没有自定义的 API 基础 URL。',
-	'settings.resetBaseUrl.failed': '重置 API 基础 URL 失败，请运行 "Multi-Model: 显示日志" 查看详情。',
 
 	// Extension
 	'extension.activateFailed': '扩展激活失败，请运行 "Multi-Model: 显示日志" 查看详情。',
@@ -523,38 +510,24 @@ const en: Translations = {
 	'error.action.checkStatus': 'Check service status',
 	'error.action.viewDetails': 'Error Details',
 	'error.network.dns':
-		'[{0}] DNS lookup failed. Check your network connection, firewall, or proxy settings, and your custom baseUrl.',
+		'[{0}] DNS lookup failed. Check your network connection, firewall, or proxy settings.',
 	'error.network.unreachable':
-		'[{0}] The target is unreachable or refused the connection. Check your custom baseUrl, proxy service, network connection, or firewall settings.',
+		'[{0}] The target is unreachable or refused the connection. Check your proxy service, network connection, or firewall settings.',
 	'error.network.interrupted':
 		'[{0}] The connection was interrupted. Check your network connection, firewall, or proxy settings, or try again later.',
 	'error.network.timeout':
 		'[{0}] Connection timed out. Try again later, or check your network connection, firewall, or proxy settings.',
 	'error.network.tls':
-		'[{0}] TLS/certificate verification failed. Check your proxy settings, certificate configuration, or custom baseUrl.',
+		'[{0}] TLS/certificate verification failed. Check your proxy settings or certificate configuration.',
 	'error.network.aborted':
 		'[{0}] The request was aborted. If you did not cancel it, check your network connection or proxy settings, or try again later.',
 	'error.network.protocol':
-		'[{0}] The HTTP connection or response parsing failed. Check your proxy settings, custom baseUrl, or service response.',
+		'[{0}] The HTTP connection or response parsing failed. Check your proxy settings or the service response.',
 	'error.network.configuration':
-		'[{0}] The request configuration is invalid. Check your custom baseUrl or extension settings.',
+		'[{0}] The request configuration is invalid. Check the extension settings.',
 	'error.network.generic':
-		'[{0}] Network request failed. Check your network connection, firewall, or proxy settings, and your custom baseUrl.',
+		'[{0}] Network request failed. Check your network connection, firewall, or proxy settings.',
 	'error.unknown': 'Model request failed: {0}',
-
-	// Settings
-	'settings.resetBaseUrl.title': 'Reset API Base URL',
-	'settings.resetBaseUrl.chooseProvider': 'Select the provider whose base URL should be reset',
-	'settings.resetBaseUrl.chooseScope': 'Select the settings scope to reset',
-	'settings.resetBaseUrl.user': 'User settings',
-	'settings.resetBaseUrl.workspace': 'Workspace settings',
-	'settings.resetBaseUrl.notConfigured': 'Not configured',
-	'settings.resetBaseUrl.current': 'Current: {0}',
-	'settings.resetBaseUrl.after': 'After reset: {0}',
-	'settings.resetBaseUrl.afterInherited': 'Inherits the remote user setting after reset.',
-	'settings.resetBaseUrl.none': 'No custom API base URL is configured.',
-	'settings.resetBaseUrl.failed':
-		'Failed to reset the API base URL. Run "Multi-Model: Show Logs" for details.',
 
 	// Extension
 	'extension.activateFailed': 'Extension failed to activate. Run "Multi-Model: Show Logs" for details.',
