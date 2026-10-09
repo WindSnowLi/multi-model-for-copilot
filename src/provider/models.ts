@@ -27,19 +27,8 @@ export type ModelPickerChatInformation = vscode.LanguageModelChatInformation &
 		readonly isUserSelectable: boolean;
 		readonly isBYOK: true;
 		readonly statusIcon?: vscode.ThemeIcon;
-		readonly capabilities: vscode.LanguageModelChatCapabilities & {
-			/**
-			 * Request protocol used by this provider (1 = Chat Completions). Declared
-			 * through the proposed `languageModelCapabilities` API so the host knows
-			 * which reasoning blocks can be replayed.
-			 */
-			readonly apiType?: number;
-		};
 		readonly configurationSchema?: ThinkingEffortConfigurationSchema;
 	};
-
-/** Chat Completions protocol marker for `LanguageModelChatCapabilities.apiType`. */
-const CHAT_COMPLETIONS_API_TYPE = 1;
 
 export function toChatInfo(
 	m: ModelDefinition,
@@ -65,9 +54,6 @@ export function toChatInfo(
 		capabilities: {
 			toolCalling: m.capabilities.toolCalling,
 			imageInput: m.capabilities.imageInput,
-			// Every built-in provider and custom model speaks the OpenAI-compatible
-			// Chat Completions protocol.
-			apiType: CHAT_COMPLETIONS_API_TYPE,
 		},
 		...toModelCostInfo(m, pricingCurrency, new Date(), showPricingNotice),
 		...(m.capabilities.thinking
