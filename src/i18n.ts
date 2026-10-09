@@ -60,7 +60,6 @@ const zh: Translations = {
 	'auth.emptyValidation': 'API Key 不能为空',
 	'auth.saved': 'API Key 已安全保存。',
 	'auth.removed': 'API Key 已移除。',
-	'auth.notConfigured': 'API Key 未配置，请在命令面板运行 "Multi-Model: 设置 API Key"。',
 	'auth.notConfiguredForModel':
 		'模型 "{0}" 的 API Key 未配置，请在命令面板运行 "Multi-Model: 设置 API Key"。',
 	'auth.clearConfirm': '确定要清除 {0} 的 API Key 吗？',
@@ -235,8 +234,6 @@ const zh: Translations = {
 	'error.action.setApiKey': '设置 API Key',
 	'error.action.createApiKey': '创建 API Key',
 	'error.action.viewUsage': '用量',
-	'error.action.checkDeepSeekStatus': '查看服务状态',
-	'error.action.checkMiMoStatus': '查看 MiMo 状态',
 	'error.action.checkStatus': '查看服务状态',
 	'error.action.viewDetails': '错误详情',
 	'error.network.dns': '[{0}] DNS 解析失败。请检查网络连接、防火墙或代理设置。',
@@ -312,8 +309,6 @@ const en: Translations = {
 	'auth.emptyValidation': 'API key cannot be empty',
 	'auth.saved': 'API key saved.',
 	'auth.removed': 'API key removed.',
-	'auth.notConfigured':
-		'API key not configured. Run "Multi-Model: Set API Key" from the Command Palette.',
 	'auth.notConfiguredForModel':
 		'API key for model "{0}" is not configured. Run "Multi-Model: Set API Key" from the Command Palette.',
 	'auth.clearConfirm': 'Clear the {0} API key?',
@@ -512,8 +507,6 @@ const en: Translations = {
 	'error.action.setApiKey': 'Set API Key',
 	'error.action.createApiKey': 'Create API Key',
 	'error.action.viewUsage': 'Usage',
-	'error.action.checkDeepSeekStatus': 'Check service status',
-	'error.action.checkMiMoStatus': 'Check MiMo status',
 	'error.action.checkStatus': 'Check service status',
 	'error.action.viewDetails': 'Error Details',
 	'error.network.dns':

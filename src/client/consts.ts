@@ -13,7 +13,6 @@ export const MAX_DIAGNOSTIC_FIELD_LENGTH = 300;
  * Driven by EXTERNAL_URLS — adding a new provider just needs an entry there.
  */
 function buildProviderErrorLinks(
-	statusKey: HttpErrorLinkStatusKey,
 	linkFn: (urls: (typeof EXTERNAL_URLS)[ApiProvider]) => HttpErrorLinkDefinition,
 ): Partial<Record<ApiProvider, HttpErrorLinkDefinition>> {
 	const result: Partial<Record<ApiProvider, HttpErrorLinkDefinition>> = {};
@@ -29,15 +28,15 @@ function buildProviderErrorLinks(
 export const API_PROVIDER_HTTP_ERROR_LINKS: Readonly<
 	Record<HttpErrorLinkStatusKey, Readonly<Partial<Record<ApiProvider, HttpErrorLinkDefinition>>>>
 > = {
-	401: buildProviderErrorLinks(401, (urls) => ({
+	401: buildProviderErrorLinks((urls) => ({
 		labelKey: 'error.action.createApiKey',
 		url: urls.apiKeys,
 	})),
-	402: buildProviderErrorLinks(402, (urls) => ({
+	402: buildProviderErrorLinks((urls) => ({
 		labelKey: 'error.action.viewUsage',
 		url: urls.usage,
 	})),
-	'5xx': buildProviderErrorLinks('5xx', (urls) => ({
+	'5xx': buildProviderErrorLinks((urls) => ({
 		labelKey: 'error.action.checkStatus',
 		url: urls.status,
 	})),
