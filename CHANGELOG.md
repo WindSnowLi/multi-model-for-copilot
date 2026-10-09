@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.8.0](https://github.com/WindSnowLi/multi-model-for-copilot/compare/v0.7.0...v0.8.0) (2026-10-08)
+## 0.8.0 (2026-10-08)
 
 
 ### Features
