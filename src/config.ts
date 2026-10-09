@@ -121,6 +121,32 @@ export async function migrateLegacyDebugSetting(): Promise<void> {
 	}
 }
 
+/**
+ * Remove the retired `multi-model-for-copilot.customModels` setting.
+ *
+ * Custom models are gone: arbitrary endpoints are handled by Copilot's built-in
+ * Custom Endpoint provider. Deleting the stale key keeps it from surfacing as an
+ * unknown setting in the Settings editor.
+ */
+export async function migrateRemovedCustomModelsSetting(): Promise<void> {
+	await removeSettingAtScope('customModels', vscode.ConfigurationTarget.Global);
+	if (vscode.workspace.workspaceFile || vscode.workspace.workspaceFolders?.length) {
+		await removeSettingAtScope('customModels', vscode.ConfigurationTarget.Workspace);
+	}
+}
+
+async function removeSettingAtScope(
+	key: string,
+	target: vscode.ConfigurationTarget,
+	resource?: vscode.Uri,
+): Promise<void> {
+	const config = vscode.workspace.getConfiguration(CONFIG_SECTION, resource);
+	if (getScopedValue(config.inspect<unknown>(key), target) === undefined) {
+		return;
+	}
+	await config.update(key, undefined, target);
+}
+
 function getConfiguredDebugMode(config: vscode.WorkspaceConfiguration): DebugMode | undefined {
 	const mode = config.inspect<unknown>('debugMode');
 	return normalizeDebugMode(mode?.workspaceValue) ?? normalizeDebugMode(mode?.globalValue);
