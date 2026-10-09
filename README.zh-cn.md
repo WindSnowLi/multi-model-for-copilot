@@ -2,12 +2,11 @@
 
 <p align="center">
   <!-- marketplace-readme:remove-start -->
-  <a href="https://marketplace.visualstudio.com/items?itemName=Vizards.multi-model-for-copilot"><img src="https://img.shields.io/badge/VS%20Code%20Marketplace-Install-007ACC?logo=visualstudiocode&logoColor=white&style=for-the-badge" alt="从 VS Code Marketplace 安装"></a>
-  <a href="https://open-vsx.org/extension/WindSnowLi/multi-model-for-copilot"><img src="https://img.shields.io/badge/Open%20VSX-Install-6A4FB6?style=for-the-badge" alt="从 Open VSX 安装"></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=Vizards.multi-model-for-copilot"><img src="https://img.shields.io/badge/VS%20Code%20Marketplace-Install-007ACC?logo=visualstudiocode&logoColor=white&style=for-the-badge" alt="安装 VS Code Marketplace 版本"></a>
+  <a href="https://open-vsx.org/extension/WindSnowLi/multi-model-for-copilot"><img src="https://img.shields.io/badge/Open%20VSX-Install-6A4FB6?style=for-the-badge" alt="安装 Open VSX 版本"></a>
   <br/>
   <!-- marketplace-readme:remove-end -->
-  <img src="https://img.shields.io/github/v/release/WindSnowLi/multi-model-for-copilot?style=for-the-badge&label=Version" alt="版本" />
-  <img src="https://vsmarketplacebadges.dev/installs-short/Vizards.multi-model-for-copilot.svg?style=for-the-badge" alt="安装量" />
+  <img src="https://img.shields.io/github/v/release/WindSnowLi/multi-model-for-copilot?style=for-the-badge&label=Version" alt="Version" />
 </p>
 
 <p align="center">
@@ -15,159 +14,61 @@
   简体中文
 </p>
 
-**将 DeepSeek、MiMo 及任意 OpenAI 兼容模型接入 GitHub Copilot Chat —— 支持视觉、思考模式、Agent 工具，使用你自己的 API Key。**
+**在 GitHub Copilot Chat 的模型选择器里使用 DeepSeek、MiMo、千问预设 —— 使用你自己的 API Key。**
 
 <p align="center">
-  <img src="resources/screenshots/01-picker.png" alt="DeepSeek V4 Pro 和 Flash 出现在 Copilot Chat 模型选择器中，带有可按模型独立设置的思考深度下拉菜单（停用 / 标准 / 深度）" width="800">
+  <img src="resources/screenshots/01-picker.png" alt="本扩展提供的模型出现在 Copilot Chat 模型选择器中" width="800">
 </p>
 
-喜欢 DeepSeek、MiMo 和千问的性价比，但不想放弃 GitHub Copilot 的 Agent 模式、工具调用和成熟的交互体验？本扩展将 **DeepSeek V4.1**、**MiMo V2.6** 和**千问 AI** 直接接入 Copilot Chat 模型选择器。其他端点请使用 Copilot 内置的 **Custom Endpoint**（见下文）。
+## 为什么用它
 
-## 为什么选这个扩展？
+Copilot 内置的 Custom Endpoint 已能接入[任意端点](docs/official-byok.zh.md)；本扩展为 DeepSeek / MiMo / 千问补充官方没有的部分：
 
-- **不是替换 Copilot，而是增强它。** 没有新的侧边栏，没有新的聊天界面。只是在模型选择器中多了更多选项。
-- **Agent 模式、工具调用、Instructions、MCP、Skills——全部正常运作。** Copilot 的完整能力栈，现在可以跑在 DeepSeek、MiMo 或千问上。
-- **视觉支持。** DeepSeek V4.1 Flash 和 MiMo V2.6 原生支持图片输入；DeepSeek V4 Pro 通过视觉代理间接支持。
-- **开箱预设。** 三家服务商的鉴权方式、思考参数、计价与上下文长度都已内置，无需手写配置。
-- **BYOK。** 你的 API Key，你的账单。存储在 OS 钥匙串中。
-- **需自行提供 API Key，直接向 DeepSeek 付费。** 你的 API Key，你的账单，你的速率限制。密钥存储在操作系统密钥链中，不会以明文形式写入磁盘。
-
-## 功能特性
-
-### DeepSeek V4.1 Flash 与 V4 Pro 出现在模型选择器中
-模型与 GPT-4o、Claude 等并列在 Copilot Chat 的模型选择器中，可在对话中途切换模型，不丢失聊天历史。
-
-### 透明视觉代理
-
-DeepSeek V4 Pro 是纯文本模型。将截图拖入聊天，本扩展会自动将图片交给视觉代理模型（默认自动选择，或你配置的代理）进行描述，再将描述结果反馈给模型。**零配置**——只需在首次使用时配置一次视觉代理来源即可。
-
-**DeepSeek V4.1 Flash** 为官方原生视觉模型，图片会以 OpenAI `image_url` 格式直接发送，无需代理描述。
-
-<p align="center">
-  <img src="resources/screenshots/03-vision.png" alt="将图片拖入 Copilot Chat，DeepSeek 通过视觉代理响应" width="800">
-</p>
-
-### 思考模式与推理深度控制
-完整支持 DeepSeek 的 `reasoning_content`。通过 Copilot Chat 模型选择器的菜单选择思考档位：DeepSeek 提供 `停用`、`低`、`标准`（默认）、`深度`；MiMo 提供 `停用`、`低`、`标准`，因为 MiMo API 不接受 `reasoning_effort: max`；其他模型提供 `停用`、`标准`、`深度`。
-
-### 继承全部 Copilot 能力
-由于本扩展接入的是 Copilot 的原生 provider API，你免费获得完整能力栈：
-- **Agent 模式**——自主执行多步骤任务
-- **工具调用**——文件编辑、终端操作、工作区搜索、Git、测试
-- **Instructions & Skills**——你的 `.instructions.md`、`AGENTS.md` 和各项 Skills 开箱即用
-- **Prompt 缓存统计**——在输出通道中记录 DeepSeek 缓存命中率，直观看到成本节省
-
-<p align="center">
-  <img src="resources/screenshots/04-agent.png" alt="DeepSeek V4 Pro 运行 Copilot 的 Agent 模式，执行工具调用" width="800">
-</p>
-
-### 安全优先
-API Key 存储在 VS Code 的 `SecretStorage` 中（macOS 钥匙串 / Windows 凭据管理器 / Linux 密钥环）。绝不会出现在 `settings.json` 中，也不会被提交到 Git 历史。
-
-### 零运行时依赖
-纯 VS Code API + Node.js 内置模块。无需 Python、Docker 或本地代理进程。
+- 各服务商的鉴权与请求形态（MiMo 的 `api-key` 头、千问的 `reasoning_effort`、DeepSeek 的 `thinking` 开关）
+- **不具备原生视觉**的模型也能传图：视觉代理先描述图片，再以文本转发
+- 峰谷计价、人民币/美元成本展示、DeepSeek 实时余额
+- 状态栏 token 速度与 `${conversationId}` 请求头模板
 
 ## 快速开始
 
-### 前置条件
+`Ctrl+Shift+P` → `Multi-Model: 设置 API Key` → 在 Copilot Chat 中选择模型。
 
-- **VS Code 1.116+** 及 **GitHub Copilot** 订阅（Free / Pro / Enterprise）
-- 至少一个提供商的 API Key：
-  - DeepSeek：[platform.deepseek.com](https://platform.deepseek.com)（`sk-...`）
-  - MiMo：[platform.xiaomimimo.com](https://platform.xiaomimimo.com)（`tp-...`）
-  - 千问：[platform.qianwenai.com](https://platform.qianwenai.com)（`sk-...`）
-  - 任意 OpenAI 兼容端点
+| 服务商 | 模型 | 鉴权 | Key |
+|---|---|---|---|
+| DeepSeek | V4.1 Flash（`deepseek-flash`）、V4 Pro | `Authorization: Bearer` | `sk-...` |
+| 小米 MiMo | V2.6 Pro、V2.6 Flash、V2.6 Pro Ultraspeed | `api-key` | `tp-...` |
+| 千问 | Max、Plus、Turbo、VL Max、VL Plus、VL Turbo | `Authorization: Bearer` | `sk-...` |
+| 其他 | 任意 OpenAI 兼容端点 | — | 用 Copilot 内置的 **Custom Endpoint** |
 
-### 安装方式
-
-1. **VS Code** — 从 [Marketplace](https://marketplace.visualstudio.com/items?itemName=Vizards.multi-model-for-copilot) 安装
-2. **其他编辑器** — 从 [Open VSX](https://open-vsx.org/extension/WindSnowLi/multi-model-for-copilot) 安装
-
-### 快速上手
-
-```
-Ctrl+Shift+P → Multi-Model: 设置 API Key → 粘贴 Key → 在 Copilot Chat 选择模型
-```
-
-MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
-
-千问：`Multi-Model: 设置千问 API Key` → 粘贴 `sk-...` Key。
-
-其他端点（OpenAI、Azure、网关、Ollama 等）请使用 Copilot 内置的 **Custom Endpoint** provider —— 见 [docs/official-byok.zh.md](docs/official-byok.zh.md)。
-
-## 模型
-
-| 模型 | 提供商 | 上下文 | 最大输出 | 视觉 | 思考 | 工具 |
-|---|---|---|---|---|---|---|
-| **DeepSeek V4.1 Flash** | DeepSeek | 1M | 384K | 原生 | 支持 | 支持 |
-| **DeepSeek V4 Pro** | DeepSeek | 1M | 384K | 代理 | 支持 | 支持 |
-| **MiMo V2.6 Pro** | 小米 MiMo | 1M | 128K | 原生 | 支持 | 支持 |
-| **MiMo V2.6 Flash** | 小米 MiMo | 1M | 128K | 原生 | 支持 | 支持 |
-| **MiMo V2.6 Pro Ultraspeed** | 小米 MiMo | 1M | 128K | 原生 | 支持 | 支持 |
-| **Qwen Max** | 千问 AI | 1M | 128K | 不支持 | 支持 | 支持 |
-| **Qwen Plus** | 千问 AI | 1M | 128K | 不支持 | 支持 | 支持 |
-| **Qwen Turbo** | 千问 AI | 1M | 128K | 不支持 | 支持 | 支持 |
-| **Qwen VL Max** | 千问 AI | 1M | 128K | 原生 | 支持 | 支持 |
-| **Qwen VL Plus** | 千问 AI | 1M | 128K | 原生 | 支持 | 支持 |
-| **Qwen VL Turbo** | 千问 AI | 1M | 128K | 原生 | 支持 | 支持 |
-
-**DeepSeek V4.1 Flash** 为当前旗舰模型，请求使用的模型名为 `deepseek-flash`。旧的 `deepseek-v4-flash` 与 `deepseek-v4-flash-vision-exp` 名称已下线：官方 API 会用 V4.1 Flash 承接这些请求，因此本扩展不再提供这两个预设。
-
-**DeepSeek V4 Pro**（`deepseek-v4-pro`）为上一代模型，DeepSeek 在 V4.1 Flash 发布后[决定继续提供](https://api-docs.deepseek.com/updates)该模型的 API 服务。
-
-## 官方方案：不装扩展也能用
-
-VS Code 内置的 Copilot Chat 自己也能接入这三家：**管理语言模型**（模型选择器里的齿轮图标）→ **Add Models** → **Custom Endpoint**，配置由 VS Code 写入 `chatLanguageModels.json`。按官方文档，BYOK 模型无需登录 GitHub 账号、也不需要 Copilot 订阅。
-
-如果你只是想把模型加进选择器，官方路径可能已经够用 —— DeepSeek / MiMo / Qwen 的可直接复制模板（含本扩展替你处理的鉴权头）见 [docs/official-byok.zh.md](docs/official-byok.zh.md)。
-
-仍然只有本扩展提供：非原生视觉模型的图片支持（视觉代理）、峰谷计价与余额、状态栏 token 速度、`${conversationId}` 请求头模板、一条命令配置 Key —— 完整对比见同一页。
-
-对于本扩展没有预置的端点，请使用 Copilot 内置的 Custom Endpoint provider —— 本扩展刻意不再自带自定义模型编辑器。
+上下文：DeepSeek 与 MiMo 为 1M（最大输出 384K / 128K），千问为 32K–131K。
+DeepSeek V4 Pro 与纯文本千问模型通过视觉代理支持图片。
+需要 VS Code 1.116+ 与 GitHub Copilot（Free / Pro / Enterprise）；BYOK 无需 Copilot 订阅。
 
 ## 命令
 
 | 命令 | 说明 |
 |---|---|
-| `Multi-Model: 设置 API Key` | 设置 DeepSeek Key |
-| `Multi-Model: 设置 MiMo API Key` | 设置 MiMo Key |
-| `Multi-Model: 清除 API Key` | 移除 DeepSeek Key |
-| `Multi-Model: 清除 MiMo API Key` | 移除 MiMo Key |
-| `Multi-Model: 配置视觉代理` | 配置图片代理 |
-| `Multi-Model: 打开设置` | 打开设置 |
-| `Multi-Model: 显示日志` | 显示日志 |
+| `Multi-Model: 设置 API Key` | 设置 DeepSeek Key（另有 `设置 MiMo API Key`、`设置 Qwen API Key`） |
+| `Multi-Model: 清除 API Key` | 移除 Key（同样有 MiMo / 千问版本） |
+| `Multi-Model: 获取 API Key` | 打开 DeepSeek 密钥页面 |
+| `Multi-Model: 配置视觉代理` | 选择用于描述图片的模型 |
+| `Multi-Model: 刷新余额` | 刷新 DeepSeek 余额 |
+| `Multi-Model: 显示日志` | 打开诊断日志 |
+| `Multi-Model: 打开设置` | 打开本扩展设置 |
 
 ## 设置项
 
-| 设置项 | 默认值 | 说明 |
+| 设置 | 默认值 | 说明 |
 |---|---|---|
-| `requestHeaders` | `{}` | 聊天补全请求的额外请求头，支持 `${conversationId}`（[文档](docs/settings/request-headers.zh.md)） |
-| `maxTokens` | `0` | 全局最大输出（0 = 不限制） |
-| `debugMode` | `minimal` | 诊断级别 |
-| `visionModel` | 自动 | 视觉代理模型 |
-| `visionPrompt` | 内置 | 图片描述提示词 |
-| `statusBar.balance` | `true` | 在状态栏实时显示账户余额（DeepSeek，点击可刷新） |
-| `statusBar.tokenSpeed` | `true` | 在流式生成时于状态栏实时显示 token 速度（tokens/秒） |
-| `showPricingNotice` | `true` | 在模型选择器中显示高峰/低峰计费提示（DeepSeek；低峰为高峰半价） |
-
-## 方案对比
-
-| 特性 | 本扩展 | 官方 Custom Endpoint（内置） | 本地代理 |
-|---|---|---|---|
-| 在 Copilot Chat 中 | ✅ | ✅ | ✅ |
-| 无需额外进程 | ✅ | ✅ | ❌ |
-| 配置方式 | 装扩展后直接选 provider | 手写 `chatLanguageModels.json` | 跑一个代理进程 |
-| DeepSeek / MiMo / Qwen 预设与鉴权头 | ✅ | 需手写 JSON | ❌ |
-| 任意 OpenAI 兼容端点 | ❌ —— 请用内置 provider | ✅ | ✅ |
-| 模型发现 | ❌ —— 请用内置 provider | ✅（provider 级 `url`） | ❌ |
-| 原生视觉 | ✅ | ✅ | ❌ |
-| 非原生视觉模型的图片支持 | ✅（视觉代理） | ❌ | ❌ |
-| 计价 / 余额可见性 | ✅ | ❌ | ❌ |
-| 状态栏 token 速度 | ✅ | ❌ | ❌ |
-| 请求头 `${conversationId}` 模板 | ✅ | ❌ | 视情况 |
-| Key 存钥匙串 | ✅ | ✅（secret storage） | 视情况 |
-
-内置配置模板见 [docs/official-byok.zh.md](docs/official-byok.zh.md)。
+| `requestHeaders` | `{}` | 额外请求头，支持 `${conversationId}`（[文档](docs/settings/request-headers.zh.md)） |
+| `maxTokens` | `0` | 全局最大输出（0 = 由服务商决定） |
+| `debugMode` | `minimal` | 诊断级别：`minimal` 或 `metadata` |
+| `visionModel` | 自动 | 视觉代理使用的模型 |
+| `visionPrompt` | 内置 | 视觉代理使用的提示词 |
+| `statusBar.balance` | `true` | 状态栏显示 DeepSeek 余额 |
+| `statusBar.tokenSpeed` | `true` | 状态栏显示 token 速度 |
+| `showPricingNotice` | `true` | 选择器中显示峰谷计费提示 |
+| `experimental.stabilizeToolList` | `false` | 预激活工具以获得更稳定的 `tools` 数组（[说明](docs/notices/tool-drift.zh.md)） |
 
 ## 许可证
 

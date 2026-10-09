@@ -1,3 +1,1 @@
-扩展激活后，DeepSeek 模型应立即出现在 Copilot 模型选择器中。如果尚未配置 API Key，模型会显示警告图标，直到你运行 `Multi-Model: 设置 API Key` 为止。
-
-如果没有立即看到，可能只是模型列表较长。在选取器中向下滚动，查找 DeepSeek V4.1 Flash 和 V4 Pro。
+扩展激活后模型即出现在 Copilot 模型选择器中。未配置 API Key 时模型带警告图标，运行 `Multi-Model: 设置 API Key` 后消失。若没看到，在选择器里向下滚动（列表通常较长）。

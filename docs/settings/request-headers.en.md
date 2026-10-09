@@ -1,12 +1,7 @@
-# Request Headers
+# Request headers
 
-`multi-model-for-copilot.requestHeaders` adds or overrides headers for chat completion requests sent to the official provider endpoints (DeepSeek, MiMo, Qwen). Its default value is `{}`.
-
-## Configuration
-
-Add header names and string values in the native VS Code Settings editor, or edit `settings.json`.
-
-Example:
+`multi-model-for-copilot.requestHeaders` adds or overrides headers on every chat completion request
+sent to the official DeepSeek / MiMo / Qwen endpoints. Default: `{}`.
 
 ```json
 {
@@ -17,15 +12,10 @@ Example:
 }
 ```
 
-- Header names are case-insensitive. Configured values override existing headers, including `Authorization` and `Content-Type`.
-- The same headers are applied to every provider (DeepSeek, MiMo, Qwen).
-- The extension adds no custom `User-Agent` by default; you can set one here if needed.
-- Header values are stored in VS Code settings.
-
-## Variables
-
-Use `${name}` anywhere in a header value. Each variable is resolved once per provider call and reused for all occurrences and HTTP attempts. Unknown placeholders are passed through unchanged.
+- Header names are case-insensitive; configured values override existing headers, including
+  `Authorization` and `Content-Type`. The extension sends no custom `User-Agent` by default.
+- `${name}` placeholders are resolved once per request. Unknown placeholders pass through unchanged.
 
 | Variable | Value | Fallback order |
 |---|---|---|
-| `${conversationId}` | Upstream conversation ID | Workspace ID (`workspace-<workspaceId>`) → Copilot request ID (`request-<requestId>`) → generated UUID (`request-<uuid>`) |
+| `${conversationId}` | Upstream conversation ID | Workspace ID (`workspace-<id>`) → Copilot request ID (`request-<id>`) → generated UUID |

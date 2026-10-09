@@ -1,3 +1,1 @@
-DeepSeek models should appear in the Copilot model picker as soon as the extension is active. If an API key is not configured yet, they show a warning icon until you run Multi-Model: Set API Key.
-
-If you do not see them right away, the model list may simply be long. Scroll down in the picker and look for DeepSeek V4.1 Flash and V4 Pro.
+The models appear in the Copilot model picker once the extension is active. Without an API key they show a warning icon until you run `Multi-Model: Set API Key`. If you do not see them, scroll the (often long) picker list.
