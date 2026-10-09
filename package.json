@@ -91,10 +91,6 @@
         "title": "%multi-model-for-copilot.command.showLogs%"
       },
       {
-        "command": "multi-model-for-copilot.openRequestDumpsFolder",
-        "title": "%multi-model-for-copilot.command.openRequestDumpsFolder%"
-      },
-      {
         "command": "multi-model-for-copilot.refreshBalance",
         "title": "%multi-model-for-copilot.command.refreshBalance%"
       }
@@ -179,18 +175,15 @@
           "default": "minimal",
           "enum": [
             "minimal",
-            "metadata",
-            "verbose"
+            "metadata"
           ],
           "enumItemLabels": [
             "%multi-model-for-copilot.config.debugMode.minimal.label%",
-            "%multi-model-for-copilot.config.debugMode.metadata.label%",
-            "%multi-model-for-copilot.config.debugMode.verbose.label%"
+            "%multi-model-for-copilot.config.debugMode.metadata.label%"
           ],
           "markdownEnumDescriptions": [
             "%multi-model-for-copilot.config.debugMode.minimal.description%",
-            "%multi-model-for-copilot.config.debugMode.metadata.description%",
-            "%multi-model-for-copilot.config.debugMode.verbose.description%"
+            "%multi-model-for-copilot.config.debugMode.metadata.description%"
           ],
           "markdownDescription": "%multi-model-for-copilot.config.debugMode.description%"
         },

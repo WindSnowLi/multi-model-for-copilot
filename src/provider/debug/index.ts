@@ -8,4 +8,3 @@ export type {
 	CacheDiagnosticsRun,
 	ReplayMarkerReportTrigger,
 } from './diagnostics';
-export { dumpChatCompletionRequest, dumpProviderInput, ensureRequestDumpRoot } from './dump';

@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 import { CONFIG_SECTION } from './consts';
 
-export type DebugMode = 'minimal' | 'metadata' | 'verbose';
+export type DebugMode = 'minimal' | 'metadata';
 
 /**
  * Get custom request headers to merge into every chat completion request.
@@ -23,7 +23,7 @@ export function getMaxTokens(): number | undefined {
 }
 
 /**
- * Diagnostic mode. `verbose` also enables metadata logs.
+ * Diagnostic mode. `metadata` enables privacy-safe request diagnostics.
  */
 export function getDebugMode(): DebugMode {
 	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
@@ -35,13 +35,6 @@ export function getDebugMode(): DebugMode {
  */
 export function getDebugLoggingEnabled(): boolean {
 	return getDebugMode() !== 'minimal';
-}
-
-/**
- * Whether to write full request payloads to disk.
- */
-export function getRequestDumpEnabled(): boolean {
-	return getDebugMode() === 'verbose';
 }
 
 export function getStabilizeToolListEnabled(): boolean {
@@ -75,7 +68,7 @@ export function getShowTokenSpeedStatusBar(): boolean {
 }
 
 function normalizeDebugMode(value: unknown): DebugMode | undefined {
-	if (value === 'minimal' || value === 'metadata' || value === 'verbose') {
+	if (value === 'minimal' || value === 'metadata') {
 		return value;
 	}
 	return undefined;

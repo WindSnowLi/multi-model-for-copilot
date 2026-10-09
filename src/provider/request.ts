@@ -6,11 +6,7 @@ import { MODELS } from '../consts';
 import { getProviderDescriptor } from '../provider-registry';
 import type { ChatCompletionRequest } from '../types';
 import { convertMessages, countMessageChars } from './convert';
-import {
-	dumpChatCompletionRequest,
-	type CacheDiagnosticsRecorder,
-	type CacheDiagnosticsRun,
-} from './debug';
+import { type CacheDiagnosticsRecorder, type CacheDiagnosticsRun } from './debug';
 import { resolveRequestHeaders } from './headers';
 import {
 	getConfiguredThinkingEffort,
@@ -45,7 +41,6 @@ export interface PreparedChatRequest {
 
 export interface PrepareChatRequestOptions {
 	authManager: AuthManager;
-	globalStorageUri: vscode.Uri;
 	/** Workspace-scoped storage URI, used to derive a stable conversation ID. */
 	storageUri?: vscode.Uri;
 	modelInfo: vscode.LanguageModelChatInformation;
@@ -59,7 +54,6 @@ export interface PrepareChatRequestOptions {
 
 export async function prepareChatRequest({
 	authManager,
-	globalStorageUri,
 	storageUri,
 	modelInfo,
 	segment,
@@ -151,22 +145,6 @@ export async function prepareChatRequest({
 					}
 			: {}),
 	};
-	dumpChatCompletionRequest(request, {
-		globalStorageUri,
-		segment,
-		requestKind,
-		vscodeModelId: modelInfo.id,
-		isThinkingModel,
-		thinkingEffort,
-		maxTokens,
-		inputMessages: messages,
-		resolvedMessages,
-		requestOptions: options,
-		visionModelId: visionResolution.visionModelId,
-		visionProxySource: visionResolution.visionProxySource,
-		visionStats: visionResolution.stats,
-	});
-
 	const diagnosticsRun = cacheDiagnostics.beginRequest({
 		request,
 		segment,

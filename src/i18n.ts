@@ -251,8 +251,6 @@ const zh: Translations = {
 	// Extension
 	'extension.activateFailed': '扩展激活失败，请运行 "Multi-Model: 显示日志" 查看详情。',
 	'extension.welcomeFailed': '欢迎引导加载异常',
-	'extension.openRequestDumpsFolderFailed':
-		'打开请求 dump 目录失败，请运行 "Multi-Model: 显示日志" 查看详情。',
 };
 
 const en: Translations = {
@@ -533,8 +531,6 @@ const en: Translations = {
 	'extension.activateFailed':
 		'Extension failed to activate. Run "Multi-Model: Show Logs" for details.',
 	'extension.welcomeFailed': 'Failed to show welcome prompt',
-	'extension.openRequestDumpsFolderFailed':
-		'Failed to open request dumps folder. Run "Multi-Model: Show Logs" for details.',
 };
 
 /**

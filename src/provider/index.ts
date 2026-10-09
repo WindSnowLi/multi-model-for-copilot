@@ -12,7 +12,7 @@ import { logger } from '../logger';
 import { getProviderDescriptor } from '../provider-registry';
 import type { ApiProvider } from '../types';
 import { StatusBarController } from '../runtime/status-bar';
-import { createCacheDiagnosticsRecorder, dumpProviderInput } from './debug';
+import { createCacheDiagnosticsRecorder } from './debug';
 import { toChatInfo } from './models';
 import { BalanceService } from './pricing/balance';
 import { BalanceCurrencyResolver } from './pricing/currency';
@@ -31,7 +31,6 @@ import { createVisionService } from './vision';
  */
 export class ChatProvider implements vscode.LanguageModelChatProvider {
 	private readonly authManager: AuthManager;
-	private readonly globalStorageUri: vscode.Uri;
 	private readonly storageUri: vscode.Uri | undefined;
 	private readonly onDidChangeLanguageModelChatInformationEmitter = new vscode.EventEmitter<void>();
 
@@ -55,7 +54,6 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 
 	constructor(context: vscode.ExtensionContext) {
 		this.authManager = new AuthManager(context);
-		this.globalStorageUri = context.globalStorageUri;
 		this.storageUri = context.storageUri;
 		this.vision = createVisionService(context);
 		this.balanceCurrencyResolver = new BalanceCurrencyResolver(context, this.authManager, () =>
@@ -225,15 +223,6 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 			tools: options.tools,
 		});
 
-		dumpProviderInput({
-			globalStorageUri: this.globalStorageUri,
-			segment,
-			modelInfo,
-			messages,
-			requestOptions: options,
-			requestKind,
-		});
-
 		const toolFlow = processToolFlow({
 			stabilizeToolList: getStabilizeToolListEnabled(),
 			messages,
@@ -247,7 +236,6 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 
 		const prepared = await prepareChatRequest({
 			authManager: this.authManager,
-			globalStorageUri: this.globalStorageUri,
 			storageUri: this.storageUri,
 			modelInfo,
 			segment,
