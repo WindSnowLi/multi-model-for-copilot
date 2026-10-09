@@ -73,11 +73,6 @@ export const API_KEY_SECRET = 'multi-model-for-copilot.apiKey';
 /** memento key tracking whether the welcome walkthrough has been shown. */
 export const WELCOME_SHOWN_KEY = 'multi-model-for-copilot.welcomeShown';
 
-// ---- Walkthrough ----
-
-/** Walkthrough contribution ID. */
-export const WALKTHROUGH_ID = 'Vizards.multi-model-for-copilot#gettingStarted';
-
 // ---- Model registry ----
 
 /** Available models exposed through the language model provider. */

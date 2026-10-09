@@ -1,5 +1,5 @@
 import vscode from 'vscode';
-import { WALKTHROUGH_ID, WELCOME_SHOWN_KEY } from '../consts';
+import { WELCOME_SHOWN_KEY } from '../consts';
 import { ChatProvider } from '../provider';
 
 export async function showWelcomeIfNeeded(
@@ -14,6 +14,9 @@ export async function showWelcomeIfNeeded(
 		return;
 	}
 
-	await vscode.commands.executeCommand('workbench.action.openWalkthrough', WALKTHROUGH_ID, false);
+	// The walkthrough id is derived from the installed extension id so it keeps
+	// working regardless of which publisher the build uses.
+	const walkthroughId = `${context.extension.id}#gettingStarted`;
+	await vscode.commands.executeCommand('workbench.action.openWalkthrough', walkthroughId, false);
 	await context.globalState.update(WELCOME_SHOWN_KEY, true);
 }
