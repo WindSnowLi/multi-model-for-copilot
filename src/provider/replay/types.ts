@@ -5,8 +5,6 @@ export interface ReplayMarkerParseResult {
 	visionTextIgnoredReason?: VisionMarkerTextIgnoredReason;
 	reasoningText?: string;
 	reasoningTextIgnoredReason?: ReasoningMarkerTextIgnoredReason;
-	legacySegmentOnly?: boolean;
-	payloadFormat?: ReplayMarkerPayloadFormat;
 	error?: string;
 }
 
@@ -14,8 +12,6 @@ export interface LocatedReplayMarker {
 	partIndex: number;
 	marker: ReplayMarkerParseResult;
 }
-
-export type ReplayMarkerPayloadFormat = 'json-base64url' | 'raw-json' | 'raw-uuid';
 
 export type VisionMarkerTextIgnoredReason =
 	| 'vision-not-object'

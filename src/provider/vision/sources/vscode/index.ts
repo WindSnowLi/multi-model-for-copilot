@@ -225,38 +225,18 @@ function pickConfiguredVSCodeVisionModelEntry<T extends { id: string; vendor: st
 	models: readonly T[],
 	configuredKey: string,
 ): T | undefined {
-	const legacyId = configuredKey.trim();
 	const parsed = parseVSCodeVisionModelKey(configuredKey);
 	if (!parsed) {
-		return legacyId ? pickLegacyVSCodeVisionModelById(models, legacyId) : undefined;
-	}
-	if (parsed.vendor) {
-		const exact = models.find((model) => model.vendor === parsed.vendor && model.id === parsed.id);
-		// VS Code model ids are opaque and may contain "/", so preserve legacy bare-id
-		// settings by retrying the whole value when no provider-qualified key matches.
-		return exact ?? pickLegacyVSCodeVisionModelById(models, legacyId);
-	}
-	return pickLegacyVSCodeVisionModelById(models, parsed.id);
-}
-
-function pickLegacyVSCodeVisionModelById<T extends { id: string; vendor: string }>(
-	models: readonly T[],
-	id: string,
-): T | undefined {
-	const matches = models.filter((model) => model.id === id);
-	return matches.find((model) => model.vendor === 'copilot') ?? matches[0];
-}
-
-function parseVSCodeVisionModelKey(
-	value: string,
-): { vendor: string | undefined; id: string } | undefined {
-	const trimmed = value.trim();
-	if (!trimmed) {
 		return undefined;
 	}
+	return models.find((model) => model.vendor === parsed.vendor && model.id === parsed.id);
+}
+
+function parseVSCodeVisionModelKey(value: string): { vendor: string; id: string } | undefined {
+	const trimmed = value.trim();
 	const separatorIndex = trimmed.indexOf(VSCODE_VISION_MODEL_KEY_SEPARATOR);
 	if (separatorIndex <= 0) {
-		return { vendor: undefined, id: trimmed };
+		return undefined;
 	}
 	const vendor = trimmed.slice(0, separatorIndex).trim();
 	const id = trimmed.slice(separatorIndex + VSCODE_VISION_MODEL_KEY_SEPARATOR.length).trim();

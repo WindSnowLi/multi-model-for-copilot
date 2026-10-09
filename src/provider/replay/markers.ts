@@ -3,7 +3,7 @@ import { safeStringify } from '../../json';
 import {
 	BASE64URL_PATTERN,
 	ENCODED_JSON_MARKER_PREFIX,
-	LEGACY_SEGMENT_ID_PATTERN,
+	SEGMENT_ID_PATTERN,
 	REPLAY_MARKER_MIME,
 	REPLAY_MARKER_PREFIXES,
 	REPLAY_MARKER_WRITER_ID,
@@ -13,7 +13,6 @@ import type {
 	ReasoningMarkerTextIgnoredReason,
 	ReplayMarkerMetadata,
 	ReplayMarkerParseResult,
-	ReplayMarkerPayloadFormat,
 	VisionMarkerTextIgnoredReason,
 } from './types';
 
@@ -75,20 +74,14 @@ export function parseReplayMarkerData(data: Uint8Array): ReplayMarkerParseResult
 	}
 
 	const markerPayload = decoded.slice(separatorIndex + 1);
+	if (!markerPayload.startsWith(ENCODED_JSON_MARKER_PREFIX)) {
+		return { valid: false, error: 'marker-json-prefix-missing' };
+	}
 	const decodedPayload = decodeReplayMarkerPayload(markerPayload);
 	if (!decodedPayload.valid) {
 		return { valid: false, error: decodedPayload.error };
 	}
 	const payload = decodedPayload.value;
-
-	if (isValidLegacySegmentId(payload)) {
-		return {
-			valid: true,
-			segmentId: payload.toLowerCase(),
-			legacySegmentOnly: true,
-			payloadFormat: decodedPayload.format,
-		};
-	}
 
 	try {
 		const value = JSON.parse(payload) as unknown;
@@ -108,8 +101,6 @@ export function parseReplayMarkerData(data: Uint8Array): ReplayMarkerParseResult
 			segmentId: segmentId.value,
 			...vision,
 			...reasoning,
-			legacySegmentOnly: Boolean(segmentId.value && !vision.visionText && !reasoning.reasoningText),
-			payloadFormat: decodedPayload.format,
 		};
 	} catch {
 		return { valid: false, error: 'marker-json-invalid' };
@@ -127,7 +118,7 @@ function parseOptionalSegmentId(value: object): {
 	if (typeof segmentId !== 'string') {
 		return { error: 'segment-id-not-string' };
 	}
-	if (!isValidLegacySegmentId(segmentId)) {
+	if (!isValidSegmentId(segmentId)) {
 		return { error: 'segment-id-not-uuid' };
 	}
 	return { value: segmentId.toLowerCase() };
@@ -194,17 +185,7 @@ function encodeReplayMarkerJson(value: object): string {
 
 function decodeReplayMarkerPayload(
 	markerPayload: string,
-):
-	| { valid: true; value: string; format: ReplayMarkerPayloadFormat }
-	| { valid: false; error: string } {
-	if (!markerPayload.startsWith(ENCODED_JSON_MARKER_PREFIX)) {
-		return {
-			valid: true,
-			value: markerPayload,
-			format: isValidLegacySegmentId(markerPayload) ? 'raw-uuid' : 'raw-json',
-		};
-	}
-
+): { valid: true; value: string } | { valid: false; error: string } {
 	const encodedPayload = markerPayload.slice(ENCODED_JSON_MARKER_PREFIX.length);
 	if (!encodedPayload || !BASE64URL_PATTERN.test(encodedPayload)) {
 		return { valid: false, error: 'marker-json-base64-invalid' };
@@ -214,13 +195,12 @@ function decodeReplayMarkerPayload(
 		return {
 			valid: true,
 			value: Buffer.from(encodedPayload, 'base64url').toString('utf8'),
-			format: 'json-base64url',
 		};
 	} catch {
 		return { valid: false, error: 'marker-json-base64-invalid' };
 	}
 }
 
-function isValidLegacySegmentId(value: string): boolean {
-	return LEGACY_SEGMENT_ID_PATTERN.test(value);
+function isValidSegmentId(value: string): boolean {
+	return SEGMENT_ID_PATTERN.test(value);
 }

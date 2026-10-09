@@ -448,8 +448,6 @@ type SerializedContentPart =
 			replayMarker?: {
 				valid: boolean;
 				segmentId?: string;
-				payloadFormat?: string;
-				legacySegmentOnly?: boolean;
 				visionTextChars?: number;
 				visionTextHash?: string;
 				visionTextIgnoredReason?: string;
@@ -565,8 +563,6 @@ function serializeContentPart(part: unknown, index: number): SerializedContentPa
 function summarizeReplayMarker(marker: ReturnType<typeof parseReplayMarkerData>): {
 	valid: boolean;
 	segmentId?: string;
-	payloadFormat?: string;
-	legacySegmentOnly?: boolean;
 	visionTextChars?: number;
 	visionTextHash?: string;
 	visionTextIgnoredReason?: string;
@@ -578,8 +574,6 @@ function summarizeReplayMarker(marker: ReturnType<typeof parseReplayMarkerData>)
 	return {
 		valid: marker.valid,
 		segmentId: marker.segmentId,
-		payloadFormat: marker.payloadFormat,
-		legacySegmentOnly: marker.legacySegmentOnly,
 		visionTextChars: marker.visionText?.length,
 		visionTextHash: marker.visionText ? hashString(marker.visionText) : undefined,
 		visionTextIgnoredReason: marker.visionTextIgnoredReason,
@@ -721,9 +715,7 @@ function summarizeVscodeCustomizations(
 	};
 }
 
-function summarizeDeepSeekCustomizations(
-	messages: readonly ChatMessage[],
-): CustomizationsSummary {
+function summarizeDeepSeekCustomizations(messages: readonly ChatMessage[]): CustomizationsSummary {
 	let customizationsUpdateCountInHistory = 0;
 	let latestUserMessageIndex: number | null = null;
 	let latestUserHasCustomizationsUpdate = false;

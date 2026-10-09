@@ -8,5 +8,4 @@ export const REPLAY_MARKER_PREFIXES = new Set([
 ]);
 export const ENCODED_JSON_MARKER_PREFIX = 'json:';
 export const BASE64URL_PATTERN = /^[A-Za-z0-9_-]+$/;
-export const LEGACY_SEGMENT_ID_PATTERN =
-	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const SEGMENT_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
