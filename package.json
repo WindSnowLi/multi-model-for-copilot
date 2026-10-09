@@ -3,7 +3,7 @@
   "displayName": "Multi-Model BYOK for Copilot Chat",
   "description": "Pick DeepSeek V4.1, MiMo V2.6, and Qwen models from the Copilot Chat model picker. Vision, thinking mode, agent tools — zero config, BYOK.",
   "icon": "resources/icon.png",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "publisher": "WindSnowLi",
   "license": "MIT",
   "repository": {

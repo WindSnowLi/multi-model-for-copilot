@@ -1,24 +1,23 @@
 # Changelog
 
-## 0.8.0 (2026-10-08)
+## 0.9.0 (2026-10-09)
 
+Rebuilt around what Copilot's built-in Custom Endpoint provider does not cover.
 
 ### Features
 
-* **statusbar:** add live token-generation speed (tokens/s) in the status bar while a response streams, and live account balance for DeepSeek (toggle via `multi-model-for-copilot.statusBar.tokenSpeed` / `statusBar.balance`)
-* **vision:** describe tool-result images through the vision proxy for non-native models, and forward them directly as `image_url` for native vision models
-* **pricing:** show DeepSeek peak/off-peak dynamic pricing in the model picker, auto-refreshing at each billing-period transition
-* **provider:** add DeepSeek V4.1 Flash with native vision input (sent to the `deepseek-flash` model name) and a 1M-token context, and drop the retired `deepseek-v4-flash` / `deepseek-v4-flash-vision-exp` presets that DeepSeek now serves from V4.1 Flash
-* **config:** add `requestHeaders` with `${conversationId}` templating, merged case-insensitively into every chat completion request
-* **tools:** emit an explicit empty schema for parameterless tools and drop the stale 128-tool limit
-* **runtime:** register the provider synchronously and refresh models after Copilot activates, which avoids a BYOK activation deadlock; stop refreshing models during deactivation
-* **settings:** add a `resetBaseUrl` command with scope preview, confirm API key removal, and contribute the previously missing `qwenBaseUrl` setting
-* **provider:** respect `toolMode: required` and declare `capabilities.apiType` as Chat Completions
-* **provider:** replace the MiMo V2.5 presets with the V2.6 series (Pro, Flash, Pro Ultraspeed); all three are natively omni-modal and accept image input
+* **presets:** DeepSeek, MiMo, and Qwen stay, with per-provider auth and `thinking` handling, pricing, context limits, and the vision proxy for models without native vision
+* **packaging:** `npm run package` works on any platform (Node replaces the bash + awk README step), and the welcome walkthrough id is derived from the installed extension id
 
-### Bug Fixes
+### Breaking changes
 
-* **vision:** ship the improved Vision Proxy prompt as the default
-* **pricing:** emit only `infoText`/`priceCategory` so the model picker stops rendering formatted cost strings as "Unknown"
-* **provider:** fix HTTP 400 "Invalid request parameters" from MiMo when thinking effort was set to `max` — the MiMo API rejects `reasoning_effort: max`, so MiMo models now offer `none`/`low`/`high` and send the documented `thinking: { type }` switch alongside `reasoning_effort`
-* **pricing:** correct DeepSeek V4 Pro's CNY peak/off-peak rates and flat fallback price so they match the USD schedule
+* **provider:** the custom-model editor and model discovery are gone - use Copilot's built-in Custom Endpoint provider (`chatLanguageModels.json`) for arbitrary endpoints
+* **settings:** `baseUrl`, `mimoBaseUrl`, `qwenBaseUrl`, `modelIdOverrides`, and the `resetBaseUrl` command are removed; providers are pinned to their official endpoints
+* **settings:** the `customModels` setting and the `debugMode: verbose` level are removed (request payloads are no longer written to disk, and the dumps-folder command is gone)
+* **auth:** API keys are read from VS Code SecretStorage only
+* **compat:** legacy replay-marker and vision-model formats, the legacy `debug` setting, and the inherited tags/releases are gone
+
+### Documentation
+
+* README, `docs/`, and the walkthrough condensed; the outdated picker screenshot removed
+* VS Code Marketplace publishing removed - this fork publishes to Open VSX only
