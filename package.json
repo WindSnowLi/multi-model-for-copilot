@@ -213,8 +213,7 @@
     "lint": "oxlint",
     "format": "oxfmt --write src/",
     "format:check": "oxfmt --check src/",
-    "package": "vsce package --readme-path dist/README.marketplace.md -o dist/",
-    "login": "vsce login Vizards"
+    "package": "vsce package --readme-path dist/README.marketplace.md -o dist/"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",

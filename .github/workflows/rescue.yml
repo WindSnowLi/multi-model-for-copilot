@@ -7,11 +7,6 @@ on:
         description: 'Existing release tag to publish, e.g. v0.3.0.'
         required: true
         type: string
-      publish_vscode_marketplace:
-        description: Publish this tag to the VS Code Marketplace.
-        required: false
-        type: boolean
-        default: true
       publish_open_vsx:
         description: Publish this tag to Open VSX.
         required: false
@@ -76,12 +71,6 @@ jobs:
             exit 1
           fi
           echo "path=${files[0]}" >> "$GITHUB_OUTPUT"
-
-      - name: Publish to VS Code Marketplace
-        if: inputs.publish_vscode_marketplace == true
-        run: npm exec -- vsce publish --packagePath "${{ steps.vsix.outputs.path }}" --skip-duplicate
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
       - name: Publish to Open VSX
         if: inputs.publish_open_vsx == true
