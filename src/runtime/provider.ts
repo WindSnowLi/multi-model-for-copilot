@@ -6,8 +6,12 @@ export function registerProvider(context: vscode.ExtensionContext): ChatProvider
 	const provider = new ChatProvider(context);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('multi-model-for-copilot.setApiKey', () => provider.configureApiKey()),
-		vscode.commands.registerCommand('multi-model-for-copilot.clearApiKey', () => provider.clearApiKey()),
+		vscode.commands.registerCommand('multi-model-for-copilot.setApiKey', () =>
+			provider.configureApiKey(),
+		),
+		vscode.commands.registerCommand('multi-model-for-copilot.clearApiKey', () =>
+			provider.clearApiKey(),
+		),
 		vscode.commands.registerCommand('multi-model-for-copilot.setMiMoApiKey', () =>
 			provider.configureMiMoApiKey(),
 		),

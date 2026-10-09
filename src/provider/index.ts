@@ -1,6 +1,11 @@
 import vscode from 'vscode';
 import { AuthManager } from '../auth';
-import { getShowBalanceStatusBar, getShowPricingNotice, getShowTokenSpeedStatusBar, getStabilizeToolListEnabled } from '../config';
+import {
+	getShowBalanceStatusBar,
+	getShowPricingNotice,
+	getShowTokenSpeedStatusBar,
+	getStabilizeToolListEnabled,
+} from '../config';
 import { MODELS } from '../consts';
 import { t } from '../i18n';
 import { logger } from '../logger';
@@ -159,12 +164,12 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 
 	private invalidateCurrencyAndRefreshModels(): void {
 		void Promise.all([
-			this.balanceCurrencyResolver.invalidate().catch((error) =>
-				logger.warn('Failed to invalidate balance currency', error),
-			),
-			this.balanceService.invalidate().catch((error) =>
-				logger.warn('Failed to invalidate balance', error),
-			),
+			this.balanceCurrencyResolver
+				.invalidate()
+				.catch((error) => logger.warn('Failed to invalidate balance currency', error)),
+			this.balanceService
+				.invalidate()
+				.catch((error) => logger.warn('Failed to invalidate balance', error)),
 		]).finally(() => {
 			this.balanceService.refreshInBackground(true);
 			this.onDidChangeLanguageModelChatInformationEmitter.fire();

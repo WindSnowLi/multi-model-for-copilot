@@ -3,12 +3,12 @@ import { safeStringify } from '../../json';
 import type { ApiProvider } from '../../types';
 import { API_PROVIDER_HTTP_ERROR_LINKS, MAX_DIAGNOSTIC_FIELD_LENGTH } from '../consts';
 import type {
-    ApiRequestErrorKind,
-    ErrorActionLink,
-    ErrorActionUrls,
-    HttpErrorLinkDefinition,
-    HttpErrorLinkStatusKey,
-    RequestErrorContext,
+	ApiRequestErrorKind,
+	ErrorActionLink,
+	ErrorActionUrls,
+	HttpErrorLinkDefinition,
+	HttpErrorLinkStatusKey,
+	RequestErrorContext,
 } from '../types';
 import { getNetworkErrorCauseInfo, getNetworkErrorCode, getNetworkErrorMessage } from './network';
 export type { ApiRequestErrorKind, ErrorActionUrls } from '../types';
@@ -156,7 +156,8 @@ export function createUserFacingError(error: Error, modelName?: string): Error {
 	const modelLabel = modelName ? `**${escapeBoldText(modelName)}**: ` : '';
 	const message =
 		error instanceof ApiRequestError
-			? modelLabel + formatMarkdownMessage(error.userSummary, getErrorActions(error, errorActionUrlStore.get()))
+			? modelLabel +
+				formatMarkdownMessage(error.userSummary, getErrorActions(error, errorActionUrlStore.get()))
 			: modelLabel + error.message;
 	const displayError = new Error(message);
 	displayError.stack = undefined;
@@ -285,7 +286,10 @@ function getConfigureApiKeyActions(actionUrls: ErrorActionUrls): readonly ErrorA
 	return url ? [{ labelKey: 'error.action.setApiKey', url }] : [];
 }
 
-function getProviderHttpErrorActions(status: number, provider: ApiProvider): readonly ErrorActionLink[] {
+function getProviderHttpErrorActions(
+	status: number,
+	provider: ApiProvider,
+): readonly ErrorActionLink[] {
 	if (status === 401) {
 		return [];
 	}

@@ -1,9 +1,9 @@
 import { EXTERNAL_URLS } from '../consts';
 import type { ApiProvider } from '../types';
 import type {
-    HttpErrorLinkDefinition,
-    HttpErrorLinkStatusKey,
-    NetworkErrorCategory,
+	HttpErrorLinkDefinition,
+	HttpErrorLinkStatusKey,
+	NetworkErrorCategory,
 } from './types';
 
 export const MAX_DIAGNOSTIC_FIELD_LENGTH = 300;
@@ -17,7 +17,10 @@ function buildProviderErrorLinks(
 	linkFn: (urls: (typeof EXTERNAL_URLS)[ApiProvider]) => HttpErrorLinkDefinition,
 ): Partial<Record<ApiProvider, HttpErrorLinkDefinition>> {
 	const result: Partial<Record<ApiProvider, HttpErrorLinkDefinition>> = {};
-	for (const [provider, urls] of Object.entries(EXTERNAL_URLS) as [ApiProvider, (typeof EXTERNAL_URLS)[ApiProvider]][]) {
+	for (const [provider, urls] of Object.entries(EXTERNAL_URLS) as [
+		ApiProvider,
+		(typeof EXTERNAL_URLS)[ApiProvider],
+	][]) {
 		result[provider] = linkFn(urls);
 	}
 	return result;

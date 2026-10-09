@@ -30,7 +30,8 @@ const zh: Translations = {
 	'model.mimo.flash.detail': '高效推理模型，支持视觉与思考',
 	'model.mimo.pro-ultraspeed.detail': '旗舰推理模型，输出速度最高提升 20 倍',
 	'model.mimo.pro.tooltip': 'MiMo V2.6 Pro 旗舰模型，专为复杂推理、深度分析和长文档处理设计。',
-	'model.mimo.flash.tooltip': 'MiMo V2.6 Flash 全模态模型，支持图片、音频、视频内容理解，同时具备深度思考能力。',
+	'model.mimo.flash.tooltip':
+		'MiMo V2.6 Flash 全模态模型，支持图片、音频、视频内容理解，同时具备深度思考能力。',
 	'model.mimo.pro-ultraspeed.tooltip':
 		'MiMo V2.6 Pro 的超高速模式，保持旗舰推理能力，输出速度最高提升 20 倍，价格为 Pro 的 10 倍。',
 
@@ -60,7 +61,8 @@ const zh: Translations = {
 	'auth.saved': 'API Key 已安全保存。',
 	'auth.removed': 'API Key 已移除。',
 	'auth.notConfigured': 'API Key 未配置，请在命令面板运行 "Multi-Model: 设置 API Key"。',
-	'auth.notConfiguredForModel': '模型 "{0}" 的 API Key 未配置，请在命令面板运行 "Multi-Model: 设置 API Key"。',
+	'auth.notConfiguredForModel':
+		'模型 "{0}" 的 API Key 未配置，请在命令面板运行 "Multi-Model: 设置 API Key"。',
 	'auth.clearConfirm': '确定要清除 {0} 的 API Key 吗？',
 	'auth.clearDetail': '删除后需要重新配置 API Key 才能继续使用该服务商的模型。',
 	'auth.clearAction': '清除',
@@ -238,18 +240,15 @@ const zh: Translations = {
 	'error.action.checkStatus': '查看服务状态',
 	'error.action.viewDetails': '错误详情',
 	'error.network.dns': '[{0}] DNS 解析失败。请检查网络连接、防火墙或代理设置。',
-	'error.network.unreachable':
-		'[{0}] 目标不可达或拒绝连接。请检查代理服务、网络连接或防火墙设置。',
+	'error.network.unreachable': '[{0}] 目标不可达或拒绝连接。请检查代理服务、网络连接或防火墙设置。',
 	'error.network.interrupted': '[{0}] 连接被中断。请检查网络连接、防火墙或代理设置，或稍后重试。',
 	'error.network.timeout': '[{0}] 连接超时。请稍后重试，或检查网络连接、防火墙或代理设置。',
 	'error.network.tls': '[{0}] TLS/证书校验失败。请检查代理或证书配置。',
 	'error.network.aborted':
 		'[{0}] 请求已中止。如果不是主动取消，请检查网络连接或代理设置，或稍后重试。',
-	'error.network.protocol':
-		'[{0}] HTTP 连接或响应解析失败。请检查代理设置或服务响应。',
+	'error.network.protocol': '[{0}] HTTP 连接或响应解析失败。请检查代理设置或服务响应。',
 	'error.network.configuration': '[{0}] 请求配置无效。请检查扩展设置。',
-	'error.network.generic':
-		'[{0}] 网络请求失败。请检查网络连接、防火墙或代理设置。',
+	'error.network.generic': '[{0}] 网络请求失败。请检查网络连接、防火墙或代理设置。',
 	'error.unknown': '模型请求失败：{0}',
 
 	// Extension
@@ -286,12 +285,18 @@ const en: Translations = {
 	'model.qwen.vl.max.detail': 'Flagship vision understanding model',
 	'model.qwen.vl.plus.detail': 'High cost-performance vision model',
 	'model.qwen.vl.turbo.detail': 'Fast vision model',
-	'model.qwen.max.tooltip': 'Qwen AI Platform flagship model with the strongest reasoning and knowledge capabilities.',
-	'model.qwen.plus.tooltip': 'Qwen AI Platform high cost-performance model, balancing performance and cost.',
-	'model.qwen.turbo.tooltip': 'Qwen AI Platform fast response model, suitable for simple tasks and high-concurrency scenarios.',
-	'model.qwen.vl.max.tooltip': 'Qwen AI Platform flagship vision understanding model, supporting image and video content understanding.',
-	'model.qwen.vl.plus.tooltip': 'Qwen AI Platform high cost-performance vision model, supporting image understanding.',
-	'model.qwen.vl.turbo.tooltip': 'Qwen AI Platform fast vision model, suitable for simple image recognition tasks.',
+	'model.qwen.max.tooltip':
+		'Qwen AI Platform flagship model with the strongest reasoning and knowledge capabilities.',
+	'model.qwen.plus.tooltip':
+		'Qwen AI Platform high cost-performance model, balancing performance and cost.',
+	'model.qwen.turbo.tooltip':
+		'Qwen AI Platform fast response model, suitable for simple tasks and high-concurrency scenarios.',
+	'model.qwen.vl.max.tooltip':
+		'Qwen AI Platform flagship vision understanding model, supporting image and video content understanding.',
+	'model.qwen.vl.plus.tooltip':
+		'Qwen AI Platform high cost-performance vision model, supporting image understanding.',
+	'model.qwen.vl.turbo.tooltip':
+		'Qwen AI Platform fast vision model, suitable for simple image recognition tasks.',
 
 	// API Key
 	'auth.apiKeyRequiredDetail': 'Please run Multi-Model: Set API Key to configure.',
@@ -410,7 +415,9 @@ const en: Translations = {
 	'vision.panel.test.image': 'Test image',
 	'vision.panel.test.response': 'Model response',
 	'vision.panel.error.required': '{0} is required',
-	'vision.panel.error.invalidJson': '{0} must be valid JSON.',	'vision.panel.error.timeoutMsInvalid': 'Request timeout must be greater than 0.',	'vision.proxy.error.configurationInvalid': 'Vision proxy configuration is invalid.',
+	'vision.panel.error.invalidJson': '{0} must be valid JSON.',
+	'vision.panel.error.timeoutMsInvalid': 'Request timeout must be greater than 0.',
+	'vision.proxy.error.configurationInvalid': 'Vision proxy configuration is invalid.',
 	'vision.proxy.error.providerFamilyInvalid': 'Vision proxy provider type is invalid.',
 	'vision.proxy.error.apiTypeInvalid': 'Vision proxy API type is invalid.',
 	'vision.proxy.error.fieldRequired': '{0} is required.',
@@ -530,7 +537,8 @@ const en: Translations = {
 	'error.unknown': 'Model request failed: {0}',
 
 	// Extension
-	'extension.activateFailed': 'Extension failed to activate. Run "Multi-Model: Show Logs" for details.',
+	'extension.activateFailed':
+		'Extension failed to activate. Run "Multi-Model: Show Logs" for details.',
 	'extension.welcomeFailed': 'Failed to show welcome prompt',
 	'extension.openRequestDumpsFolderFailed':
 		'Failed to open request dumps folder. Run "Multi-Model: Show Logs" for details.',

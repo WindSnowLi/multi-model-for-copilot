@@ -3,11 +3,12 @@ import { safeStringify } from '../json';
 import { logger } from '../logger';
 import { buildAuthHeaders } from '../provider-registry';
 import type {
-    ApiProvider, ChatCompletionRequest,
-    ChatStreamChunk,
-    ChatToolCall,
-    ChatUsage,
-    StreamCallbacks
+	ApiProvider,
+	ChatCompletionRequest,
+	ChatStreamChunk,
+	ChatToolCall,
+	ChatUsage,
+	StreamCallbacks,
 } from '../types';
 import { createHttpError, formatRequestError, normalizeRequestError } from './error';
 
@@ -65,7 +66,11 @@ export class ApiClient {
 			});
 
 			if (!response.ok) {
-				throw await createHttpError(response, { provider: this.provider, baseUrl: this.baseUrl, request });
+				throw await createHttpError(response, {
+					provider: this.provider,
+					baseUrl: this.baseUrl,
+					request,
+				});
 			}
 
 			if (!response.body) {
@@ -186,7 +191,11 @@ export class ApiClient {
 			if (isAbortError(error) && cancellationToken?.isCancellationRequested) {
 				return;
 			}
-			const normalizedError = normalizeRequestError(error, { provider: this.provider, baseUrl: this.baseUrl, request });
+			const normalizedError = normalizeRequestError(error, {
+				provider: this.provider,
+				baseUrl: this.baseUrl,
+				request,
+			});
 			logger.error('DeepSeek request failed:', formatRequestError(normalizedError));
 			callbacks.onError(normalizedError);
 		} finally {

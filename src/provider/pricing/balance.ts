@@ -1,7 +1,11 @@
 import vscode from 'vscode';
 import { AuthManager } from '../../auth';
 import { logger } from '../../logger';
-import { buildAuthHeaders, getBalanceCapableProviders, requireProviderDescriptor } from '../../provider-registry';
+import {
+	buildAuthHeaders,
+	getBalanceCapableProviders,
+	requireProviderDescriptor,
+} from '../../provider-registry';
 import type { ApiProvider, PricingCurrency } from '../../types';
 
 const BALANCE_TIMEOUT_MS = 5000;
@@ -43,8 +47,7 @@ export class BalanceService {
 	private timer: ReturnType<typeof setInterval> | undefined;
 	private lastRefreshedAt: number | undefined;
 
-	private readonly onDidChangeEmitter =
-		new vscode.EventEmitter<BalanceSnapshot | undefined>();
+	private readonly onDidChangeEmitter = new vscode.EventEmitter<BalanceSnapshot | undefined>();
 
 	readonly onDidChange = this.onDidChangeEmitter.event;
 

@@ -130,10 +130,7 @@ export function getBalanceCapableProviders(): ReadonlyArray<ApiProvider> {
 /**
  * Build the auth header for an API request.
  */
-export function buildAuthHeaders(
-	provider: ApiProvider,
-	apiKey: string,
-): Record<string, string> {
+export function buildAuthHeaders(provider: ApiProvider, apiKey: string): Record<string, string> {
 	const desc = getProviderDescriptor(provider);
 	if (!desc) {
 		// Fallback: standard bearer

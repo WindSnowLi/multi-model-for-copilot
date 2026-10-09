@@ -1,10 +1,7 @@
 import vscode from 'vscode';
 import { AuthManager } from '../auth';
 import { ApiClient, createApiKeyNotConfiguredError } from '../client';
-import {
-	getMaxTokens,
-	getRequestHeaders,
-} from '../config';
+import { getMaxTokens, getRequestHeaders } from '../config';
 import { MODELS } from '../consts';
 import { getProviderDescriptor } from '../provider-registry';
 import type { ChatCompletionRequest } from '../types';
@@ -79,8 +76,9 @@ export async function prepareChatRequest({
 		throw createApiKeyNotConfiguredError(modelInfo.name || modelInfo.id);
 	}
 
-	const baseUrl = getProviderDescriptor(modelDef?.provider ?? 'deepseek')?.defaultBaseUrl
-		?? 'https://api.deepseek.com';
+	const baseUrl =
+		getProviderDescriptor(modelDef?.provider ?? 'deepseek')?.defaultBaseUrl ??
+		'https://api.deepseek.com';
 	const provider = modelDef?.provider ?? 'deepseek';
 	const requestHeaders = resolveRequestHeaders(getRequestHeaders(), options, storageUri);
 	const client = new ApiClient(baseUrl, apiKey, provider, requestHeaders);
