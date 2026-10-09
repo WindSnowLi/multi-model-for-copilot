@@ -16,10 +16,6 @@
 
 **在 GitHub Copilot Chat 的模型选择器里使用 DeepSeek、MiMo、千问预设 —— 使用你自己的 API Key。**
 
-<p align="center">
-  <img src="resources/screenshots/01-picker.png" alt="本扩展提供的模型出现在 Copilot Chat 模型选择器中" width="800">
-</p>
-
 ## 为什么用它
 
 Copilot 内置的 Custom Endpoint 已能接入[任意端点](docs/official-byok.zh.md)；本扩展为 DeepSeek / MiMo / 千问补充官方没有的部分：

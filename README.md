@@ -16,10 +16,6 @@
 
 **DeepSeek, MiMo, and Qwen presets in GitHub Copilot Chat's model picker — with your own API keys.**
 
-<p align="center">
-  <img src="resources/screenshots/01-picker.png" alt="Models from this extension in the Copilot Chat model picker" width="800">
-</p>
-
 ## Why this extension
 
 Copilot's built-in Custom Endpoint provider already connects [any endpoint](docs/official-byok.en.md).
