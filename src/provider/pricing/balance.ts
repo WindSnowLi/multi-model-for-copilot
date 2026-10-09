@@ -1,6 +1,5 @@
 import vscode from 'vscode';
 import { AuthManager } from '../../auth';
-import { normalizeBaseUrl } from '../../endpoint';
 import { logger } from '../../logger';
 import { buildAuthHeaders, getBalanceCapableProviders, requireProviderDescriptor } from '../../provider-registry';
 import type { ApiProvider, PricingCurrency } from '../../types';
@@ -117,7 +116,7 @@ export class BalanceService {
 		generation: number,
 	): Promise<void> {
 		for (const provider of getBalanceCapableProviders()) {
-			const baseUrl = normalizeBaseUrl(requireProviderDescriptor(provider).defaultBaseUrl);
+			const baseUrl = requireProviderDescriptor(provider).defaultBaseUrl;
 
 			const apiKey = await this.authManager.getApiKey(provider);
 			if (!apiKey) {

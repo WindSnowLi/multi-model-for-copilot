@@ -5,10 +5,9 @@ import { API_KEY_SECRET } from './consts';
 import type { ApiProvider } from './types';
 
 /**
- * Manages API keys via VS Code SecretStorage (secure) with
- * fallback to extension settings (less secure, for CI/automation).
- * Supports multiple providers — all provider-specific logic is driven
- * by the Provider Registry, not per-file branching.
+ * Manages API keys in VS Code SecretStorage (macOS Keychain / Windows Credential
+ * Manager / Linux keyring). Keys are never read from or written to settings.
+ * All provider-specific logic is driven by the Provider Registry.
  */
 export class AuthManager {
 	private readonly secretStorage: vscode.SecretStorage;
@@ -18,24 +17,10 @@ export class AuthManager {
 	}
 
 	/**
-	 * Get API key for a specific provider.
-	 * Tries SecretStorage first, then falls back to settings.
+	 * Get API key for a specific provider from SecretStorage.
 	 */
 	async getApiKey(provider?: ApiProvider): Promise<string | undefined> {
-		const secretKey = await this.getSecretKey(provider ?? 'deepseek');
-		if (secretKey) {
-			return secretKey;
-		}
-
-		const desc = getProviderDescriptor(provider ?? 'deepseek');
-		const config = vscode.workspace.getConfiguration('multi-model-for-copilot');
-		const settingsKeyName = desc?.settingsKey ?? 'apiKey';
-		const settingsKey = config.get<string>(settingsKeyName);
-		if (settingsKey?.trim()) {
-			return settingsKey.trim();
-		}
-
-		return undefined;
+		return this.getSecretKey(provider ?? 'deepseek');
 	}
 
 	/**

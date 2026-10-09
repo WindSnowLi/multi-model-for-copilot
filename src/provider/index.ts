@@ -74,15 +74,6 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 			this.balanceService,
 			this.pricingRefreshScheduler,
 			{ dispose: () => this.statusBar.dispose() },
-			// Settings-based fallback API key + base URL changes.
-			vscode.workspace.onDidChangeConfiguration((e) => {
-				if (
-					e.affectsConfiguration('multi-model-for-copilot.apiKey') ||
-					e.affectsConfiguration('multi-model-for-copilot.mimoApiKey')
-				) {
-					this.invalidateCurrencyAndRefreshModels();
-				}
-			}),
 			// Multi-window: SecretStorage changes don't fire onDidChangeConfiguration.
 			// When another window sets/clears the API key, refresh this window's
 			// model picker so the warning state stays in sync.

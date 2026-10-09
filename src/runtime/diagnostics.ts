@@ -1,14 +1,13 @@
 import vscode from 'vscode';
-import { getDebugMode, migrateLegacyDebugSetting, migrateRemovedCustomModelsSetting } from '../config';
+import { getDebugMode, migrateLegacyDebugSetting } from '../config';
 import { CONFIG_SECTION } from '../consts';
 import { logger } from '../logger';
 
 export async function initializeDiagnostics(context: vscode.ExtensionContext): Promise<void> {
 	try {
 		await migrateLegacyDebugSetting();
-		await migrateRemovedCustomModelsSetting();
 	} catch (error) {
-		logger.warn('Failed to migrate legacy settings', error);
+		logger.warn('Failed to migrate legacy debug setting', error);
 	}
 
 	logger.info(

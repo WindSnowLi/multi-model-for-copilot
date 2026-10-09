@@ -1,9 +1,8 @@
-import { isOfficialDeepSeekBaseUrl, isOfficialMiMoBaseUrl, isOfficialQwenBaseUrl } from '../../endpoint';
 import { t } from '../../i18n';
 import { safeStringify } from '../../json';
+import type { ApiProvider } from '../../types';
 import { API_PROVIDER_HTTP_ERROR_LINKS, MAX_DIAGNOSTIC_FIELD_LENGTH } from '../consts';
 import type {
-    ApiProviderId,
     ApiRequestErrorKind,
     ErrorActionLink,
     ErrorActionUrls,
@@ -33,6 +32,7 @@ export class ApiRequestError extends Error {
 	readonly kind: ApiRequestErrorKind;
 	readonly userSummary: string;
 	readonly diagnosticMessage: string;
+	readonly provider?: ApiProvider;
 	readonly baseUrl?: string;
 	readonly status?: number;
 	readonly code?: string;
@@ -42,6 +42,7 @@ export class ApiRequestError extends Error {
 		userSummary?: string;
 		kind: ApiRequestErrorKind;
 		diagnosticMessage?: string;
+		provider?: ApiProvider;
 		baseUrl?: string;
 		status?: number;
 		code?: string;
@@ -52,6 +53,7 @@ export class ApiRequestError extends Error {
 		this.kind = options.kind;
 		this.userSummary = options.userSummary ?? options.message;
 		this.diagnosticMessage = options.diagnosticMessage ?? options.message;
+		this.provider = options.provider;
 		this.baseUrl = options.baseUrl;
 		this.status = options.status;
 		this.code = options.code;
@@ -62,18 +64,19 @@ export async function createHttpError(
 	response: Response,
 	context: RequestErrorContext,
 ): Promise<ApiRequestError> {
-	const { baseUrl } = context;
+	const { baseUrl, provider } = context;
 	const responseText = await response.text();
 	const serverMessage = extractServerMessage(responseText);
 	const userSummary = getHttpErrorMessage(
 		response.status,
-		getCreateApiKeyUrl(response.status, baseUrl),
+		getCreateApiKeyUrl(response.status, provider),
 	);
 
 	return new ApiRequestError({
 		message: `DeepSeek API request failed with HTTP ${response.status}`,
 		userSummary,
 		kind: 'http',
+		provider,
 		baseUrl,
 		status: response.status,
 		code: `HTTP_${response.status}`,
@@ -101,6 +104,7 @@ export function normalizeRequestError(error: unknown, context: RequestErrorConte
 			message: `DeepSeek request failed with a non-Error value: ${value}`,
 			userSummary: t('error.unknown', value),
 			kind: 'unknown',
+			provider: context.provider,
 			baseUrl: context.baseUrl,
 			diagnosticMessage: joinDiagnosticParts(
 				`kind=unknown`,
@@ -123,6 +127,7 @@ export function normalizeRequestError(error: unknown, context: RequestErrorConte
 			: 'API request failed due to a network error',
 		userSummary,
 		kind: 'network',
+		provider: context.provider,
 		baseUrl: context.baseUrl,
 		code,
 		cause: error,
@@ -249,8 +254,8 @@ function getErrorActions(
 	error: ApiRequestError,
 	actionUrls: ErrorActionUrls,
 ): readonly ErrorActionLink[] {
-	if (error.kind === 'http' && error.status !== undefined && error.baseUrl) {
-		return getHttpErrorActions(error.status, error.baseUrl, actionUrls);
+	if (error.kind === 'http' && error.status !== undefined && error.provider) {
+		return getHttpErrorActions(error.status, error.provider, actionUrls);
 	}
 
 	return getDiagnosticErrorActions(actionUrls);
@@ -258,12 +263,12 @@ function getErrorActions(
 
 function getHttpErrorActions(
 	status: number,
-	baseUrl: string,
+	provider: ApiProvider,
 	actionUrls: ErrorActionUrls,
 ): readonly ErrorActionLink[] {
 	return [
 		...getUniversalHttpErrorActions(status, actionUrls),
-		...getProviderHttpErrorActions(status, baseUrl),
+		...getProviderHttpErrorActions(status, provider),
 		...getDiagnosticErrorActions(actionUrls),
 	];
 }
@@ -280,26 +285,25 @@ function getConfigureApiKeyActions(actionUrls: ErrorActionUrls): readonly ErrorA
 	return url ? [{ labelKey: 'error.action.setApiKey', url }] : [];
 }
 
-function getProviderHttpErrorActions(status: number, baseUrl: string): readonly ErrorActionLink[] {
+function getProviderHttpErrorActions(status: number, provider: ApiProvider): readonly ErrorActionLink[] {
 	if (status === 401) {
 		return [];
 	}
 
-	const link = getProviderHttpErrorLink(status, baseUrl);
+	const link = getProviderHttpErrorLink(status, provider);
 	return link ? [{ labelKey: link.labelKey, url: link.url }] : [];
 }
 
 function getProviderHttpErrorLink(
 	status: number,
-	baseUrl: string,
+	provider: ApiProvider,
 ): HttpErrorLinkDefinition | undefined {
-	const providerId = identifyApiProvider(baseUrl);
 	const statusKey = getHttpErrorLinkStatusKey(status);
-	return providerId && statusKey ? API_PROVIDER_HTTP_ERROR_LINKS[statusKey][providerId] : undefined;
+	return statusKey ? API_PROVIDER_HTTP_ERROR_LINKS[statusKey][provider] : undefined;
 }
 
-function getCreateApiKeyUrl(status: number, baseUrl: string): string | undefined {
-	return status === 401 ? getProviderHttpErrorLink(status, baseUrl)?.url : undefined;
+function getCreateApiKeyUrl(status: number, provider: ApiProvider): string | undefined {
+	return status === 401 ? getProviderHttpErrorLink(status, provider)?.url : undefined;
 }
 
 function getDiagnosticErrorActions(actionUrls: ErrorActionUrls): readonly ErrorActionLink[] {
@@ -343,19 +347,6 @@ function truncateSingleLine(value: string): string {
 
 function escapeBoldText(value: string): string {
 	return value.replace(/\*/g, '\\*');
-}
-
-function identifyApiProvider(baseUrl: string): ApiProviderId | undefined {
-	if (isOfficialDeepSeekBaseUrl(baseUrl)) {
-		return 'deepseek';
-	}
-	if (isOfficialMiMoBaseUrl(baseUrl)) {
-		return 'mimo';
-	}
-	if (isOfficialQwenBaseUrl(baseUrl)) {
-		return 'qwen';
-	}
-	return undefined;
 }
 
 function getHttpErrorLinkStatusKey(status: number): HttpErrorLinkStatusKey | undefined {

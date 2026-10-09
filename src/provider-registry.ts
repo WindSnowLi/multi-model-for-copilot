@@ -42,14 +42,8 @@ export interface ProviderDescriptor {
 	/** SecretStorage key for this provider's API key. */
 	readonly secretKey: string;
 
-	/** VS Code settings key for fallback API key storage. */
-	readonly settingsKey: string;
-
 	/** Official API base URL. */
 	readonly defaultBaseUrl: string;
-
-	/** Official API hostnames (used to map a base URL back to its provider). */
-	readonly officialHosts: readonly string[];
 
 	/** Authentication header style. */
 	readonly authStyle: AuthHeaderStyle;
@@ -71,9 +65,7 @@ const PROVIDER_REGISTRY: Record<ApiProvider, ProviderDescriptor> = {
 		id: 'deepseek',
 		displayName: 'DeepSeek',
 		secretKey: 'multi-model-for-copilot.apiKey',
-		settingsKey: 'apiKey',
 		defaultBaseUrl: 'https://api.deepseek.com',
-		officialHosts: ['api.deepseek.com'],
 		authStyle: 'bearer',
 		thinkingFormat: 'thinking_type',
 		useMaxCompletionTokens: false,
@@ -83,13 +75,7 @@ const PROVIDER_REGISTRY: Record<ApiProvider, ProviderDescriptor> = {
 		id: 'mimo',
 		displayName: 'MiMo',
 		secretKey: 'multi-model-for-copilot.mimoApiKey',
-		settingsKey: 'mimoApiKey',
 		defaultBaseUrl: 'https://token-plan-cn.xiaomimimo.com/v1',
-		officialHosts: [
-			'token-plan-cn.xiaomimimo.com',
-			'token-plan-sgp.xiaomimimo.com',
-			'token-plan-ams.xiaomimimo.com',
-		],
 		authStyle: 'api-key',
 		thinkingFormat: 'thinking_type',
 		useMaxCompletionTokens: true,
@@ -99,9 +85,7 @@ const PROVIDER_REGISTRY: Record<ApiProvider, ProviderDescriptor> = {
 		id: 'qwen',
 		displayName: 'Qwen',
 		secretKey: 'multi-model-for-copilot.qwenApiKey',
-		settingsKey: 'qwenApiKey',
 		defaultBaseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-		officialHosts: ['dashscope.aliyuncs.com'],
 		authStyle: 'bearer',
 		thinkingFormat: 'reasoning_effort',
 		useMaxCompletionTokens: true,
@@ -141,23 +125,6 @@ export function getBalanceCapableProviders(): ReadonlyArray<ApiProvider> {
 	return (Object.keys(PROVIDER_REGISTRY) as ApiProvider[]).filter(
 		(id) => PROVIDER_REGISTRY[id].hasBalanceEndpoint,
 	);
-}
-
-/**
- * Resolve the official hostname check for a base URL.
- * Returns `false` for unknown providers.
- */
-export function isOfficialHost(baseUrl: string, provider: ApiProvider): boolean {
-	const desc = getProviderDescriptor(provider);
-	if (!desc) {
-		return false;
-	}
-	try {
-		const hostname = new URL(baseUrl).hostname.toLowerCase();
-		return desc.officialHosts.includes(hostname);
-	} catch {
-		return false;
-	}
 }
 
 /**

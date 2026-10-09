@@ -1,6 +1,5 @@
 import vscode from 'vscode';
 import { AuthManager } from '../../auth';
-import { normalizeBaseUrl } from '../../endpoint';
 import { logger } from '../../logger';
 import { getBalanceCapableProviders, requireProviderDescriptor } from '../../provider-registry';
 import type { PricingCurrency } from '../../types';
@@ -40,8 +39,7 @@ export class BalanceCurrencyResolver {
 	getDisplayCurrency(): PricingCurrency | undefined {
 		// Check all balance-capable providers in priority order.
 		for (const provider of getBalanceCapableProviders()) {
-			const desc = requireProviderDescriptor(provider);
-			const baseUrl = normalizeBaseUrl(desc.defaultBaseUrl);
+			const baseUrl = requireProviderDescriptor(provider).defaultBaseUrl;
 
 			if (this.resolved?.provider === provider && this.resolved?.baseUrl === baseUrl) {
 				return this.resolved.currency;
@@ -91,7 +89,7 @@ export class BalanceCurrencyResolver {
 
 	private needsRefresh(): boolean {
 		for (const provider of getBalanceCapableProviders()) {
-			const baseUrl = normalizeBaseUrl(requireProviderDescriptor(provider).defaultBaseUrl);
+			const baseUrl = requireProviderDescriptor(provider).defaultBaseUrl;
 			if (this.resolved?.baseUrl === baseUrl || this.readCache()?.baseUrl === baseUrl) {
 				return false;
 			}
@@ -102,7 +100,7 @@ export class BalanceCurrencyResolver {
 
 	private async refreshFromBalance(controller: AbortController, generation: number): Promise<void> {
 		for (const provider of getBalanceCapableProviders()) {
-			const baseUrl = normalizeBaseUrl(requireProviderDescriptor(provider).defaultBaseUrl);
+			const baseUrl = requireProviderDescriptor(provider).defaultBaseUrl;
 
 			const apiKey = await this.authManager.getApiKey(provider);
 			if (!apiKey) {
