@@ -115,6 +115,14 @@ MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
 
 **DeepSeek V4 Pro**（`deepseek-v4-pro`）为上一代模型，DeepSeek 在 V4.1 Flash 发布后[决定继续提供](https://api-docs.deepseek.com/updates)该模型的 API 服务。
 
+## 官方方案：不装扩展也能用
+
+VS Code 内置的 Copilot Chat 自己也能接入这三家：**管理语言模型**（模型选择器里的齿轮图标）→ **Add Models** → **Custom Endpoint**，配置由 VS Code 写入 `chatLanguageModels.json`。按官方文档，BYOK 模型无需登录 GitHub 账号、也不需要 Copilot 订阅。
+
+如果你只是想把模型加进选择器，官方路径可能已经够用 —— DeepSeek / MiMo / Qwen 的可直接复制模板（含本扩展替你处理的鉴权头）见 [docs/official-byok.zh.md](docs/official-byok.zh.md)。
+
+仍然只有本扩展提供：非原生视觉模型的图片支持（视觉代理）、峰谷计价与余额、状态栏 token 速度、`${conversationId}` 请求头模板、一条命令配置 Key —— 完整对比见同一页。
+
 ## 自定义模型
 
 通过 `settings.json` 添加任意 OpenAI 兼容模型：
@@ -188,16 +196,22 @@ MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
 
 ## 方案对比
 
-| 特性 | 本扩展 | 本地代理 | 独立扩展 |
+| 特性 | 本扩展 | 官方 Custom Endpoint（内置） | 本地代理 |
 |---|---|---|---|
-| 在 Copilot Chat 中 | ✅ | ✅ | ❌ |
-| 多提供商 | ✅ | ✅ | ❌ |
-| 自定义模型 | ✅ | ✅ | ❌ |
-| 模型发现 | ✅ | ❌ | ❌ |
-| 原生视觉 | ✅ | ❌ | ❌ |
-| 无需额外进程 | ✅ | ❌ | ✅ |
-| 一键安装 | ✅ | ❌ | ✅ |
-| Key 存钥匙串 | ✅ | ❌ | ⚠️ |
+| 在 Copilot Chat 中 | ✅ | ✅ | ✅ |
+| 无需额外进程 | ✅ | ✅ | ❌ |
+| 配置方式 | 装扩展后直接选 provider | 手写 `chatLanguageModels.json` | 跑一个代理进程 |
+| DeepSeek / MiMo / Qwen 预设与鉴权头 | ✅ | 需手写 JSON | ❌ |
+| 任意 OpenAI 兼容端点 | ✅ | ✅ | ✅ |
+| 模型发现 | ✅ | ✅（provider 级 `url`） | ❌ |
+| 原生视觉 | ✅ | ✅ | ❌ |
+| 非原生视觉模型的图片支持 | ✅（视觉代理） | ❌ | ❌ |
+| 计价 / 余额可见性 | ✅ | ❌ | ❌ |
+| 状态栏 token 速度 | ✅ | ❌ | ❌ |
+| 请求头 `${conversationId}` 模板 | ✅ | ❌ | 视情况 |
+| Key 存钥匙串 | ✅ | ✅（secret storage） | 视情况 |
+
+内置配置模板见 [docs/official-byok.zh.md](docs/official-byok.zh.md)。
 
 ## 许可证
 

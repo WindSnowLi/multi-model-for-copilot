@@ -117,6 +117,21 @@ third-party endpoint still exposes the old names, map them through `modelIdOverr
 **DeepSeek V4 Pro** (`deepseek-v4-pro`) is the previous-generation model, which DeepSeek
 [decided to keep serving](https://api-docs.deepseek.com/updates) after the V4.1 Flash release.
 
+## Official alternative: no extension required
+
+VS Code's built-in Copilot Chat can also connect these providers on its own: **Manage Language
+Models** (gear icon in the model picker) → **Add Models** → **Custom Endpoint**, which VS Code saves
+to `chatLanguageModels.json`. Per the VS Code docs, BYOK models need neither a GitHub sign-in nor a
+Copilot plan.
+
+If you only need the models in the picker, that path may already be enough — copy-paste templates for
+DeepSeek, MiMo, and Qwen (including the auth headers this extension handles for you) are in
+[docs/official-byok.en.md](docs/official-byok.en.md).
+
+What stays unique to this extension: images for models **without** native vision (vision proxy),
+peak/off-peak pricing and balance, status-bar token speed, `${conversationId}` header templating, and
+one-command API key setup — see the same page for the full comparison.
+
 ## Custom Models
 
 Add any OpenAI-compatible model via `settings.json`:
@@ -191,16 +206,22 @@ Add any OpenAI-compatible model via `settings.json`:
 
 ## Compared to Alternatives
 
-| Feature | This Extension | Local Proxy | Standalone Extensions |
+| Feature | This Extension | Copilot Custom Endpoint (built-in) | Local Proxy |
 |---|---|---|---|
-| Inside Copilot Chat | Yes | Yes | No |
-| Multiple providers | Yes | Yes | No |
-| Custom models | Yes | Yes | No |
-| Model discovery | Yes | No | No |
-| Native vision | Yes | No | No |
-| No extra process | Yes | No | Yes |
-| One-click install | Yes | No | Yes |
-| API key in keychain | Yes | No | Varies |
+| Inside Copilot Chat | Yes | Yes | Yes |
+| No extra process | Yes | Yes | No |
+| Setup | Install extension, pick provider | Edit `chatLanguageModels.json` | Run a proxy process |
+| DeepSeek / MiMo / Qwen presets + auth headers | Yes | Manual JSON | No |
+| Any OpenAI-compatible endpoint | Yes | Yes | Yes |
+| Model discovery | Yes | Yes (provider-level `url`) | No |
+| Native vision | Yes | Yes | No |
+| Images for models without native vision | Yes (vision proxy) | No | No |
+| Pricing / balance visibility | Yes | No | No |
+| Token speed in status bar | Yes | No | No |
+| `${conversationId}` header templating | Yes | No | Varies |
+| API key in OS keychain | Yes | Yes (secret storage) | Varies |
+
+See [docs/official-byok.en.md](docs/official-byok.en.md) for the built-in configuration templates.
 
 ## License
 
