@@ -83,18 +83,6 @@
         "title": "%multi-model-for-copilot.command.resetBaseUrl%"
       },
       {
-        "command": "multi-model-for-copilot.addCustomModel",
-        "title": "%multi-model-for-copilot.command.addCustomModel%"
-      },
-      {
-        "command": "multi-model-for-copilot.removeCustomModel",
-        "title": "%multi-model-for-copilot.command.removeCustomModel%"
-      },
-      {
-        "command": "multi-model-for-copilot.discoverModels",
-        "title": "%multi-model-for-copilot.command.discoverModels%"
-      },
-      {
         "command": "multi-model-for-copilot.setVisionModel",
         "title": "%multi-model-for-copilot.command.setVisionModel%"
       },
@@ -254,81 +242,6 @@
               "description": "%multi-model-for-copilot.config.modelIdOverrides.qwen-vl-turbo.description%"
             }
           }
-        },
-        "multi-model-for-copilot.customModels": {
-          "type": "array",
-          "default": [],
-          "items": {
-            "type": "object",
-            "required": [
-              "id",
-              "name",
-              "baseUrl",
-              "modelId"
-            ],
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "Unique model identifier"
-              },
-              "name": {
-                "type": "string",
-                "description": "Display name in model picker"
-              },
-              "baseUrl": {
-                "type": "string",
-                "description": "API base URL (e.g. https://api.example.com/v1)"
-              },
-              "modelId": {
-                "type": "string",
-                "description": "Model ID sent in API request"
-              },
-              "authHeader": {
-                "type": "string",
-                "default": "Authorization",
-                "description": "Auth header name"
-              },
-              "authPrefix": {
-                "type": "string",
-                "default": "Bearer ",
-                "description": "Prefix before API key (e.g. 'Bearer ' or '')"
-              },
-              "maxInputTokens": {
-                "type": "number",
-                "default": 128000
-              },
-              "maxOutputTokens": {
-                "type": "number",
-                "default": 8192
-              },
-              "toolCalling": {
-                "default": false,
-                "description": "Tool calling support (true/false or number)"
-              },
-              "imageInput": {
-                "type": "boolean",
-                "default": false
-              },
-              "thinking": {
-                "type": "boolean",
-                "default": false
-              },
-              "requiresThinkingParam": {
-                "type": "boolean",
-                "default": false
-              },
-              "useMaxCompletionTokens": {
-                "type": "boolean",
-                "default": false,
-                "description": "Use max_completion_tokens instead of max_tokens"
-              },
-              "detail": {
-                "type": "string",
-                "description": "Short description shown in model picker"
-              }
-            }
-          },
-          "markdownDescription": "%multi-model-for-copilot.config.customModels.description%"
         },
         "multi-model-for-copilot.visionModel": {
           "type": "string",

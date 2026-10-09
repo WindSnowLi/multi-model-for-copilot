@@ -23,15 +23,6 @@ export function registerProvider(context: vscode.ExtensionContext): ChatProvider
 		vscode.commands.registerCommand('multi-model-for-copilot.setVisionModel', () =>
 			provider.setVisionModel(),
 		),
-		vscode.commands.registerCommand('multi-model-for-copilot.addCustomModel', () =>
-			provider.addCustomModel(),
-		),
-		vscode.commands.registerCommand('multi-model-for-copilot.removeCustomModel', () =>
-			provider.removeCustomModel(),
-		),
-		vscode.commands.registerCommand('multi-model-for-copilot.discoverModels', () =>
-			provider.discoverAndAddModels(),
-		),
 		vscode.commands.registerCommand('multi-model-for-copilot.refreshBalance', () =>
 			provider.refreshBalance(),
 		),

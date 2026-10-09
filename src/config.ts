@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 import { CONFIG_SECTION } from './consts';
 import { getProviderDescriptor } from './provider-registry';
-import type { ApiProvider, CustomModelConfig } from './types';
+import type { ApiProvider } from './types';
 
 export type DebugMode = 'minimal' | 'metadata' | 'verbose';
 
@@ -48,64 +48,6 @@ export function getMaxTokens(): number | undefined {
 	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
 	const value = config.get<number>('maxTokens', 0);
 	return value > 0 ? value : undefined;
-}
-
-/**
- * Read user-defined custom model configurations from settings.
- * Returns validated entries with required fields present.
- */
-export function getCustomModels(): CustomModelConfig[] {
-	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
-	const raw = config.get<CustomModelConfig[]>('customModels', []);
-	return raw.filter(
-		(m) =>
-			m &&
-			typeof m.id === 'string' &&
-			m.id.trim() &&
-			typeof m.name === 'string' &&
-			m.name.trim() &&
-			typeof m.baseUrl === 'string' &&
-			m.baseUrl.trim() &&
-			typeof m.modelId === 'string' &&
-			m.modelId.trim(),
-	);
-}
-
-/**
- * Get the API key secret storage key for a custom model.
- */
-export function getCustomModelSecretKey(modelId: string): string {
-	return `multi-model-for-copilot.custom.${modelId}`;
-}
-
-/** Model entry returned by the OpenAI-compatible /v1/models endpoint. */
-export interface DiscoveredModel {
-	id: string;
-	object: string;
-	owned_by: string;
-}
-
-/**
- * Discover available models from an OpenAI-compatible /v1/models endpoint.
- * Works with MiMo, DeepSeek, and any custom provider.
- */
-export async function discoverModels(
-	baseUrl: string,
-	apiKey: string,
-	authHeader: string = 'Authorization',
-	authPrefix: string = 'Bearer ',
-	abortSignal?: AbortSignal,
-): Promise<DiscoveredModel[]> {
-	const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-	headers[authHeader] = `${authPrefix}${apiKey}`;
-
-	const url = `${baseUrl.replace(/\/+$/u, '')}/models`;
-	const response = await fetch(url, { headers, signal: abortSignal });
-	if (!response.ok) {
-		throw new Error(`Model discovery failed: HTTP ${response.status}`);
-	}
-	const data = await response.json() as { data?: DiscoveredModel[] };
-	return data.data ?? [];
 }
 
 /**

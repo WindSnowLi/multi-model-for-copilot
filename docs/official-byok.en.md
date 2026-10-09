@@ -176,7 +176,8 @@ If the models do not show up in the picker, restart VS Code.
 ## What this extension adds on top
 
 The built-in Custom Endpoint provider covers model access; these are the parts that still require this
-extension:
+extension. This extension deliberately ships no custom-endpoint editor of its own — use the provider
+above for any endpoint without a preset.
 
 | Capability | This extension |
 |---|---|

@@ -170,7 +170,8 @@ VS Code 会用 `vscode://schemas/language-models` 校验该文件，API Key 存�
 
 ## 本扩展额外提供什么
 
-官方 Custom Endpoint 已经覆盖了"接入模型"这件事，下面这些能力仍需要本扩展：
+官方 Custom Endpoint 已经覆盖了"接入模型"这件事，下面这些能力仍需要本扩展。本扩展刻意不再自带
+自定义端点编辑器 —— 没有预置的端点请使用上面的官方 provider。
 
 | 能力 | 本扩展 |
 |---|---|

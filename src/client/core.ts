@@ -3,7 +3,7 @@ import { safeStringify } from '../json';
 import { logger } from '../logger';
 import { buildAuthHeaders } from '../provider-registry';
 import type {
-    ApiProvider, ChatCompletionRequest, CustomModelConfig,
+    ApiProvider, ChatCompletionRequest,
     ChatStreamChunk,
     ChatToolCall,
     ChatUsage,
@@ -20,7 +20,6 @@ export class ApiClient {
 		private readonly baseUrl: string,
 		private readonly apiKey: string,
 		private readonly provider: ApiProvider = 'deepseek',
-		private readonly customConfig?: CustomModelConfig,
 		private readonly requestHeaders?: Readonly<Record<string, string>>,
 	) {}
 
@@ -53,14 +52,8 @@ export class ApiClient {
 				'Content-Type': 'application/json',
 			};
 
-			// Auth headers: custom models use their own config, built-in providers use the registry.
-			if (this.customConfig) {
-				const headerName = this.customConfig.authHeader || 'Authorization';
-				const prefix = this.customConfig.authPrefix ?? 'Bearer ';
-				headers[headerName] = `${prefix}${this.apiKey}`;
-			} else {
-				Object.assign(headers, buildAuthHeaders(this.provider, this.apiKey));
-			}
+			// Auth headers come from the provider registry (bearer or api-key style).
+			Object.assign(headers, buildAuthHeaders(this.provider, this.apiKey));
 
 			applyRequestHeaders(headers, this.requestHeaders);
 

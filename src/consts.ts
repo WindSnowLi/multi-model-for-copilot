@@ -1,4 +1,4 @@
-import type { CustomModelConfig, ModelDefinition, ThinkingEffort } from './types';
+import type { ModelDefinition, ThinkingEffort } from './types';
 
 /**
  * Compile-time constants shared across the extension.
@@ -356,38 +356,3 @@ export const MODELS: ModelDefinition[] = [
 		priceCategory: 'low',
 	},
 ];
-
-/**
- * Convert a user-defined CustomModelConfig into a ModelDefinition
- * that the provider can use like any built-in model.
- */
-export function toModelDefinition(cfg: CustomModelConfig): ModelDefinition {
-	return {
-		id: cfg.id,
-		name: cfg.name,
-		provider: 'custom',
-		family: cfg.id,
-		version: '',
-		detail: cfg.detail || `Custom model via ${new URL(cfg.baseUrl).hostname}`,
-		maxInputTokens: cfg.maxInputTokens ?? 128000,
-		maxOutputTokens: cfg.maxOutputTokens ?? 8192,
-		capabilities: {
-			toolCalling: cfg.toolCalling ?? false,
-			imageInput: cfg.imageInput ?? false,
-			nativeImageInput: cfg.nativeImageInput ?? cfg.imageInput ?? false,
-			thinking: cfg.thinking ?? false,
-		},
-		// Custom models keep the default effort set unless they opt into low.
-		thinkingEfforts: cfg.thinkingEfforts,
-		requiresThinkingParam: cfg.requiresThinkingParam ?? false,
-	};
-}
-
-/**
- * Get the merged list of all models: built-in + user-defined custom models.
- */
-export function getAllModels(customConfigs: CustomModelConfig[]): ModelDefinition[] {
-	const builtIn = MODELS;
-	const custom = customConfigs.map(toModelDefinition);
-	return [...builtIn, ...custom];
-}

@@ -21,14 +21,14 @@
   <img src="resources/screenshots/01-picker.png" alt="DeepSeek V4 Pro 和 Flash 出现在 Copilot Chat 模型选择器中，带有可按模型独立设置的思考深度下拉菜单（停用 / 标准 / 深度）" width="800">
 </p>
 
-喜欢 DeepSeek、MiMo 和千问的性价比，但不想放弃 GitHub Copilot 的 Agent 模式、工具调用和成熟的交互体验？本扩展将 **DeepSeek V4.1**、**MiMo V2.6** 和**千问 AI** 直接接入 Copilot Chat 模型选择器，并支持**任意 OpenAI 兼容端点**。
+喜欢 DeepSeek、MiMo 和千问的性价比，但不想放弃 GitHub Copilot 的 Agent 模式、工具调用和成熟的交互体验？本扩展将 **DeepSeek V4.1**、**MiMo V2.6** 和**千问 AI** 直接接入 Copilot Chat 模型选择器。其他端点请使用 Copilot 内置的 **Custom Endpoint**（见下文）。
 
 ## 为什么选这个扩展？
 
 - **不是替换 Copilot，而是增强它。** 没有新的侧边栏，没有新的聊天界面。只是在模型选择器中多了更多选项。
-- **Agent 模式、工具调用、Instructions、MCP、Skills——全部正常运作。** Copilot 的完整能力栈，现在可以跑在 DeepSeek、MiMo 或任意自定义模型上。
+- **Agent 模式、工具调用、Instructions、MCP、Skills——全部正常运作。** Copilot 的完整能力栈，现在可以跑在 DeepSeek、MiMo 或千问上。
 - **视觉支持。** DeepSeek V4.1 Flash 和 MiMo V2.6 原生支持图片输入；DeepSeek V4 Pro 通过视觉代理间接支持。
-- **模型发现。** 一键从任意 `/v1/models` 端点发现并添加可用模型。
+- **开箱预设。** 三家服务商的鉴权方式、思考参数、计价与上下文长度都已内置，无需手写配置。
 - **BYOK。** 你的 API Key，你的账单。存储在 OS 钥匙串中。
 - **需自行提供 API Key，直接向 DeepSeek 付费。** 你的 API Key，你的账单，你的速率限制。密钥存储在操作系统密钥链中，不会以明文形式写入磁盘。
 
@@ -93,7 +93,7 @@ MiMo：`Multi-Model: 设置 MiMo API Key` → 粘贴 `tp-...` Key。
 
 千问：`Multi-Model: 设置千问 API Key` → 粘贴 `sk-...` Key。
 
-自定义模型：`Multi-Model: 发现可用模型` → 选择端点 → 选择模型。
+其他端点（OpenAI、Azure、网关、Ollama 等）请使用 Copilot 内置的 **Custom Endpoint** provider —— 见 [docs/official-byok.zh.md](docs/official-byok.zh.md)。
 
 ## 模型
 
@@ -123,42 +123,7 @@ VS Code 内置的 Copilot Chat 自己也能接入这三家：**管理语言模�
 
 仍然只有本扩展提供：非原生视觉模型的图片支持（视觉代理）、峰谷计价与余额、状态栏 token 速度、`${conversationId}` 请求头模板、一条命令配置 Key —— 完整对比见同一页。
 
-## 自定义模型
-
-通过 `settings.json` 添加任意 OpenAI 兼容模型：
-
-```json
-{
-  "multi-model-for-copilot.customModels": [
-    {
-      "id": "gpt-4o",
-      "name": "GPT-4o（自定义）",
-      "baseUrl": "https://api.openai.com/v1",
-      "modelId": "gpt-4o",
-      "toolCalling": true,
-      "imageInput": true,
-      "useMaxCompletionTokens": true
-    }
-  ]
-}
-```
-
-| 字段 | 必填 | 默认值 | 说明 |
-|---|---|---|---|
-| `id` | 是 | — | 唯一标识符 |
-| `name` | 是 | — | 显示名称 |
-| `baseUrl` | 是 | — | API 端点 |
-| `modelId` | 是 | — | 请求体中的模型 ID |
-| `authHeader` | 否 | `Authorization` | 认证头名称 |
-| `authPrefix` | 否 | `Bearer ` | Key 前缀 |
-| `maxInputTokens` | 否 | 128000 | 最大输入 |
-| `maxOutputTokens` | 否 | 8192 | 最大输出 |
-| `toolCalling` | 否 | false | 工具调用 |
-| `imageInput` | 否 | false | 允许粘贴图片（选择器能力） |
-| `nativeImageInput` | 否 | `imageInput` | API 原生接受图片（`image_url`） |
-| `thinking` | 否 | false | 思考模式 |
-| `thinkingEfforts` | 否 | 停用/标准/深度 | 有序推理强度列表（支持低强度可加 `low`） |
-| `useMaxCompletionTokens` | 否 | false | 使用 `max_completion_tokens` |
+对于本扩展没有预置的端点，请使用 Copilot 内置的 Custom Endpoint provider —— 本扩展刻意不再自带自定义模型编辑器。
 
 ## 命令
 
@@ -169,9 +134,6 @@ VS Code 内置的 Copilot Chat 自己也能接入这三家：**管理语言模�
 | `Multi-Model: 清除 API Key` | 移除 DeepSeek Key |
 | `Multi-Model: 清除 MiMo API Key` | 移除 MiMo Key |
 | `Multi-Model: 重置 API 基础 URL` | 将服务商基础 URL 重置为默认值（可选择范围） |
-| `Multi-Model: 发现可用模型` | 自动发现模型 |
-| `Multi-Model: 添加自定义模型` | 手动添加 |
-| `Multi-Model: 移除自定义模型` | 移除自定义模型 |
 | `Multi-Model: 配置视觉代理` | 配置图片代理 |
 | `Multi-Model: 打开设置` | 打开设置 |
 | `Multi-Model: 显示日志` | 显示日志 |
@@ -185,7 +147,6 @@ VS Code 内置的 Copilot Chat 自己也能接入这三家：**管理语言模�
 | `qwenBaseUrl` | `https://dashscope.aliyuncs.com/compatible-mode/v1` | 千问（DashScope）API 端点 |
 | `requestHeaders` | `{}` | 聊天补全请求的额外请求头，支持 `${conversationId}`（[文档](docs/settings/request-headers.zh.md)） |
 | `maxTokens` | `0` | 全局最大输出（0 = 不限制） |
-| `customModels` | `[]` | 自定义模型定义 |
 | `modelIdOverrides` | 官方 ID | 覆盖内置模型 ID |
 | `debugMode` | `minimal` | 诊断级别 |
 | `visionModel` | 自动 | 视觉代理模型 |
@@ -202,8 +163,8 @@ VS Code 内置的 Copilot Chat 自己也能接入这三家：**管理语言模�
 | 无需额外进程 | ✅ | ✅ | ❌ |
 | 配置方式 | 装扩展后直接选 provider | 手写 `chatLanguageModels.json` | 跑一个代理进程 |
 | DeepSeek / MiMo / Qwen 预设与鉴权头 | ✅ | 需手写 JSON | ❌ |
-| 任意 OpenAI 兼容端点 | ✅ | ✅ | ✅ |
-| 模型发现 | ✅ | ✅（provider 级 `url`） | ❌ |
+| 任意 OpenAI 兼容端点 | ❌ —— 请用内置 provider | ✅ | ✅ |
+| 模型发现 | ❌ —— 请用内置 provider | ✅（provider 级 `url`） | ❌ |
 | 原生视觉 | ✅ | ✅ | ❌ |
 | 非原生视觉模型的图片支持 | ✅（视觉代理） | ❌ | ❌ |
 | 计价 / 余额可见性 | ✅ | ❌ | ❌ |

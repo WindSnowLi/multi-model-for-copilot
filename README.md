@@ -22,7 +22,7 @@
 
 ## What is this?
 
-This extension brings **multiple AI model providers** into GitHub Copilot Chat's model picker. Use built-in presets for **DeepSeek** and **MiMo**, or connect **any OpenAI-compatible API endpoint** — all with your own API keys (BYOK).
+This extension brings **DeepSeek, MiMo, and Qwen presets** into GitHub Copilot Chat's model picker — with your own API keys (BYOK). For any other endpoint, use Copilot's built-in **Custom Endpoint** provider (see below).
 
 **Don't replace Copilot — power it up.** No new sidebar, no new chat UI. Just more models in the picker you already use.
 
@@ -35,17 +35,9 @@ This extension brings **multiple AI model providers** into GitHub Copilot Chat's
 | **DeepSeek** | V4.1 Flash, V4 Pro | `Authorization: Bearer` | `sk-...` |
 | **Xiaomi MiMo** | V2.6 Pro, V2.6 Flash, V2.6 Pro Ultraspeed | `api-key` header | `tp-...` (Token Plan) |
 | **Qwen (千问)** | Max, Plus, Turbo, VL Max, VL Plus, VL Turbo | `Authorization: Bearer` | `sk-...` |
-| **Custom** | Any OpenAI-compatible | Configurable | Any |
 
-Built-in presets include full pricing, capabilities, and context limits. Custom models are added via settings or interactive commands.
-
-### Model Discovery
-
-Run **`Multi-Model: Discover Available Models`** to auto-detect available models:
-
-1. Pick a source: **DeepSeek**, **MiMo**, **Qwen**, or **custom endpoint**
-2. Extension calls `GET /v1/models` and lists all available models
-3. Multi-select the ones you want — added to config instantly
+Presets include full pricing, capabilities, and context limits. The provider-specific quirks — MiMo's
+`api-key` header, Qwen's `reasoning_effort` shape, DeepSeek's `thinking` switch — are handled for you.
 
 ### Vision Support
 
@@ -59,7 +51,6 @@ proxy and forward the description as text.
 | **MiMo V2.6 Pro / Flash / Pro Ultraspeed** | Native | Images sent directly via OpenAI `image_url` format |
 | **Qwen VL Max/Plus/Turbo** | Native | Images sent directly via OpenAI `image_url` format |
 | **DeepSeek V4 Pro** | Proxy | Images described by another model, text sent to DeepSeek |
-| **Custom models** | Configurable | Set `imageInput: true` for native support |
 
 Supports JPEG, PNG, GIF, WebP, BMP (up to 50MB per image). Multi-image input supported.
 
@@ -97,7 +88,7 @@ Ctrl+Shift+P → Multi-Model: Set API Key → paste your key → pick a model in
 
 For MiMo: `Multi-Model: Set MiMo API Key` → paste `tp-...` key.
 
-For custom models: `Multi-Model: Discover Available Models` → pick endpoint → select models.
+For any other endpoint (OpenAI, Azure, a gateway, Ollama, …), use Copilot's built-in **Custom Endpoint** provider — see [docs/official-byok.en.md](docs/official-byok.en.md).
 
 ## Built-in Models
 
@@ -132,43 +123,8 @@ What stays unique to this extension: images for models **without** native vision
 peak/off-peak pricing and balance, status-bar token speed, `${conversationId}` header templating, and
 one-command API key setup — see the same page for the full comparison.
 
-## Custom Models
-
-Add any OpenAI-compatible model via `settings.json`:
-
-```json
-{
-  "multi-model-for-copilot.customModels": [
-    {
-      "id": "gpt-4o",
-      "name": "GPT-4o (Custom)",
-      "baseUrl": "https://api.openai.com/v1",
-      "modelId": "gpt-4o",
-      "toolCalling": true,
-      "imageInput": true,
-      "useMaxCompletionTokens": true
-    }
-  ]
-}
-```
-
-| Field | Required | Default | Description |
-|---|---|---|---|
-| `id` | Yes | — | Unique identifier |
-| `name` | Yes | — | Display name |
-| `baseUrl` | Yes | — | API endpoint URL |
-| `modelId` | Yes | — | Model ID in request body |
-| `authHeader` | No | `Authorization` | HTTP auth header name |
-| `authPrefix` | No | `Bearer ` | Prefix before API key |
-| `maxInputTokens` | No | 128000 | Max input context |
-| `maxOutputTokens` | No | 8192 | Max output tokens |
-| `toolCalling` | No | false | Tool calling support |
-| `imageInput` | No | false | Allow attaching images (picker capability) |
-| `nativeImageInput` | No | `imageInput` | API accepts images natively (`image_url`) |
-| `thinking` | No | false | Thinking mode |
-| `thinkingEfforts` | No | none/high/max | Ordered reasoning efforts (add `low` if supported) |
-| `requiresThinkingParam` | No | false | Send thinking wrapper |
-| `useMaxCompletionTokens` | No | false | Use `max_completion_tokens` |
+For endpoints this extension has no preset for, the built-in Custom Endpoint provider is the
+supported path; this extension deliberately keeps no custom-model editor of its own.
 
 ## Commands
 
@@ -179,9 +135,6 @@ Add any OpenAI-compatible model via `settings.json`:
 | `Multi-Model: Clear API Key` | Remove DeepSeek key |
 | `Multi-Model: Clear MiMo API Key` | Remove MiMo key |
 | `Multi-Model: Reset API Base URL` | Reset a provider base URL to its default (choose scope) |
-| `Multi-Model: Discover Available Models` | Auto-discover from any provider |
-| `Multi-Model: Add Custom Model` | Manually add custom model |
-| `Multi-Model: Remove Custom Model` | Remove custom model |
 | `Multi-Model: Configure Vision Proxy` | Configure image proxy |
 | `Multi-Model: Open Settings` | Open settings |
 | `Multi-Model: Show Logs` | Show diagnostics |
@@ -195,7 +148,6 @@ Add any OpenAI-compatible model via `settings.json`:
 | `qwenBaseUrl` | `https://dashscope.aliyuncs.com/compatible-mode/v1` | Qwen (DashScope) API endpoint |
 | `requestHeaders` | `{}` | Extra headers for chat completion requests; supports `${conversationId}` ([docs](docs/settings/request-headers.en.md)) |
 | `maxTokens` | `0` | Global max output tokens (0 = no limit) |
-| `customModels` | `[]` | Custom model definitions |
 | `modelIdOverrides` | official IDs | Override built-in model IDs |
 | `debugMode` | `minimal` | Diagnostic level |
 | `visionModel` | auto | Vision proxy model |
@@ -212,8 +164,8 @@ Add any OpenAI-compatible model via `settings.json`:
 | No extra process | Yes | Yes | No |
 | Setup | Install extension, pick provider | Edit `chatLanguageModels.json` | Run a proxy process |
 | DeepSeek / MiMo / Qwen presets + auth headers | Yes | Manual JSON | No |
-| Any OpenAI-compatible endpoint | Yes | Yes | Yes |
-| Model discovery | Yes | Yes (provider-level `url`) | No |
+| Any OpenAI-compatible endpoint | No — use the built-in provider | Yes | Yes |
+| Model discovery | No — use the built-in provider | Yes (provider-level `url`) | No |
 | Native vision | Yes | Yes | No |
 | Images for models without native vision | Yes (vision proxy) | No | No |
 | Pricing / balance visibility | Yes | No | No |

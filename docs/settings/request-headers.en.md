@@ -1,6 +1,6 @@
 # Request Headers
 
-`multi-model-for-copilot.requestHeaders` adds or overrides headers for chat completion requests sent to the configured provider base URLs (`multi-model-for-copilot.baseUrl`, `multi-model-for-copilot.mimoBaseUrl`, `multi-model-for-copilot.qwenBaseUrl`, and any custom model endpoint). Its default value is `{}`.
+`multi-model-for-copilot.requestHeaders` adds or overrides headers for chat completion requests sent to the configured provider base URLs (`multi-model-for-copilot.baseUrl`, `multi-model-for-copilot.mimoBaseUrl`, `multi-model-for-copilot.qwenBaseUrl`). Its default value is `{}`.
 
 ## Configuration
 
@@ -19,7 +19,7 @@ Example configuration for an OpenAI-compatible gateway:
 ```
 
 - Header names are case-insensitive. Configured values override existing headers, including `Authorization` and `Content-Type`.
-- The same headers are applied to every provider (DeepSeek, MiMo, Qwen and custom models).
+- The same headers are applied to every provider (DeepSeek, MiMo, Qwen).
 - The extension adds no custom `User-Agent` by default; you can set one here if needed.
 - Header values are stored in VS Code settings.
 

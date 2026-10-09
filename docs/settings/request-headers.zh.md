@@ -1,6 +1,6 @@
 # 自定义请求头
 
-`multi-model-for-copilot.requestHeaders` 用于为发送到已配置的服务商基础 URL（`multi-model-for-copilot.baseUrl`、`multi-model-for-copilot.mimoBaseUrl`、`multi-model-for-copilot.qwenBaseUrl` 以及自定义模型端点）的聊天补全请求添加或覆盖请求头，默认值为 `{}`。
+`multi-model-for-copilot.requestHeaders` 用于为发送到已配置的服务商基础 URL（`multi-model-for-copilot.baseUrl`、`multi-model-for-copilot.mimoBaseUrl`、`multi-model-for-copilot.qwenBaseUrl`）的聊天补全请求添加或覆盖请求头，默认值为 `{}`。
 
 ## 配置方式
 
@@ -19,7 +19,7 @@
 ```
 
 - 请求头名称不区分大小写，配置值会覆盖已有值，包括 `Authorization` 和 `Content-Type`。
-- 所有服务商（DeepSeek、MiMo、千问和自定义模型）都会应用这些请求头。
+- 所有服务商（DeepSeek、MiMo、千问）都会应用这些请求头。
 - 扩展默认不额外添加 `User-Agent`，有需要时可在此配置。
 - 请求头的值保存在 VS Code 设置中。
 

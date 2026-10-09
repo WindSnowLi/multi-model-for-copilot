@@ -4,12 +4,10 @@ import { ApiClient, createApiKeyNotConfiguredError } from '../client';
 import {
 	getApiModelId,
 	getBaseUrl,
-	getCustomModels,
-	getCustomModelSecretKey,
 	getMaxTokens,
 	getRequestHeaders,
 } from '../config';
-import { getAllModels } from '../consts';
+import { MODELS } from '../consts';
 import { isOfficialProviderBaseUrl } from '../endpoint';
 import { getProviderDescriptor } from '../provider-registry';
 import type { ChatCompletionRequest } from '../types';
@@ -77,27 +75,17 @@ export async function prepareChatRequest({
 	cacheDiagnostics,
 	getVisionDescriber,
 }: PrepareChatRequestOptions): Promise<PreparedChatRequest> {
-	const customConfigs = getCustomModels();
-	const allModels = getAllModels(customConfigs);
-	const modelDef = allModels.find((m) => m.id === modelInfo.id);
-	const customCfg = customConfigs.find((m) => m.id === modelInfo.id);
+	const modelDef = MODELS.find((m) => m.id === modelInfo.id);
 
-	// For custom models, get API key from model-specific secret; otherwise use provider key
-	const secretKey = customCfg ? getCustomModelSecretKey(customCfg.id) : undefined;
-	const apiKey = customCfg
-		? await authManager.getApiKeyForSecret(secretKey!)
-		: await authManager.getApiKey(modelDef?.provider);
+	const apiKey = await authManager.getApiKey(modelDef?.provider);
 	if (!apiKey) {
 		throw createApiKeyNotConfiguredError(modelInfo.name || modelInfo.id);
 	}
 
-	// Custom models use their own baseUrl; built-in models use settings
-	const baseUrl = customCfg
-		? customCfg.baseUrl.replace(/\/+$/u, '')
-		: getBaseUrl(modelDef?.provider);
-	const provider = customCfg ? 'deepseek' : (modelDef?.provider ?? 'deepseek'); // custom models use DeepSeek-style auth by default
+	const baseUrl = getBaseUrl(modelDef?.provider);
+	const provider = modelDef?.provider ?? 'deepseek';
 	const requestHeaders = resolveRequestHeaders(getRequestHeaders(), options, storageUri);
-	const client = new ApiClient(baseUrl, apiKey, provider, customCfg, requestHeaders);
+	const client = new ApiClient(baseUrl, apiKey, provider, requestHeaders);
 	const isThinkingModel = modelDef?.capabilities.thinking ?? false;
 	const nativeImageInput = modelDef?.capabilities.nativeImageInput === true;
 	const supportedThinkingEfforts = getModelThinkingEfforts(modelDef);
@@ -119,10 +107,9 @@ export async function prepareChatRequest({
 	const hasNativeImages =
 		nativeImageInput && ChatMessages.some((msg) => Boolean(msg.imageUrls?.length));
 	const providerDesc = getProviderDescriptor(modelDef?.provider ?? 'deepseek');
-	const useMaxCompletionTokens =
-		providerDesc?.useMaxCompletionTokens || customCfg?.useMaxCompletionTokens;
+	const useMaxCompletionTokens = providerDesc?.useMaxCompletionTokens ?? false;
 	const baseRequest: ChatCompletionRequest = {
-		model: customCfg ? customCfg.modelId : getApiModelId(modelInfo.id),
+		model: getApiModelId(modelInfo.id),
 		messages: ChatMessages,
 		stream: true,
 		tools,
@@ -145,8 +132,7 @@ export async function prepareChatRequest({
 		options as ModelConfigurationOptions,
 		supportedThinkingEfforts,
 	);
-	// Only force helper requests into disabled thinking on the official API.
-	// Custom endpoints keep their configured effort to preserve pre-#137 request shape.
+	// Helper requests on the official API run with thinking disabled.
 	const forceNoneThinking =
 		shouldForceThinkingNone(requestKind) &&
 		isOfficialProviderBaseUrl(baseUrl, modelDef?.provider ?? 'deepseek');
@@ -155,10 +141,7 @@ export async function prepareChatRequest({
 	// Thinking parameter format is provider-specific:
 	//   'reasoning_effort' → only reasoning_effort param (Qwen)
 	//   'thinking_type'    → thinking: { type } + reasoning_effort (DeepSeek, MiMo)
-	const thinkingFormat =
-		customCfg?.requiresThinkingParam === false
-			? 'reasoning_effort'
-			: (providerDesc?.thinkingFormat ?? 'thinking_type');
+	const thinkingFormat = providerDesc?.thinkingFormat ?? 'thinking_type';
 
 	const request: ChatCompletionRequest = {
 		...baseRequest,

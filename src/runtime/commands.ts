@@ -11,7 +11,7 @@ interface ResetTarget extends vscode.QuickPickItem {
 }
 
 interface BaseUrlProviderPick extends vscode.QuickPickItem {
-	provider: Exclude<ApiProvider, 'custom'>;
+	provider: ApiProvider;
 }
 
 export function registerCommands(context: vscode.ExtensionContext): void {

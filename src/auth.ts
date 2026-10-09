@@ -63,20 +63,6 @@ export class AuthManager {
 	}
 
 	/**
-	 * Get API key by arbitrary secret key name (for custom models).
-	 */
-	async getApiKeyForSecret(secretKey: string): Promise<string | undefined> {
-		return this.secretStorage.get(secretKey) ?? undefined;
-	}
-
-	/**
-	 * Store API key by arbitrary secret key name (for custom models).
-	 */
-	async setApiKeyForSecret(secretKey: string, apiKey: string): Promise<void> {
-		await this.secretStorage.store(secretKey, apiKey.trim());
-	}
-
-	/**
 	 * Prompt user to enter API key via input box.
 	 */
 	async promptForApiKey(provider?: ApiProvider): Promise<boolean> {

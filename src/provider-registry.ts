@@ -69,7 +69,7 @@ export interface ProviderDescriptor {
 
 // ---- Registry ----
 
-const PROVIDER_REGISTRY: Record<Exclude<ApiProvider, 'custom'>, ProviderDescriptor> = {
+const PROVIDER_REGISTRY: Record<ApiProvider, ProviderDescriptor> = {
 	deepseek: {
 		id: 'deepseek',
 		displayName: 'DeepSeek',
@@ -118,19 +118,19 @@ const PROVIDER_REGISTRY: Record<Exclude<ApiProvider, 'custom'>, ProviderDescript
 // ---- Public API ----
 
 /**
- * Get the provider descriptor. Returns `undefined` for 'custom' or unknown providers.
+ * Get the provider descriptor. Returns `undefined` for unknown providers.
  */
 export function getProviderDescriptor(provider: ApiProvider): ProviderDescriptor | undefined {
 	return PROVIDER_REGISTRY[provider as keyof typeof PROVIDER_REGISTRY];
 }
 
 /**
- * Get the provider descriptor, throwing if not found (for built-in providers only).
+ * Get the provider descriptor, throwing if not found.
  */
-export function requireProviderDescriptor(provider: Exclude<ApiProvider, 'custom'>): ProviderDescriptor {
+export function requireProviderDescriptor(provider: ApiProvider): ProviderDescriptor {
 	const desc = PROVIDER_REGISTRY[provider];
 	if (!desc) {
-		throw new Error(`Unknown built-in provider: ${provider}`);
+		throw new Error(`Unknown provider: ${provider}`);
 	}
 	return desc;
 }
@@ -143,22 +143,22 @@ export function requireProviderDescriptor(provider: Exclude<ApiProvider, 'custom
  *   1. setting `hasBalanceEndpoint: true` in its descriptor above, and
  *   2. providing a `fetchBalance` implementation for its response shape.
  */
-export function getBalanceCapableProviders(): ReadonlyArray<Exclude<ApiProvider, 'custom'>> {
-	return (Object.keys(PROVIDER_REGISTRY) as Exclude<ApiProvider, 'custom'>[]).filter(
+export function getBalanceCapableProviders(): ReadonlyArray<ApiProvider> {
+	return (Object.keys(PROVIDER_REGISTRY) as ApiProvider[]).filter(
 		(id) => PROVIDER_REGISTRY[id].hasBalanceEndpoint,
 	);
 }
 
 /**
- * List every built-in provider ID (excludes the user-defined 'custom' provider).
+ * List every built-in provider ID.
  */
-export function getBuiltinProviderIds(): ReadonlyArray<Exclude<ApiProvider, 'custom'>> {
-	return Object.keys(PROVIDER_REGISTRY) as Exclude<ApiProvider, 'custom'>[];
+export function getBuiltinProviderIds(): ReadonlyArray<ApiProvider> {
+	return Object.keys(PROVIDER_REGISTRY) as ApiProvider[];
 }
 
 /**
  * Resolve the official hostname check for a base URL.
- * Returns `false` for 'custom' or unknown providers.
+ * Returns `false` for unknown providers.
  */
 export function isOfficialHost(baseUrl: string, provider: ApiProvider): boolean {
 	const desc = getProviderDescriptor(provider);
