@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.10.0 (2026-10-29)
+
+Brings large tool sets back under control and keeps the request prefix cacheable.
+
+### Features
+
+* **tools:** tool search — when a chat has more enabled tools than `toolSearch.maxTools` (default 24), only the relevant tools plus one `multi_model_tool_search` entry point are sent; the model searches for anything else and then calls it directly. Tools disabled in the picker are never re-added, while tools the host trimmed stay reachable once searched for ([docs](docs/settings/tool-search.en.md))
+* **settings:** `toolSearch.mode` (`auto` / `off`) and `toolSearch.maxTools`
+
+### Performance
+
+* **cache:** the tool list is picked once per conversation and only ever grows at its tail, so the cached request prefix survives later turns; `experimental.stabilizeToolList` pre-activation is skipped while tool search is active
+* **diagnostics:** the `[tool-search]` log line reports `sticky=` and `appended=` next to the existing cache trace
+
 ## 0.9.0 (2026-10-09)
 
 Rebuilt around what Copilot's built-in Custom Endpoint provider does not cover.
