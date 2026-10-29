@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import vscode from 'vscode';
 import type { ToolSearchMode } from '../../config';
 import type { ChatTool } from '../../types';
@@ -7,6 +8,7 @@ import {
 	TOOL_SEARCH_MAX_RESULTS,
 	TOOL_SEARCH_QUERY_MESSAGE_COUNT,
 	TOOL_SEARCH_TOOL_NAME,
+	TOOL_SEARCH_TRACKED_CONVERSATIONS,
 } from './consts';
 
 /** Tool description handed to the model after a tool-search call. */
@@ -25,6 +27,10 @@ export interface ToolSearchResponse {
 /** Outcome of narrowing the request tool list for one provider call. */
 export interface ToolSearchPlan {
 	applied: boolean;
+	/** Whether the tool list was reused from an earlier turn of this conversation. */
+	sticky: boolean;
+	/** Tools appended because the model unlocked them through tool search. */
+	appendedCount: number;
 	/** Tools the host offered for this request, tool-search entry included. */
 	availableCount: number;
 	/** Tools forwarded to the API. */
@@ -37,6 +43,8 @@ export interface ResolveRequestToolsOptions {
 	toolCallingCapability: boolean | number | undefined;
 	tools: readonly vscode.LanguageModelChatTool[] | undefined;
 	messages: readonly vscode.LanguageModelChatRequestMessage[];
+	/** Model id, used to scope the per-conversation tool selection. */
+	modelId: string;
 	mode: ToolSearchMode;
 	maxTools: number;
 }
@@ -53,6 +61,13 @@ type ToolDefinition = {
 };
 
 let hostTools: readonly vscode.LanguageModelChatTool[] = [];
+
+/**
+ * Tool lists that were already sent in a conversation, keyed by model and the
+ * first user message. Reusing them keeps the `tools` array - and therefore the
+ * request prefix the provider caches on - byte-identical across turns.
+ */
+const conversationSelections = new Map<string, readonly string[]>();
 
 /**
  * Remember the tools the host offered for the latest request. `lm.tools` does
@@ -84,6 +99,7 @@ export function resolveRequestTools({
 	toolCallingCapability,
 	tools,
 	messages,
+	modelId,
 	mode,
 	maxTools,
 }: ResolveRequestToolsOptions): ResolvedRequestTools {
@@ -93,7 +109,14 @@ export function resolveRequestTools({
 	const availableCount = available.length;
 	const forwardAll = (unlockedCount = 0): ResolvedRequestTools => ({
 		tools: toolCallingCapability ? convertTools(available) : undefined,
-		plan: { applied: false, availableCount, forwardedCount: availableCount, unlockedCount },
+		plan: {
+			applied: false,
+			sticky: false,
+			appendedCount: 0,
+			availableCount,
+			forwardedCount: availableCount,
+			unlockedCount,
+		},
 	});
 
 	if (!toolCallingCapability || !isToolSearchActive(available, mode, maxTools)) {
@@ -107,8 +130,45 @@ export function resolveRequestTools({
 
 	const unlocked = collectUnlockedToolNames(messages);
 	const candidates = collectCandidates(available, unlocked);
-	const selected = selectTools(candidates, unlocked, collectQueryText(messages), maxTools);
-	const forwarded = [...selected, searchTool];
+	const candidateByName = new Map(candidates.map((tool) => [tool.name, tool]));
+	const limit = Math.max(1, maxTools);
+	const conversationKey = buildConversationKey(modelId, messages);
+	const previousNames = conversationKey
+		? conversationSelections.get(conversationKey)
+		: undefined;
+
+	let names: string[];
+	let sticky = false;
+	if (previousNames) {
+		// Keep the order that is already cached; only drop tools the host no
+		// longer offers or that fall outside a shrunken budget.
+		names = previousNames.filter((name) => candidateByName.has(name)).slice(0, limit);
+		sticky = true;
+	} else {
+		names = selectToolNames(candidates, unlocked, collectQueryText(messages), limit);
+	}
+
+	// Unlocked tools are always callable, so they are appended instead of being
+	// inserted, which would invalidate the cached prefix from that point on.
+	let appendedCount = 0;
+	for (const name of unlocked) {
+		if (!candidateByName.has(name) || names.includes(name)) {
+			continue;
+		}
+		names.push(name);
+		appendedCount += 1;
+	}
+
+	if (conversationKey) {
+		rememberSelection(conversationKey, names);
+	}
+
+	const selected = names
+		.map((name) => candidateByName.get(name))
+		.filter((tool): tool is ToolDefinition => tool !== undefined);
+	// The search entry point stays first so the growing tool list only ever
+	// changes at its tail.
+	const forwarded = [searchTool, ...selected];
 
 	if (forwarded.length >= availableCount) {
 		return forwardAll(unlocked.size);
@@ -118,6 +178,8 @@ export function resolveRequestTools({
 		tools: convertTools(forwarded),
 		plan: {
 			applied: true,
+			sticky,
+			appendedCount,
 			availableCount,
 			forwardedCount: forwarded.length,
 			unlockedCount: unlocked.size,
@@ -249,13 +311,12 @@ function collectCandidates(
 	return [...candidates.values()];
 }
 
-function selectTools(
+function selectToolNames(
 	candidates: readonly ToolDefinition[],
 	unlocked: ReadonlySet<string>,
 	query: string,
-	maxTools: number,
-): ToolDefinition[] {
-	const limit = Math.max(1, maxTools);
+	limit: number,
+): string[] {
 	const order = new Map(candidates.map((tool, index) => [tool.name, index]));
 	const selected = new Set<string>();
 
@@ -280,8 +341,7 @@ function selectTools(
 		selected.add(tool.name);
 	}
 
-	// Fill up in host order so the forwarded list stays as close as possible to
-	// the previous turn when nothing scores, keeping the prompt prefix cacheable.
+	// Fill up in host order so the initial list is as predictable as possible.
 	for (const tool of candidates) {
 		if (selected.size >= limit) {
 			break;
@@ -289,7 +349,44 @@ function selectTools(
 		selected.add(tool.name);
 	}
 
-	return candidates.filter((tool) => selected.has(tool.name));
+	return candidates.filter((tool) => selected.has(tool.name)).map((tool) => tool.name);
+}
+
+/**
+ * Identify the conversation by model and first human message, so the tool list
+ * picked on the first turn is reused for every later turn of the same chat.
+ */
+function buildConversationKey(
+	modelId: string,
+	messages: readonly vscode.LanguageModelChatRequestMessage[],
+): string | undefined {
+	for (const message of messages) {
+		if (message.role !== vscode.LanguageModelChatMessageRole.User) {
+			continue;
+		}
+		const text = message.content
+			.map((part) => (part instanceof vscode.LanguageModelTextPart ? part.value : ''))
+			.join(' ')
+			.trim();
+		if (text.length === 0) {
+			continue;
+		}
+		const digest = createHash('sha256').update(text.slice(0, 2000)).digest('hex');
+		return `${modelId}\u0000${digest.slice(0, 32)}`;
+	}
+	return undefined;
+}
+
+function rememberSelection(key: string, names: readonly string[]): void {
+	conversationSelections.delete(key);
+	conversationSelections.set(key, [...names]);
+	while (conversationSelections.size > TOOL_SEARCH_TRACKED_CONVERSATIONS) {
+		const oldestKey = conversationSelections.keys().next().value;
+		if (oldestKey === undefined) {
+			return;
+		}
+		conversationSelections.delete(oldestKey);
+	}
 }
 
 function collectSearchEntries(): ToolDefinition[] {

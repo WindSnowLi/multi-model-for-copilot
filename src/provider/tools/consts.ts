@@ -12,6 +12,7 @@ export const TOOL_SEARCH_TOOL_NAME = 'multi_model_tool_search';
 export const TOOL_SEARCH_MAX_RESULTS = 8;
 export const TOOL_SEARCH_MAX_DESCRIPTION_CHARS = 400;
 export const TOOL_SEARCH_QUERY_MESSAGE_COUNT = 3;
+export const TOOL_SEARCH_TRACKED_CONVERSATIONS = 32;
 
 export const TOOL_DRIFT_NOTICE_START = '[multi-model-for-copilot-tool-drift-notice-start]: #';
 export const TOOL_DRIFT_NOTICE_END = '[multi-model-for-copilot-tool-drift-notice-end]: #';

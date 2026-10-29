@@ -16,6 +16,16 @@ A chat with many enabled tools cannot hand all of them to the model: Copilot cap
 - Tools the host trimmed from the prompt but that are still registered in VS Code remain searchable and callable.
 - When `experimental.stabilizeToolList` is also enabled, requests handled by tool search skip pre-activation: expanding every `activate_*` group would only inflate the list again.
 
+## Cache stability
+
+DeepSeek's context cache matches the request prefix, and the `tools` definitions sit before the messages, so a different list invalidates everything after it. Tool search therefore picks the list once, on the **first turn** of a conversation, and reuses it verbatim afterwards:
+
+- The search entry point is pinned to the **first** position and everything else is only ever **appended**, so unlocking a tool keeps the previous prefix intact.
+- Tools the host stops offering (for example after disabling them in `Configure Tools`) are removed; that is the only case that changes the middle of the list.
+- Selections are remembered in memory per model plus first user message, for the 32 most recent conversations.
+
+With `debugMode: metadata` the log shows `[tool-search] … sticky=true appended=0` and the cache trace reports `toolsChanged=false`.
+
 ## Limits
 
 - The host's own tool cap (for example the 128 tools mentioned by **Configure Tools**) is controlled by Copilot and cannot be raised by this extension. Keeping the request well below it means no tool is ever dropped.

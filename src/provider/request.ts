@@ -105,6 +105,7 @@ export async function prepareChatRequest({
 		toolCallingCapability: modelDef?.capabilities.toolCalling,
 		tools: options.tools,
 		messages,
+		modelId: modelInfo.id,
 		mode: getToolSearchMode(),
 		maxTools: getToolSearchMaxTools(),
 	});

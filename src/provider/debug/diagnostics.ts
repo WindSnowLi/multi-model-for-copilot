@@ -298,7 +298,7 @@ export function logToolSearchDiagnostics({
 	requestKind: RequestKind;
 	plan: ToolSearchPlan;
 }): void {
-	if (!getDebugLoggingEnabled() || !plan.applied) {
+	if (!getDebugLoggingEnabled() || (!plan.applied && !plan.sticky)) {
 		return;
 	}
 
@@ -307,7 +307,9 @@ export function logToolSearchDiagnostics({
 			requestKind,
 			`[tool-search] tools=${plan.availableCount}` +
 				` forwarded=${plan.forwardedCount}` +
-				` unlocked=${plan.unlockedCount}`,
+				` unlocked=${plan.unlockedCount}` +
+				` sticky=${plan.sticky}` +
+				` appended=${plan.appendedCount}`,
 		),
 	);
 }
