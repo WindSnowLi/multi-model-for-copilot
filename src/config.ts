@@ -60,9 +60,7 @@ export function getToolSearchMode(): ToolSearchMode {
 export function getToolSearchMaxTools(): number {
 	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
 	const value = config.get<number>('toolSearch.maxTools', DEFAULT_TOOL_SEARCH_MAX_TOOLS);
-	return Number.isFinite(value) && value >= 1
-		? Math.floor(value)
-		: DEFAULT_TOOL_SEARCH_MAX_TOOLS;
+	return Number.isFinite(value) && value >= 1 ? Math.floor(value) : DEFAULT_TOOL_SEARCH_MAX_TOOLS;
 }
 
 /**

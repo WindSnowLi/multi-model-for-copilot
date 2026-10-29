@@ -74,9 +74,7 @@ const conversationSelections = new Map<string, readonly string[]>();
  * not know about host-provided tools in every chat host (for example tools
  * owned by an agent host), so tool search reads this snapshot too.
  */
-export function recordHostTools(
-	tools: readonly vscode.LanguageModelChatTool[] | undefined,
-): void {
+export function recordHostTools(tools: readonly vscode.LanguageModelChatTool[] | undefined): void {
 	hostTools = tools ?? [];
 }
 
@@ -133,9 +131,7 @@ export function resolveRequestTools({
 	const candidateByName = new Map(candidates.map((tool) => [tool.name, tool]));
 	const limit = Math.max(1, maxTools);
 	const conversationKey = buildConversationKey(modelId, messages);
-	const previousNames = conversationKey
-		? conversationSelections.get(conversationKey)
-		: undefined;
+	const previousNames = conversationKey ? conversationSelections.get(conversationKey) : undefined;
 
 	let names: string[];
 	let sticky = false;
@@ -194,10 +190,7 @@ export function collectUnlockedToolNames(
 	const searchCallIds = new Set<string>();
 	for (const message of messages) {
 		for (const part of message.content) {
-			if (
-				part instanceof vscode.LanguageModelToolCallPart &&
-				part.name === TOOL_SEARCH_TOOL_NAME
-			) {
+			if (part instanceof vscode.LanguageModelToolCallPart && part.name === TOOL_SEARCH_TOOL_NAME) {
 				searchCallIds.add(part.callId);
 			}
 		}
@@ -249,15 +242,13 @@ export function searchToolCatalog(
 	};
 }
 
-function countSelectableTools(
-	tools: readonly vscode.LanguageModelChatTool[] | undefined,
-): number {
+function countSelectableTools(tools: readonly vscode.LanguageModelChatTool[] | undefined): number {
 	if (!tools) {
 		return 0;
 	}
-	return new Set(
-		tools.map((tool) => tool.name).filter((name) => name !== TOOL_SEARCH_TOOL_NAME),
-	).size;
+	const names = new Set(tools.map((tool) => tool.name));
+	names.delete(TOOL_SEARCH_TOOL_NAME);
+	return names.size;
 }
 
 /**
@@ -331,8 +322,7 @@ function selectToolNames(
 		.map((tool) => ({ tool, score: scoreEntry(tool, tokens) }))
 		.filter((candidate) => candidate.score > 0)
 		.sort(
-			(a, b) =>
-				b.score - a.score || (order.get(a.tool.name) ?? 0) - (order.get(b.tool.name) ?? 0),
+			(a, b) => b.score - a.score || (order.get(a.tool.name) ?? 0) - (order.get(b.tool.name) ?? 0),
 		);
 	for (const { tool } of ranked) {
 		if (selected.size >= limit) {
@@ -447,9 +437,7 @@ function isToolSearchResponse(value: unknown): value is ToolSearchResponse {
 	);
 }
 
-function collectQueryText(
-	messages: readonly vscode.LanguageModelChatRequestMessage[],
-): string {
+function collectQueryText(messages: readonly vscode.LanguageModelChatRequestMessage[]): string {
 	const texts: string[] = [];
 	for (let index = messages.length - 1; index >= 0; index -= 1) {
 		if (texts.length >= TOOL_SEARCH_QUERY_MESSAGE_COUNT) {
