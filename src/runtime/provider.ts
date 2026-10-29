@@ -1,6 +1,7 @@
 import vscode from 'vscode';
 import { logger } from '../logger';
 import { ChatProvider } from '../provider';
+import { registerToolSearchTool } from '../provider/tools/search-tool';
 
 export function registerProvider(context: vscode.ExtensionContext): ChatProvider {
 	const provider = new ChatProvider(context);
@@ -31,6 +32,7 @@ export function registerProvider(context: vscode.ExtensionContext): ChatProvider
 			provider.refreshBalance(),
 		),
 		vscode.lm.registerLanguageModelChatProvider('multi-model', provider),
+		registerToolSearchTool(),
 	);
 
 	// Make models discoverable without waiting for Copilot, which may itself be waiting for BYOK.

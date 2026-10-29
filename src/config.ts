@@ -1,6 +1,8 @@
 import vscode from 'vscode';
 import { CONFIG_SECTION } from './consts';
 
+const DEFAULT_TOOL_SEARCH_MAX_TOOLS = 24;
+
 export type DebugMode = 'minimal' | 'metadata';
 
 /**
@@ -42,6 +44,27 @@ export function getStabilizeToolListEnabled(): boolean {
 	return config.get<boolean>('experimental.stabilizeToolList', false);
 }
 
+export type ToolSearchMode = 'auto' | 'off';
+
+/**
+ * When the extension narrows the `tools` array down to a relevant subset plus
+ * the single tool-search entry point. `auto` narrows only once more tools are
+ * enabled than `toolSearch.maxTools`, so small tool sets are forwarded as-is.
+ */
+export function getToolSearchMode(): ToolSearchMode {
+	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
+	return normalizeToolSearchMode(config.get<unknown>('toolSearch.mode')) ?? 'auto';
+}
+
+/** Number of tools kept in the request when tool search narrows the list. */
+export function getToolSearchMaxTools(): number {
+	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
+	const value = config.get<number>('toolSearch.maxTools', DEFAULT_TOOL_SEARCH_MAX_TOOLS);
+	return Number.isFinite(value) && value >= 1
+		? Math.floor(value)
+		: DEFAULT_TOOL_SEARCH_MAX_TOOLS;
+}
+
 /**
  * Whether to show the live account balance in the status bar.
  */
@@ -69,6 +92,13 @@ export function getShowTokenSpeedStatusBar(): boolean {
 
 function normalizeDebugMode(value: unknown): DebugMode | undefined {
 	if (value === 'minimal' || value === 'metadata') {
+		return value;
+	}
+	return undefined;
+}
+
+function normalizeToolSearchMode(value: unknown): ToolSearchMode | undefined {
+	if (value === 'auto' || value === 'off') {
 		return value;
 	}
 	return undefined;

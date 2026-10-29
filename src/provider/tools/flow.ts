@@ -12,6 +12,7 @@ import {
 
 interface ToolFlowOptions {
 	stabilizeToolList: boolean;
+	toolSearchActive: boolean;
 	messages: readonly vscode.LanguageModelChatRequestMessage[];
 	tools: readonly vscode.LanguageModelChatTool[] | undefined;
 	progress: vscode.Progress<vscode.LanguageModelResponsePart>;
@@ -26,6 +27,7 @@ interface ToolFlowResult {
 
 export function processToolFlow({
 	stabilizeToolList,
+	toolSearchActive,
 	messages,
 	tools,
 	progress,
@@ -34,12 +36,14 @@ export function processToolFlow({
 	const filteredMessages = filterProviderNotices(filterPreflightControlFlow(messages));
 	const messagesFiltered = filteredMessages !== messages;
 
-	if (!stabilizeToolList) {
+	// Tool search already narrows the forwarded tools, so expanding every
+	// `activate_*` group first would only inflate the request.
+	if (!stabilizeToolList || toolSearchActive) {
 		logToolFlowDiagnostics({
 			requestKind,
 			tools,
 			messagesFiltered,
-			preflight: 'skipped',
+			preflight: toolSearchActive ? 'tool-search' : 'skipped',
 		});
 		return {
 			preflightHandled: false,

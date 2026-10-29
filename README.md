@@ -65,6 +65,8 @@ Requires VS Code 1.116+ and GitHub Copilot (Free / Pro / Enterprise); BYOK needs
 | `statusBar.tokenSpeed` | `true` | Token speed in the status bar |
 | `showPricingNotice` | `true` | Peak/off-peak pricing notice in the picker |
 | `experimental.stabilizeToolList` | `false` | Pre-activate tools for a more stable `tools` array ([notice](docs/notices/tool-drift.en.md)) |
+| `toolSearch.mode` | `auto` | Send only the relevant tools plus the `multi_model_tool_search` entry point once more tools are enabled than `toolSearch.maxTools` ([docs](docs/settings/tool-search.en.md)) |
+| `toolSearch.maxTools` | `24` | Tools kept in one request while tool search is active |
 
 ## License
 

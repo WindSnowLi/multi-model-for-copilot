@@ -64,6 +64,8 @@ DeepSeek V4 Pro 与纯文本千问模型通过视觉代理支持图片。
 | `statusBar.tokenSpeed` | `true` | 状态栏显示 token 速度 |
 | `showPricingNotice` | `true` | 选择器中显示峰谷计费提示 |
 | `experimental.stabilizeToolList` | `false` | 预激活工具以获得更稳定的 `tools` 数组（[说明](docs/notices/tool-drift.zh.md)） |
+| `toolSearch.mode` | `auto` | 已启用工具多于 `toolSearch.maxTools` 时，只发送相关工具并附加 `multi_model_tool_search` 搜索入口（[说明](docs/settings/tool-search.zh.md)） |
+| `toolSearch.maxTools` | `24` | 工具搜索生效时单次请求保留的工具数量 |
 
 ## 许可证
 

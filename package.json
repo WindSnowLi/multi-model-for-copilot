@@ -49,6 +49,30 @@
         "displayName": "Multi-Model"
       }
     ],
+    "languageModelTools": [
+      {
+        "name": "multi_model_tool_search",
+        "tags": [
+          "multi-model",
+          "tools"
+        ],
+        "displayName": "%multi-model-for-copilot.toolSearch.displayName%",
+        "userDescription": "%multi-model-for-copilot.toolSearch.userDescription%",
+        "modelDescription": "Search the tools available in this session by keyword and return their names, descriptions, and input schemas. Call this whenever a tool you need is not in the current tool list, then call the returned tool directly.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Keywords describing the tool you need, for example \"git commit\" or \"run terminal command\"."
+            }
+          },
+          "required": [
+            "query"
+          ]
+        }
+      }
+    ],
     "commands": [
       {
         "command": "multi-model-for-copilot.setApiKey",
@@ -155,6 +179,30 @@
           "tags": [
             "experimental"
           ]
+        },
+        "multi-model-for-copilot.toolSearch.mode": {
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "auto",
+            "off"
+          ],
+          "enumItemLabels": [
+            "%multi-model-for-copilot.config.toolSearch.mode.auto.label%",
+            "%multi-model-for-copilot.config.toolSearch.mode.off.label%"
+          ],
+          "markdownEnumDescriptions": [
+            "%multi-model-for-copilot.config.toolSearch.mode.auto.description%",
+            "%multi-model-for-copilot.config.toolSearch.mode.off.description%"
+          ],
+          "markdownDescription": "%multi-model-for-copilot.config.toolSearch.mode.description%"
+        },
+        "multi-model-for-copilot.toolSearch.maxTools": {
+          "type": "number",
+          "default": 24,
+          "minimum": 1,
+          "maximum": 128,
+          "markdownDescription": "%multi-model-for-copilot.config.toolSearch.maxTools.description%"
         },
         "multi-model-for-copilot.visionModel": {
           "type": "string",

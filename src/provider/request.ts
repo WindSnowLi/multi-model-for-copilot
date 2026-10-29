@@ -1,12 +1,21 @@
 import vscode from 'vscode';
 import { AuthManager } from '../auth';
 import { ApiClient, createApiKeyNotConfiguredError } from '../client';
-import { getMaxTokens, getRequestHeaders } from '../config';
+import {
+	getMaxTokens,
+	getRequestHeaders,
+	getToolSearchMaxTools,
+	getToolSearchMode,
+} from '../config';
 import { MODELS } from '../consts';
 import { getProviderDescriptor } from '../provider-registry';
 import type { ChatCompletionRequest } from '../types';
 import { convertMessages, countMessageChars } from './convert';
-import { type CacheDiagnosticsRecorder, type CacheDiagnosticsRun } from './debug';
+import {
+	type CacheDiagnosticsRecorder,
+	type CacheDiagnosticsRun,
+	logToolSearchDiagnostics,
+} from './debug';
 import { resolveRequestHeaders } from './headers';
 import {
 	getConfiguredThinkingEffort,
@@ -20,7 +29,8 @@ import {
 	type RequestKind,
 } from './routing';
 import type { ConversationSegment } from './segment';
-import { collectTrailingToolResultIds, prepareRequestTools } from './tools/request';
+import { collectTrailingToolResultIds } from './tools/request';
+import { resolveRequestTools } from './tools/search';
 import { resolveImageMessages, type VisionDescriber } from './vision';
 
 export interface PreparedChatRequest {
@@ -89,7 +99,15 @@ export async function prepareChatRequest({
 	);
 	const resolvedMessages = visionResolution.messages;
 	const ChatMessages = convertMessages(resolvedMessages, isThinkingModel, nativeImageInput);
-	const tools = prepareRequestTools(modelDef?.capabilities.toolCalling, options);
+	// A numeric tool capability only advertises the model's own tool limit to the
+	// host; the host trims the list, so the provider never rejects a request.
+	const { tools, plan: toolSearchPlan } = resolveRequestTools({
+		toolCallingCapability: modelDef?.capabilities.toolCalling,
+		tools: options.tools,
+		messages,
+		mode: getToolSearchMode(),
+		maxTools: getToolSearchMaxTools(),
+	});
 
 	const totalRequestChars = countMessageChars(ChatMessages);
 	// A request only counts as native-image when the converted payload actually
@@ -118,6 +136,7 @@ export async function prepareChatRequest({
 		request: baseRequest,
 		inputMessages: messages,
 	});
+	logToolSearchDiagnostics({ requestKind, plan: toolSearchPlan });
 	const configuredThinkingEffort = getConfiguredThinkingEffort(
 		options as ModelConfigurationOptions,
 		supportedThinkingEfforts,

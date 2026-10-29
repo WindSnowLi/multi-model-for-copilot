@@ -5,6 +5,8 @@ import {
 	getShowPricingNotice,
 	getShowTokenSpeedStatusBar,
 	getStabilizeToolListEnabled,
+	getToolSearchMaxTools,
+	getToolSearchMode,
 } from '../config';
 import { MODELS } from '../consts';
 import { t } from '../i18n';
@@ -23,6 +25,7 @@ import { resolveConversationSegment } from './segment';
 import { streamChatCompletion } from './stream';
 import { estimateTokenCount } from './tokens';
 import { processToolFlow } from './tools/flow';
+import { isToolSearchActive } from './tools/search';
 import { createVisionService } from './vision';
 
 /**
@@ -225,6 +228,11 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 
 		const toolFlow = processToolFlow({
 			stabilizeToolList: getStabilizeToolListEnabled(),
+			toolSearchActive: isToolSearchActive(
+				options.tools,
+				getToolSearchMode(),
+				getToolSearchMaxTools(),
+			),
 			messages,
 			tools: options.tools,
 			progress,

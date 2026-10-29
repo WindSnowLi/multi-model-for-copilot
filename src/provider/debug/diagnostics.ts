@@ -15,6 +15,7 @@ import { REPLAY_MARKER_MIME, parseFirstReplayMarker } from '../replay';
 import type { ConversationSegment } from '../segment';
 import { ACTIVATE_TOOL_PREFIX } from '../tools/consts';
 import type { ActivatePreflightInspection } from '../tools/preflight';
+import type { ToolSearchPlan } from '../tools/search';
 import { IMAGE_DESCRIPTION_UNAVAILABLE } from '../vision/consts';
 import type { VisionProxySource, VisionResolutionStats as VisionPipelineStats } from '../vision';
 
@@ -248,7 +249,7 @@ export function logToolFlowDiagnostics({
 	requestKind: RequestKind;
 	tools: readonly vscode.LanguageModelChatTool[] | undefined;
 	messagesFiltered: boolean;
-	preflight: 'skipped' | 'handled' | 'ready' | 'round-limit';
+	preflight: 'skipped' | 'handled' | 'ready' | 'round-limit' | 'tool-search';
 	activatePreflight?: ActivatePreflightInspection;
 	nextRound?: number;
 	initialResponseNotice?: boolean;
@@ -287,6 +288,28 @@ export function logToolFlowDiagnostics({
 	}
 
 	logger.info(formatRequestLogLine(requestKind, message));
+}
+
+/** Log how the request tool list was narrowed by tool search. */
+export function logToolSearchDiagnostics({
+	requestKind,
+	plan,
+}: {
+	requestKind: RequestKind;
+	plan: ToolSearchPlan;
+}): void {
+	if (!getDebugLoggingEnabled() || !plan.applied) {
+		return;
+	}
+
+	logger.info(
+		formatRequestLogLine(
+			requestKind,
+			`[tool-search] tools=${plan.availableCount}` +
+				` forwarded=${plan.forwardedCount}` +
+				` unlocked=${plan.unlockedCount}`,
+		),
+	);
 }
 
 interface VisionMessageStats {

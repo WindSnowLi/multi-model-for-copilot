@@ -218,6 +218,9 @@ const zh: Translations = {
 	'notice.toolDrift':
 		'⚠️ 工具列表不稳定，缓存命中率可能下降。[了解更多](https://github.com/WindSnowLi/multi-model-for-copilot/blob/main/docs/notices/tool-drift.zh.md)',
 
+	// Tool search
+	'toolSearch.invoking': '正在搜索可用工具：{0}',
+
 	// Errors
 	'error.http.400': '[{0}] 请求体格式错误。请根据错误信息提示修改请求体。',
 	'error.http.401':
@@ -481,6 +484,9 @@ const en: Translations = {
 	'notice.visionProxyFailure': '**⚠️ {0}**\\\n\\\n**{1} · {2}**',
 	'notice.toolDrift':
 		'⚠️ Tool list is unstable; cache hit rate may drop. [Learn more](https://github.com/WindSnowLi/multi-model-for-copilot/blob/main/docs/notices/tool-drift.en.md)',
+
+	// Tool search
+	'toolSearch.invoking': 'Searching available tools: {0}',
 
 	// Errors
 	'error.http.400':

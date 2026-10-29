@@ -6,4 +6,6 @@
 2. 关闭该设置。
 3. 或接受较低的缓存命中率。
 
+已启用工具很多时还会撞上宿主的工具上限（例如“The model only supports 128 tools”提示）。[工具搜索](https://github.com/WindSnowLi/multi-model-for-copilot/blob/main/docs/settings/tool-search.zh.md) 只发送相关工具加一个搜索入口，并跳过预激活。
+
 讨论：[issue #56](https://github.com/WindSnowLi/multi-model-for-copilot/issues/56)。

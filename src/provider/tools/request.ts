@@ -1,15 +1,4 @@
-import vscode from 'vscode';
-import type { ChatMessage, ChatTool } from '../../types';
-import { convertTools } from '../convert';
-
-export function prepareRequestTools(
-	toolCallingCapability: boolean | number | undefined,
-	options: vscode.ProvideLanguageModelChatResponseOptions,
-): ChatTool[] | undefined {
-	// A numeric capability only advertises the model's own tool limit to VS Code.
-	// The host trims the tool list, so the provider never rejects a request.
-	return toolCallingCapability ? convertTools(options.tools) : undefined;
-}
+import type { ChatMessage } from '../../types';
 
 export function collectTrailingToolResultIds(messages: readonly ChatMessage[]): string[] {
 	const trailingToolResultIds: string[] = [];
