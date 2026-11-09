@@ -1,22 +1,24 @@
+import { randomUUID } from 'crypto';
 import vscode from 'vscode';
 import { createUserFacingError } from '../client';
 import { logger } from '../logger';
 import type { ChatToolCall, ChatUsage } from '../types';
 import {
-    observeCancellationToken,
-    type CacheDiagnosticsRun,
-    type ReplayMarkerReportTrigger,
+	observeCancellationToken,
+	type CacheDiagnosticsRun,
+	type ReplayMarkerReportTrigger,
 } from './debug';
 import {
-    createReplayMarkerPart,
-    hasReplayMarkerMetadata,
-    type ReplayMarkerMetadata,
+	createReplayMarkerPart,
+	hasReplayMarkerMetadata,
+	type ReplayMarkerMetadata,
 } from './replay';
 import type { PreparedChatRequest } from './request';
 import { formatRequestLogLine, type RequestKind } from './routing';
 
 interface ResponseStreamState {
 	accumulatedReasoning: string;
+	reasoningRunId: string | undefined;
 	emittedToolCallIds: string[];
 	initialResponseNoticeReported: boolean;
 	replayMarkerReported: boolean;
@@ -58,6 +60,7 @@ export function streamChatCompletion({
 }: StreamChatCompletionOptions): Promise<void> {
 	const state: ResponseStreamState = {
 		accumulatedReasoning: '',
+		reasoningRunId: undefined,
 		emittedToolCallIds: [],
 		initialResponseNoticeReported: false,
 		replayMarkerReported: false,
@@ -70,6 +73,7 @@ export function streamChatCompletion({
 			prepared.request,
 			{
 				onContent: (content: string) => {
+					state.reasoningRunId = undefined;
 					reportInitialResponseNoticeOnce(progress, state, initialResponseNotice);
 					progress.report(new vscode.LanguageModelTextPart(content));
 					speedTracker?.onChars(content.length);
@@ -82,6 +86,7 @@ export function streamChatCompletion({
 				},
 
 				onToolCall: (toolCall: ChatToolCall) => {
+					state.reasoningRunId = undefined;
 					reportInitialResponseNoticeOnce(progress, state, initialResponseNotice);
 					handleToolCall(toolCall, state, progress);
 					speedTracker?.onChars(toolCall.function.arguments.length);
@@ -101,16 +106,13 @@ export function streamChatCompletion({
 				},
 
 				onUsage: (usage) => {
+					state.reasoningRunId = undefined;
 					// Native-image requests include image token cost that our
 					// char-based calibration cannot represent. Skip adapting the
 					// charsPerToken ratio so image-heavy requests do not skew it.
 					const charsPerToken = prepared.hasNativeImages
 						? getCharsPerToken()
-						: updateCharsPerToken(
-								prepared.totalRequestChars,
-								usage,
-								getCharsPerToken(),
-							);
+						: updateCharsPerToken(prepared.totalRequestChars, usage, getCharsPerToken());
 					if (!prepared.hasNativeImages) {
 						setCharsPerToken(charsPerToken);
 					}
@@ -243,10 +245,15 @@ function handleThinking(
 	progress: vscode.Progress<vscode.LanguageModelResponsePart>,
 ): void {
 	state.accumulatedReasoning += text;
+	// Consecutive thinking deltas belong to one run, even across render updates.
+	state.reasoningRunId ??= randomUUID();
 
 	// LanguageModelThinkingPart is a proposed API; the project root augmentation provides types.
 	progress.report(
-		new vscode.LanguageModelThinkingPart(text) as unknown as vscode.LanguageModelResponsePart,
+		new vscode.LanguageModelThinkingPart(
+			text,
+			state.reasoningRunId,
+		) as unknown as vscode.LanguageModelResponsePart,
 	);
 }
 
