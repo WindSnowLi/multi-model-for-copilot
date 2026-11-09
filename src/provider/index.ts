@@ -15,6 +15,7 @@ import { getProviderDescriptor } from '../provider-registry';
 import type { ApiProvider } from '../types';
 import { StatusBarController } from '../runtime/status-bar';
 import { createCacheDiagnosticsRecorder } from './debug';
+import { getHostConversationId } from './headers';
 import { toChatInfo } from './models';
 import { BalanceService } from './pricing/balance';
 import { BalanceCurrencyResolver } from './pricing/currency';
@@ -25,7 +26,7 @@ import { resolveConversationSegment } from './segment';
 import { streamChatCompletion } from './stream';
 import { estimateTokenCount } from './tokens';
 import { processToolFlow } from './tools/flow';
-import { isToolSearchActive } from './tools/search';
+import { resolveToolSearchNarrowing } from './tools/search';
 import { createVisionService } from './vision';
 
 /**
@@ -225,14 +226,28 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 			messages,
 			tools: options.tools,
 		});
+		const identity = {
+			conversationId: getHostConversationId(options),
+			// A freshly minted segment id is only a per-request random value; it
+			// becomes a conversation identity once a replay marker carries it.
+			segmentId: segment.reason === 'markerFound' ? segment.segmentId : undefined,
+			requestKind,
+		};
+		// Decided once per conversation so the forwarded tool list never flips
+		// between the full and the narrowed set, which would reset the cached
+		// request prefix.
+		const toolSearchNarrowing = resolveToolSearchNarrowing({
+			tools: options.tools,
+			messages,
+			modelId: modelInfo.id,
+			identity,
+			mode: getToolSearchMode(),
+			maxTools: getToolSearchMaxTools(),
+		});
 
 		const toolFlow = processToolFlow({
 			stabilizeToolList: getStabilizeToolListEnabled(),
-			toolSearchActive: isToolSearchActive(
-				options.tools,
-				getToolSearchMode(),
-				getToolSearchMaxTools(),
-			),
+			toolSearchActive: toolSearchNarrowing,
 			messages,
 			tools: options.tools,
 			progress,
@@ -252,6 +267,8 @@ export class ChatProvider implements vscode.LanguageModelChatProvider {
 			token,
 			cacheDiagnostics: this.cacheDiagnostics,
 			getVisionDescriber: () => this.vision.get(),
+			identity,
+			toolSearchNarrowing,
 		});
 
 		return streamChatCompletion({

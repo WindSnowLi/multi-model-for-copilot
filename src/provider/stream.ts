@@ -235,6 +235,7 @@ function getReplayMarkerMetadata(
 ): ReplayMarkerMetadata {
 	return {
 		...prepared.replayMarkerMetadata,
+		segmentId: prepared.segment.segmentId,
 		reasoningText: state.accumulatedReasoning || undefined,
 	};
 }

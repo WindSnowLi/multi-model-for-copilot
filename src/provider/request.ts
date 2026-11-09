@@ -1,16 +1,11 @@
 import vscode from 'vscode';
 import { AuthManager } from '../auth';
 import { ApiClient, createApiKeyNotConfiguredError } from '../client';
-import {
-	getMaxTokens,
-	getRequestHeaders,
-	getToolSearchMaxTools,
-	getToolSearchMode,
-} from '../config';
+import { getMaxTokens, getRequestHeaders, getToolSearchMaxTools } from '../config';
 import { MODELS } from '../consts';
 import { getProviderDescriptor } from '../provider-registry';
 import type { ChatCompletionRequest } from '../types';
-import { convertMessages, countMessageChars } from './convert';
+import { convertMessages, countMessageChars, countToolChars } from './convert';
 import {
 	type CacheDiagnosticsRecorder,
 	type CacheDiagnosticsRun,
@@ -30,7 +25,7 @@ import {
 } from './routing';
 import type { ConversationSegment } from './segment';
 import { collectTrailingToolResultIds } from './tools/request';
-import { resolveRequestTools } from './tools/search';
+import { resolveRequestTools, type ToolConversationIdentity } from './tools/search';
 import { resolveImageMessages, type VisionDescriber } from './vision';
 
 export interface PreparedChatRequest {
@@ -60,6 +55,10 @@ export interface PrepareChatRequestOptions {
 	token: vscode.CancellationToken;
 	cacheDiagnostics: CacheDiagnosticsRecorder;
 	getVisionDescriber: () => Promise<VisionDescriber | undefined>;
+	/** Copilot's conversation id, when the host exposes one. */
+	identity: ToolConversationIdentity;
+	/** Whether this conversation forwards a narrowed tool list (decided once per conversation). */
+	toolSearchNarrowing: boolean;
 }
 
 export async function prepareChatRequest({
@@ -72,6 +71,8 @@ export async function prepareChatRequest({
 	token,
 	cacheDiagnostics,
 	getVisionDescriber,
+	identity,
+	toolSearchNarrowing,
 }: PrepareChatRequestOptions): Promise<PreparedChatRequest> {
 	const modelDef = MODELS.find((m) => m.id === modelInfo.id);
 
@@ -84,7 +85,12 @@ export async function prepareChatRequest({
 		getProviderDescriptor(modelDef?.provider ?? 'deepseek')?.defaultBaseUrl ??
 		'https://api.deepseek.com';
 	const provider = modelDef?.provider ?? 'deepseek';
-	const requestHeaders = resolveRequestHeaders(getRequestHeaders(), options, storageUri);
+	const requestHeaders = resolveRequestHeaders(
+		getRequestHeaders(),
+		options,
+		storageUri,
+		identity.segmentId,
+	);
 	const client = new ApiClient(baseUrl, apiKey, provider, requestHeaders);
 	const isThinkingModel = modelDef?.capabilities.thinking ?? false;
 	const nativeImageInput = modelDef?.capabilities.nativeImageInput === true;
@@ -106,11 +112,14 @@ export async function prepareChatRequest({
 		tools: options.tools,
 		messages,
 		modelId: modelInfo.id,
-		mode: getToolSearchMode(),
+		identity,
+		narrow: toolSearchNarrowing,
 		maxTools: getToolSearchMaxTools(),
 	});
 
-	const totalRequestChars = countMessageChars(ChatMessages);
+	// Tool definitions are part of the token count the API reports, so they must
+	// be part of the characters the chars-per-token calibration divides by.
+	const totalRequestChars = countMessageChars(ChatMessages) + countToolChars(tools);
 	// A request only counts as native-image when the converted payload actually
 	// carries forwarded image data. Proxy-described images do not qualify.
 	const hasNativeImages =

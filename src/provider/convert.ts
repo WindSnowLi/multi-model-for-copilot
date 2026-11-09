@@ -45,9 +45,7 @@ export function convertMessages(
 					content: collectToolResultText(part),
 					// Native vision models receive tool-result images directly as
 					// image_url content blocks instead of a proxy description.
-					imageUrls: supportsNativeVision
-						? collectToolResultImageUrls(part)
-						: undefined,
+					imageUrls: supportsNativeVision ? collectToolResultImageUrls(part) : undefined,
 				});
 			} else if (supportsNativeVision && isImageDataPart(part)) {
 				// Collect image data for native vision models
@@ -153,9 +151,7 @@ function collectToolResultText(part: vscode.LanguageModelToolResultPart): string
  * so native vision models can receive them directly as `image_url` blocks.
  */
 function collectToolResultImageUrls(part: vscode.LanguageModelToolResultPart): string[] {
-	return (part.content as readonly unknown[])
-		.filter(isImageDataPart)
-		.map(toImageDataUrl);
+	return (part.content as readonly unknown[]).filter(isImageDataPart).map(toImageDataUrl);
 }
 
 function mapRole(role: vscode.LanguageModelChatMessageRole): 'user' | 'assistant' {
@@ -205,6 +201,28 @@ export function countMessageChars(messages: ChatMessage[]): number {
 			for (const tc of msg.tool_calls) {
 				total += tc.function?.name?.length ?? 0;
 				total += tc.function?.arguments?.length ?? 0;
+			}
+		}
+	}
+	return total;
+}
+
+/**
+ * Count the characters of the forwarded tool definitions. The API's
+ * `prompt_tokens` includes them, so leaving them out of the character count
+ * would bias the adaptive chars-per-token ratio low and make token estimates
+ * run high.
+ */
+export function countToolChars(tools: ChatTool[] | undefined): number {
+	let total = 0;
+	for (const tool of tools ?? []) {
+		total += tool.function.name.length;
+		total += tool.function.description?.length ?? 0;
+		if (tool.function.parameters) {
+			try {
+				total += safeStringify(tool.function.parameters).length;
+			} catch {
+				// Unserializable schemas never reach the API either.
 			}
 		}
 	}

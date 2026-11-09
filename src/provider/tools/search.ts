@@ -3,6 +3,7 @@ import vscode from 'vscode';
 import type { ToolSearchMode } from '../../config';
 import type { ChatTool } from '../../types';
 import { convertTools } from '../convert';
+import type { RequestKind } from '../routing';
 import {
 	TOOL_SEARCH_MAX_DESCRIPTION_CHARS,
 	TOOL_SEARCH_MAX_RESULTS,
@@ -45,7 +46,10 @@ export interface ResolveRequestToolsOptions {
 	messages: readonly vscode.LanguageModelChatRequestMessage[];
 	/** Model id, used to scope the per-conversation tool selection. */
 	modelId: string;
-	mode: ToolSearchMode;
+	/** Conversation identity, used to scope the per-conversation tool selection. */
+	identity: ToolConversationIdentity;
+	/** Whether this conversation narrows tools (see {@link resolveToolSearchNarrowing}). */
+	narrow: boolean;
 	maxTools: number;
 }
 
@@ -63,19 +67,49 @@ type ToolDefinition = {
 let hostTools: readonly vscode.LanguageModelChatTool[] = [];
 
 /**
- * Tool lists that were already sent in a conversation, keyed by model and the
- * first user message. Reusing them keeps the `tools` array - and therefore the
- * request prefix the provider caches on - byte-identical across turns.
+ * Tool lists that were already sent in a conversation, keyed by every known
+ * identity of that conversation (see {@link buildConversationKeys}). Reusing
+ * them keeps the `tools` array - and therefore the request prefix the provider
+ * caches on - byte-identical across turns.
  */
 const conversationSelections = new Map<string, readonly string[]>();
+
+/**
+ * Whether a conversation forwards a narrowed tool list. The answer is decided
+ * once, on the conversation's first turn, so a tool count hovering around
+ * `maxTools` cannot flip between the full and the narrowed list - which would
+ * invalidate the cached request prefix - mid-conversation.
+ */
+const conversationNarrowing = new Map<string, boolean>();
+
+/** Identity of the conversation a request belongs to. */
+export interface ToolConversationIdentity {
+	/** Copilot's own conversation id, when the host exposes it. */
+	conversationId?: string;
+	/** Replay-marker persisted conversation segment id. */
+	segmentId?: string;
+	/**
+	 * Request kind. Helper requests (titles, progress messages, todo tracker)
+	 * share the chat's conversation id but carry their own small tool set, so
+	 * they must not share tool decisions with the agent.
+	 */
+	requestKind: RequestKind;
+}
 
 /**
  * Remember the tools the host offered for the latest request. `lm.tools` does
  * not know about host-provided tools in every chat host (for example tools
  * owned by an agent host), so tool search reads this snapshot too.
+ *
+ * Helper requests (titles, progress messages, ...) run concurrently with the
+ * chat and usually carry no tools; keeping the previous snapshot stops them
+ * from wiping the catalog while the chat is still using it.
  */
 export function recordHostTools(tools: readonly vscode.LanguageModelChatTool[] | undefined): void {
-	hostTools = tools ?? [];
+	if (!tools || tools.length === 0) {
+		return;
+	}
+	hostTools = tools;
 }
 
 /** Whether narrowing applies for the given host tool list. */
@@ -85,6 +119,51 @@ export function isToolSearchActive(
 	maxTools: number,
 ): boolean {
 	return mode !== 'off' && countSelectableTools(tools) > Math.max(1, maxTools);
+}
+
+export interface ToolSearchNarrowingOptions {
+	tools: readonly vscode.LanguageModelChatTool[] | undefined;
+	messages: readonly vscode.LanguageModelChatRequestMessage[];
+	modelId: string;
+	identity: ToolConversationIdentity;
+	mode: ToolSearchMode;
+	maxTools: number;
+}
+
+/**
+ * Decide once per conversation whether its requests forward a narrowed tool
+ * list, and reuse that answer for every later turn.
+ */
+export function resolveToolSearchNarrowing({
+	tools,
+	messages,
+	modelId,
+	identity,
+	mode,
+	maxTools,
+}: ToolSearchNarrowingOptions): boolean {
+	if (mode === 'off') {
+		return false;
+	}
+
+	const keys = buildConversationKeys(modelId, messages, identity);
+	const remembered = findRemembered(conversationNarrowing, keys.all);
+	if (remembered === true) {
+		return true;
+	}
+
+	const active = isToolSearchActive(tools, mode, maxTools);
+	// A chat that started wide only escalates once its tool set grows far past
+	// the threshold; otherwise a count hovering at the boundary would flip the
+	// tool list - and the cached request prefix - on nearly every turn.
+	const narrowed =
+		remembered === false
+			? active && countSelectableTools(tools) > Math.max(1, maxTools) * 2
+			: active;
+	if (narrowed !== remembered) {
+		rememberForAllConversationKeys(conversationNarrowing, getWriteKeys(keys), narrowed);
+	}
+	return narrowed;
 }
 
 /**
@@ -98,14 +177,15 @@ export function resolveRequestTools({
 	tools,
 	messages,
 	modelId,
-	mode,
+	identity,
+	narrow,
 	maxTools,
 }: ResolveRequestToolsOptions): ResolvedRequestTools {
 	recordHostTools(tools);
 
 	const available = tools ?? [];
 	const availableCount = available.length;
-	const forwardAll = (unlockedCount = 0): ResolvedRequestTools => ({
+	const forwardAll = (): ResolvedRequestTools => ({
 		tools: toolCallingCapability ? convertTools(available) : undefined,
 		plan: {
 			applied: false,
@@ -113,11 +193,11 @@ export function resolveRequestTools({
 			appendedCount: 0,
 			availableCount,
 			forwardedCount: availableCount,
-			unlockedCount,
+			unlockedCount: 0,
 		},
 	});
 
-	if (!toolCallingCapability || !isToolSearchActive(available, mode, maxTools)) {
+	if (!toolCallingCapability || !narrow) {
 		return forwardAll();
 	}
 
@@ -130,8 +210,8 @@ export function resolveRequestTools({
 	const candidates = collectCandidates(available, unlocked);
 	const candidateByName = new Map(candidates.map((tool) => [tool.name, tool]));
 	const limit = Math.max(1, maxTools);
-	const conversationKey = buildConversationKey(modelId, messages);
-	const previousNames = conversationKey ? conversationSelections.get(conversationKey) : undefined;
+	const conversationKeys = buildConversationKeys(modelId, messages, identity);
+	const previousNames = findRemembered(conversationSelections, conversationKeys.all);
 
 	let names: string[];
 	let sticky = false;
@@ -155,20 +235,17 @@ export function resolveRequestTools({
 		appendedCount += 1;
 	}
 
-	if (conversationKey) {
-		rememberSelection(conversationKey, names);
-	}
+	rememberForAllConversationKeys(conversationSelections, getWriteKeys(conversationKeys), [
+		...names,
+	]);
 
 	const selected = names
 		.map((name) => candidateByName.get(name))
 		.filter((tool): tool is ToolDefinition => tool !== undefined);
 	// The search entry point stays first so the growing tool list only ever
-	// changes at its tail.
+	// changes at its tail. The narrowed shape is used even when every tool fits,
+	// because switching back to the host order would reorder the whole array.
 	const forwarded = [searchTool, ...selected];
-
-	if (forwarded.length >= availableCount) {
-		return forwardAll(unlocked.size);
-	}
 
 	return {
 		tools: convertTools(forwarded),
@@ -342,6 +419,43 @@ function selectToolNames(
 	return candidates.filter((tool) => selected.has(tool.name)).map((tool) => tool.name);
 }
 
+interface ConversationKeys {
+	/** Host id and marker segment id: stable even when the first message changes. */
+	strong: string[];
+	/** Every identity, including the first-message digest fallback. */
+	all: string[];
+}
+
+/**
+ * Every identity this conversation is known by. The host's own conversation id
+ * and the replay-marker segment id survive a compacted first message. The
+ * first-user-message digest is only a read fallback: two chats can share their
+ * first message, so a decision is only written under it when no stronger
+ * identity exists.
+ */
+function buildConversationKeys(
+	modelId: string,
+	messages: readonly vscode.LanguageModelChatRequestMessage[],
+	identity: ToolConversationIdentity,
+): ConversationKeys {
+	const scope = `${identity.requestKind}\u0000${modelId}`;
+	const strong: string[] = [];
+	if (identity.conversationId) {
+		strong.push(`host\u0000${scope}\u0000${identity.conversationId}`);
+	}
+	if (identity.segmentId) {
+		strong.push(`segment\u0000${scope}\u0000${identity.segmentId}`);
+	}
+
+	const textKey = buildConversationKey(modelId, messages);
+	const all = textKey ? [...strong, `${identity.requestKind}\u0000${textKey}`] : strong;
+	return { strong, all };
+}
+
+function getWriteKeys(keys: ConversationKeys): readonly string[] {
+	return keys.strong.length > 0 ? keys.strong : keys.all;
+}
+
 /**
  * Identify the conversation by model and first human message, so the tool list
  * picked on the first turn is reused for every later turn of the same chat.
@@ -367,15 +481,34 @@ function buildConversationKey(
 	return undefined;
 }
 
-function rememberSelection(key: string, names: readonly string[]): void {
-	conversationSelections.delete(key);
-	conversationSelections.set(key, [...names]);
-	while (conversationSelections.size > TOOL_SEARCH_TRACKED_CONVERSATIONS) {
-		const oldestKey = conversationSelections.keys().next().value;
+function findRemembered<T>(map: Map<string, T>, keys: readonly string[]): T | undefined {
+	for (const key of keys) {
+		const value = map.get(key);
+		if (value !== undefined) {
+			return value;
+		}
+	}
+	return undefined;
+}
+
+function rememberForAllConversationKeys<T>(
+	map: Map<string, T>,
+	keys: readonly string[],
+	value: T,
+): void {
+	if (keys.length === 0) {
+		return;
+	}
+	for (const key of keys) {
+		map.delete(key);
+		map.set(key, value);
+	}
+	while (map.size > TOOL_SEARCH_TRACKED_CONVERSATIONS) {
+		const oldestKey = map.keys().next().value;
 		if (oldestKey === undefined) {
 			return;
 		}
-		conversationSelections.delete(oldestKey);
+		map.delete(oldestKey);
 	}
 }
 

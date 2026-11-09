@@ -24,6 +24,8 @@ export type ReasoningMarkerTextIgnoredReason =
 	| 'reasoning-text-empty';
 
 export interface ReplayMarkerMetadata {
+	/** Conversation segment this response belongs to, persisted for later turns. */
+	segmentId?: string;
 	visionText?: string;
 	reasoningText?: string;
 }

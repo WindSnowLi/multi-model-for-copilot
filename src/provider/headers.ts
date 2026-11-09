@@ -1,18 +1,36 @@
 import { randomUUID } from 'crypto';
 import type vscode from 'vscode';
 
-/** Resolve header templates once per provider call, before any HTTP attempts. */
+/** Last-resort id so every request of an extension-host session shares it. */
+let fallbackConversationId: string | undefined;
+
+/** Copilot's own conversation id, when the host transports it. */
+export function getHostConversationId(
+	options: vscode.ProvideLanguageModelChatResponseOptions,
+): string | undefined {
+	const upstreamId = options.modelOptions?._conversationId;
+	return typeof upstreamId === 'string' && upstreamId.length > 0 ? upstreamId : undefined;
+}
+
+/**
+ * Resolve header templates once per provider call, before any HTTP attempts.
+ *
+ * `segmentId` identifies the conversation when Copilot does not expose one; it
+ * is carried by the replay markers, so every turn of a chat resolves the same
+ * `${conversationId}` value instead of a fresh random id.
+ */
 export function resolveRequestHeaders(
 	headers: Readonly<Record<string, string>>,
 	options: vscode.ProvideLanguageModelChatResponseOptions,
 	storageUri: vscode.Uri | undefined,
+	segmentId?: string,
 ): Record<string, string> {
 	let conversationId: string | undefined;
 	return Object.fromEntries(
 		Object.entries(headers).map(([name, value]) => [
 			name,
 			value.replaceAll('${conversationId}', () => {
-				conversationId ??= resolveConversationId(options, storageUri);
+				conversationId ??= resolveConversationId(options, storageUri, segmentId);
 				return conversationId;
 			}),
 		]),
@@ -22,10 +40,10 @@ export function resolveRequestHeaders(
 function resolveConversationId(
 	options: vscode.ProvideLanguageModelChatResponseOptions,
 	storageUri: vscode.Uri | undefined,
+	segmentId: string | undefined,
 ): string {
-	// Copilot transports this optional internal field through modelOptions.
-	const upstreamId = options.modelOptions?._conversationId;
-	if (typeof upstreamId === 'string' && upstreamId.length > 0) {
+	const upstreamId = getHostConversationId(options);
+	if (upstreamId) {
 		return upstreamId;
 	}
 
@@ -37,11 +55,17 @@ function resolveConversationId(
 		return `workspace-${workspaceId}`;
 	}
 
-	// Copilot creates this correlation ID for each model request.
+	if (segmentId) {
+		return `segment-${segmentId}`;
+	}
+
+	// Copilot creates this correlation ID for each model request, so it is only
+	// a last resort before the session-wide fallback.
 	const upstreamRequestId = options.modelOptions?._capturingTokenCorrelationId;
 	if (typeof upstreamRequestId === 'string' && upstreamRequestId.length > 0) {
 		return `request-${upstreamRequestId}`;
 	}
 
-	return `request-${randomUUID()}`;
+	fallbackConversationId ??= `request-${randomUUID()}`;
+	return fallbackConversationId;
 }

@@ -52,6 +52,7 @@ export function createReplayMarkerPart(
 	metadata: ReplayMarkerMetadata,
 ): vscode.LanguageModelDataPart {
 	const payload = encodeReplayMarkerJson({
+		...createSegmentMarkerPayload(metadata.segmentId),
 		...createVisionMarkerPayload(metadata.visionText),
 		...createReasoningMarkerPayload(metadata.reasoningText),
 	});
@@ -122,6 +123,10 @@ function parseOptionalSegmentId(value: object): {
 		return { error: 'segment-id-not-uuid' };
 	}
 	return { value: segmentId.toLowerCase() };
+}
+
+function createSegmentMarkerPayload(segmentId: string | undefined): object {
+	return segmentId ? { segmentId } : {};
 }
 
 function createVisionMarkerPayload(visionText: string | undefined): object {
