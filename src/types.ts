@@ -38,6 +38,11 @@ export interface ChatUsage {
 	total_tokens: number;
 	prompt_cache_hit_tokens?: number;
 	prompt_cache_miss_tokens?: number;
+	/** OpenAI-compatible cache accounting (`cached_tokens`, Qwen creation tokens). */
+	prompt_tokens_details?: {
+		cached_tokens?: number;
+		cache_creation_input_tokens?: number;
+	};
 }
 
 export interface ChatCompletionRequest {

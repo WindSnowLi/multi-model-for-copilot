@@ -11,6 +11,7 @@ import type {
 	StreamCallbacks,
 } from '../types';
 import { createHttpError, formatRequestError, normalizeRequestError } from './error';
+import { normalizeUsage } from './usage';
 
 /**
  * Lightweight SSE-streaming API client supporting multiple providers.
@@ -131,7 +132,7 @@ export class ApiClient {
 						// Some OpenAI-compatible providers emit usage on every streaming chunk.
 						// Keep only the latest value and report it once when the stream completes.
 						if (chunk.usage) {
-							latestUsage = chunk.usage;
+							latestUsage = normalizeUsage(chunk.usage);
 						}
 
 						if (!choice) {

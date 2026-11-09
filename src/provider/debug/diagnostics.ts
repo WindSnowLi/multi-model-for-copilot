@@ -651,7 +651,7 @@ class ActiveCacheDiagnosticsRun implements CacheDiagnosticsRun {
 			logger.info(
 				formatRequestLogLine(
 					this.snapshot.requestKind,
-					`[cache-trace #${this.requestId}] result cacheRate=${hitRate}%` +
+					`[cache-trace #${this.requestId}] result cacheRate=${hitRate}` +
 						` ${this.prefixLabel}=${this.resultComparison.commonPrefixSummaryChars}` +
 						` chars (${this.resultComparison.commonPrefixSummaryPercent.toFixed(1)}%)`,
 				),
@@ -836,7 +836,7 @@ function logUsage(
 			`tokens${requestId ? ` #${requestId}` : ''}: ` +
 				formatModelFields(context.vscodeModelId, context.apiModelId) +
 				` prompt=${usage.prompt_tokens} completion=${usage.completion_tokens}` +
-				` | cache: hit=${cacheHit} miss=${cacheMiss} rate=${getCacheHitRate(usage)}%` +
+				` | cache: hit=${cacheHit} miss=${cacheMiss} rate=${getCacheHitRate(usage)}` +
 				` | chars/tok=${charsPerToken.toFixed(2)}`,
 		),
 	);
@@ -846,7 +846,7 @@ function getCacheHitRate(usage: ChatUsage): string {
 	const cacheHit = usage.prompt_cache_hit_tokens ?? 0;
 	const cacheMiss = usage.prompt_cache_miss_tokens ?? 0;
 	const cacheTotal = cacheHit + cacheMiss;
-	return cacheTotal > 0 ? ((cacheHit / cacheTotal) * 100).toFixed(0) : 'n/a';
+	return cacheTotal > 0 ? `${((cacheHit / cacheTotal) * 100).toFixed(0)}%` : 'n/a';
 }
 
 function summarizeVisionResolution(
