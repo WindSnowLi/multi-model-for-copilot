@@ -26,10 +26,7 @@ export class StatusBarController {
 	private readonly disposables: vscode.Disposable[] = [];
 
 	constructor(private readonly options: StatusBarControllerOptions) {
-		this.balanceItem = vscode.window.createStatusBarItem(
-			vscode.StatusBarAlignment.Right,
-			100,
-		);
+		this.balanceItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 		this.speedItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 99);
 		this.disposables.push(this.balanceItem, this.speedItem);
 

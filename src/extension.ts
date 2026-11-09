@@ -3,4 +3,3 @@
 process.noDeprecation = true;
 
 export { activate, deactivate } from './runtime';
-

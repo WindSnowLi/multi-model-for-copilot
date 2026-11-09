@@ -45,22 +45,13 @@ export function toModelCostInfo(
 	return {
 		...(model.priceCategory ? { priceCategory: model.priceCategory } : {}),
 		infoText: {
-			pricing: formatPricingNotice(
-				period.period,
-				pricing,
-				currency,
-				now,
-				period.nextTransitionAt,
-			),
+			pricing: formatPricingNotice(period.period, pricing, currency, now, period.nextTransitionAt),
 		},
 	};
 }
 
 function formatStaticPricingNotice(pricing: ModelPricing, currency: PricingCurrency): string {
-	return [
-		`**${t('model.pricing.ratesTitle')}**`,
-		formatPricingBlock(pricing, currency),
-	].join('\n');
+	return [`**${t('model.pricing.ratesTitle')}**`, formatPricingBlock(pricing, currency)].join('\n');
 }
 
 function formatPricingNotice(

@@ -381,12 +381,13 @@ function countToolResultImageParts(
 
 function isToolResultWithImage(part: unknown): part is vscode.LanguageModelToolResultPart {
 	return (
-		part instanceof vscode.LanguageModelToolResultPart &&
-		getToolResultImageParts(part).length > 0
+		part instanceof vscode.LanguageModelToolResultPart && getToolResultImageParts(part).length > 0
 	);
 }
 
-function getToolResultImageParts(part: vscode.LanguageModelToolResultPart): vscode.LanguageModelDataPart[] {
+function getToolResultImageParts(
+	part: vscode.LanguageModelToolResultPart,
+): vscode.LanguageModelDataPart[] {
 	return (part.content as readonly unknown[]).filter(isImageDataPart);
 }
 
